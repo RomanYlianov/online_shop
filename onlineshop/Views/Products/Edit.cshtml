@@ -1,0 +1,81 @@
+﻿@model onlineshop.Services.DTO.ProductDTO
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Product</h2>
+
+@using (Html.BeginForm("Edit", "Products", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    
+
+    <div class="container">
+        <h4>Product</h4>
+        <br />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model=>model.Cipher)
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--category-->
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.CategoryDTOId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model=>model.CategoryDTOId, ViewBag.Categories as IEnumerable<SelectListItem>, new { @class = "form-control"})
+                @Html.ValidationMessageFor(model => model.CategoryDTOId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--suppler firm-->
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.SupplerFirmDTOId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model=>model.SupplerFirmDTOId, ViewBag.SupplerFirms as IEnumerable<SelectListItem>, new { @class = "form-control"})
+                @Html.ValidationMessageFor(model => model.SupplerFirmDTOId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.CountAll, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CountAll, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CountAll, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+
+    </div>
+}

@@ -1,0 +1,82 @@
+﻿@model onlineshop.Services.DTO.PaymentMethodDTO;
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Payment method details</h2>
+
+<div class="container">
+    <dl class="row">
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Name)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PaymentType)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PaymentType)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Provider)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Provider)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Number)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Number)
+        </dd>
+
+        @if (Model.ExpirationDate != null)
+        {
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.ExpirationDate)
+            </dt>
+
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.ExpirationDate.Value)
+            </dd>
+        }
+
+        @if (Model.CVV != null)
+        {
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.CVV )
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.CVV.Value)
+            </dd>
+        }
+
+    </dl>
+</div>
+
+@if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+{
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id })
+    </p>
+}
+
+<br />
+
+<p>
+   
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
+
+

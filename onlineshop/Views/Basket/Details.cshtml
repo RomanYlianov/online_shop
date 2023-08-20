@@ -1,0 +1,45 @@
+﻿@model onlineshop.Services.DTO.BasketDTO
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Product in basket</h2>
+
+<div class="container">
+    <h4>Product in basket</h4>
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Count)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Count)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.IntermediateCost)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.IntermediateCost)
+        </dd>
+
+    </dl>
+
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

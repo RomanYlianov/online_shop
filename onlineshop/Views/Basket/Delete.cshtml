@@ -1,0 +1,52 @@
+﻿@model onlineshop.Services.DTO.BasketDTO
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Product in basket</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+
+<div class="container">
+    <h4>Product in basket</h4>
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Count)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Count)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.IntermediateCost)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.IntermediateCost)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+
+</div>

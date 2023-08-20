@@ -1,0 +1,34 @@
+﻿@model onlineshop.Services.DTO.RoleDTO
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Role details</h2>
+
+<div class="container">
+    <dl class="row">
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Name)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Description)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Description)
+        </dd>
+
+    </dl>
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

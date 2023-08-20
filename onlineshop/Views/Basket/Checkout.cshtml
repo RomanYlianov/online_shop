@@ -1,0 +1,94 @@
+﻿@model List<onlineshop.Services.DTO.BasketDTO>
+
+@{
+    ViewBag.Title = "Checkout";
+}
+
+<h2>Select products for order</h2>
+
+
+
+<script>
+    function f1() {
+
+        for (let i = 0; i < @Model.Count; i++) {
+            let arg0 = document.getElementById('list' + i + '.Price').value;
+            let arg1 = document.getElementById('list' + i + '.Count').value;
+            let cost = arg0 * arg1;
+
+            document.getElementById('list' + i + '.Cost').value = cost;
+        }
+    }
+</script>
+
+@if (ViewBag.flag == true)
+{
+    @using (Html.BeginForm("Checkout", "Basket", FormMethod.Post))
+    {
+
+        <div class="validation" asp-validation-summary="ModelOnly"></div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="display: none">
+                        id
+                    </th>
+                    <th>
+                        product name
+                    </th>
+                    <th>
+                        price
+                    </th>
+                    <th>
+                        count
+                    </th>
+                    <th>
+                        cost
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr>
+                        <td style="display: none">
+                            @Html.TextBox("list["+i+"].Id", Model[i].Id, new {@readonly = "readonly", @class= "form-control"} )
+                        </td>
+                        <td>
+                            @Html.TextBox("list["+i+"].ProductDTO.Name", Model[i].ProductDTO.Name, new {@readonly = "readonly", @class= "form-control"} )
+                        </td>
+                        <td>
+
+                            @Html.TextBox("list["+i+"].ProductDTO.Price", Model[i].ProductDTO.Price, new { @id="list"+i+".Price",  @readonly="readonly", @class= "form-control" } )
+                        </td>
+                        <td>
+
+                            @Html.TextBox("list["+i+"].Count", Model[i].Count, new {@id="list"+i+".Count",  @class= "form-control",  @type = "number", @onchange="f1();" } )
+                        </td>
+                        <td>
+                            @Html.TextBox("list["+i+"].IntermediateCost,", Model[i].IntermediateCost, new { @id="list"+i+".Cost", @readonly="readonly", @class= "form-control", @type = "number" } )
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="4">
+                        <input type="submit" value="checkout" class="btn btn-default" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <h2>nothing to checkout</h2>
+}
+
+
+
+
+
+
+
+

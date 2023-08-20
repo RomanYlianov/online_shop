@@ -1,0 +1,146 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.ProductDTO>
+
+@{
+    ViewBag.Title = "Catalog";
+}
+
+<h2>Products catalog</h2>
+
+
+@using (Html.BeginForm("Catalog", "Products", FormMethod.Get))
+{
+    <div class="form-group">
+        <label for="nid">Name</label>
+        <input type="text" class="form-control" id="nid" name="name" />
+    </div>
+    <div class="form-group">
+        <label for="cid">Category name</label>
+        <input type="text" class="form-control" id="cid" name="categoryName" />
+    </div>
+    <div class="form-group">
+        <label for="sfid">suppler firm name</label>
+        <input type="text" class="form-control" id="sfid" name="supplerFirmName" />
+    </div>
+    <div class="form-group">
+        <label for="lpid">lowest price</label>
+        <input type="text" class="form-control" id="lpid" name="lowestPrice" />
+    </div>
+    <div class="form-group">
+        <label for="hpid">higest price</label>
+        <input type="text" class="form-control" id="hpid" name="higestPrice" />
+    </div>
+    <div class="form-group">
+        <label for="lrid">lowest rating</label>
+        <input type="text" class="form-control" id="lrid" name="lowestRating" />
+    </div>
+    <div class="form-group">
+        <label for="hrid">higest rating</label>
+        <input type="text" class="form-control" id="hrid" name="higestRating" />
+    </div>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="ihid" name="isHot" />
+        <label for="ihid" class="form-check-label">is hot</label>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">send</button>
+    </div>
+}
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model=>model.Cipher)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.Name)
+            </td>
+            <td>
+                Category
+            </td>
+            <td>
+                Suppler firm
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.CountAll)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.CountThis)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.Price)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.Rating)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.IsHot)
+            </td>
+            <td colspan="2">
+                Details &ensp; Add to basket
+            </td>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @if (ViewBag.flag == true)
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Cipher)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.CategoryDTO.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.SupplerFirmDTO.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.CountAll)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.CountThis)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Rating)
+                    </td>
+                    @if (item.IsHot == true)
+                    {
+                        <td>
+                            hot
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            &nbsp;
+                        </td>
+                    }
+                    <td colspan="2">
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Add to basket", "AddProductToBasket", new { id=item.Id }) 
+                    </td>
+
+                </tr>
+
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10">no data</td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

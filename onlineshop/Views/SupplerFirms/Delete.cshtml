@@ -1,0 +1,64 @@
+﻿@model onlineshop.Services.DTO.SupplerFirmDTO
+
+@{
+    ViewBag.Titel = "Delete";
+}
+
+<h2>Suppler firm</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+
+<div class="container">
+    <h4>suppler firm</h4>
+    <br />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Name)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Address)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Address)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Country)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Country)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.RegisterDate)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.RegisterDate)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Rating)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Rating)
+        </dd>
+        <dt class="ol-sm-3">
+            @Html.DisplayNameFor(model=>model.Description)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Description)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+
+</div>

@@ -1,0 +1,61 @@
+﻿@model List<onlineshop.Services.DTO.ProductDTO>
+
+@{
+    ViewBag.Title = "Return products";
+}
+
+<h2>Select products for return</h2>
+
+@if (ViewBag.flag == true)
+{
+
+}
+else
+{
+    <h2>nothing to return</h2>
+}
+
+@using (Html.BeginForm("Return", "Orders", FormMethod.Post))
+{
+
+    <div class="validation" asp-validation-summary="ModelOnly"></div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="display: none">
+                    id
+                </th>
+                <th>
+                    product name
+                </th>
+                <th>
+                    count
+                </th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count(); i++)
+            {
+                <tr>
+                    <td style="display: none">
+                        @Html.TextBox("list["+i+"].Id", Model[i].Id, new {@readonly = "readonly", @class= "form-control"} )
+                    </td>
+                    <td>
+                        @Html.TextBox("list["+i+"].Name", Model[i].Name, new {@readonly = "readonly", @class= "form-control"} )
+                    </td>
+                    <td>
+                        @Html.TextBox("list["+i+"].CountThis", Model[i].CountThis, new { @class= "form-control",  @type = "number" } )
+                    </td>                    
+                </tr>
+            }
+            <tr>
+                <td colspan="4">
+                    <input type="submit" value="checkout" class="btn btn-default" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+

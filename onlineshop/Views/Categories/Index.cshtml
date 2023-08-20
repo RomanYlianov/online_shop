@@ -1,0 +1,77 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.CategoryDTO>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Categories list</h2>
+
+<p>
+    @Html.ActionLink("Create new", "Create")
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model=>model.Name)
+            </td>
+            <td>
+                @Html.DisplayNameFor(model=>model.Description)
+            </td>
+            <td>
+                Details
+            </td>
+            @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+            {
+                <td>
+                    Edit
+                </td>
+                <td>
+                    Delete
+                </td>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag == true)
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem=>item.Name)</td>
+                    <td>@Html.DisplayFor(modeItem=>item.Description)</td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) 
+                        
+                    </td>
+                    @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+                    {
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id=item.Id })
+                        </td>
+                        <td>
+                            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                        </td>
+                    }
+                </tr>
+            }
+        }
+        else
+        {
+            @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+            {
+                <tr>
+                    <td colspan="5">no data</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="3">no data</td>
+                </tr>
+            }
+           
+        }
+    </tbody>
+</table>

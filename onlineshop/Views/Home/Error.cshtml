@@ -1,0 +1,39 @@
+﻿@{
+    ViewBag.Title = "Error page";
+}
+
+@if (ViewBag.error != null)
+{
+
+   
+    <div class="container">
+        <h2>Error occured</h2> 
+        <br/>
+        @switch (ViewData["error"])
+        {
+            case 404:
+                <div class="alert alert-danger align-content-center" role="alert">page was not found</div>
+                break;
+            case 401:
+                <div class="alert alert-danger align-content-center" role="alert">access deaned</div>
+                break;
+            case 403:
+                <div class="alert alert-danger align-content-center" role="alert">forbidden</div>
+                break;
+            case 400:
+                <div class="alert alert-danger align-content-center" role="alert">bad request</div>
+                break;
+            case 500:
+                <div class="alert alert-danger align-content-center" role="alert">internal server error</div>
+                break;
+            default:
+                <div class="alert alert-danger align-content-center" role="alert">error code: @ViewBag.error</div>
+                break;
+        }
+        
+    </div>
+}
+else
+{
+    <div class="alert alert-info align-content-center" role="alert">error page</div>
+}

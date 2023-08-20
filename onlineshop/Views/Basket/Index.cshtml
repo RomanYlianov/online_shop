@@ -1,0 +1,120 @@
+﻿@model Tuple<onlineshop.Services.DTO.BasketDTO ,List<onlineshop.Services.DTO.BasketDTO>, List<onlineshop.Services.DTO.BasketDTO>>
+
+@{
+    ViewBag.Title = "Basket";
+}
+
+<h2>Avaliable products</h2>
+
+<p>
+    @Html.ActionLink("Checkout", "Checkout", "Basket")
+</p>
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.ProductDTOId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.Count)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.IntermediateCost)
+            </th>
+            <th colspan="3">
+                Details &ensp; Update &nbsp; Delete
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag1 == true)
+        {
+            @foreach (var item in Model.Item2)
+            {
+                <tr>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.ProductDTO.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Count)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.IntermediateCost)
+                    </td>
+                    <td colspan="3">
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6">no data</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+
+<br/>
+
+<h2>Not avaliable products</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.ProductDTOId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.Count)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Item1.IntermediateCost)
+            </th>
+            <th colspan="2">
+                Details &nbsp; Delete
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag2 == true)
+        {
+            @foreach (var item in Model.Item3)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.ProductDTO.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Count)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.IntermediateCost)
+                    </td>
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id=item.Id })                       
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4">no data</td>
+            </tr>
+        }
+    </tbody>
+</table>

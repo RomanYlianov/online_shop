@@ -1,0 +1,58 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.EvaluationQueueDTO>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Evaluations queue</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.OrderDTOId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.BuyerDTOId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.ProductDTOId)
+            </th>
+           
+            <th colspan="3">
+                Details &nbsp; Add Comment &nbsp; Mark Product
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag == true)
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.OrderDTO.Cipher)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.BuyerDTO.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.ProductDTO.Name)
+                    </td>
+                    <td colspan="3">
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Add comment", "Create" , "Comments" , new { id=item.Id }) |
+                        @Html.ActionLink("Rate product", "RateProduct", "Products",new { id=item.Id })
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6">no data</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

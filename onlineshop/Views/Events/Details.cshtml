@@ -1,0 +1,68 @@
+﻿@model onlineshop.Services.DTO.EventDTO
+
+@{
+    ViewBag.Title = "Event details";
+}
+
+<h2>Event</h2>
+
+<div class="container">
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Title)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Title)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Text)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Text)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.CreationTime)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.CreationTime)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ExpirationTime)
+        </dt>
+
+        @if (Model.ExpirationTime != null)
+        {
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model=>model.ExpirationTime)
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                not set
+            </dd>
+        }
+
+    </dl>
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Product details", "Details", "Products", new {id = Model.ProductDTOId}) |
+    @Html.ActionLink("Back to List", "Index")
+</p>

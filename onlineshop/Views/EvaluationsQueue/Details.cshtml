@@ -1,0 +1,80 @@
+﻿@model onlineshop.Services.DTO.EvaluationQueueDTO
+
+@{
+    ViewBag.Title = "Evaluation queue details";
+}
+
+<h2>Evaluation queue details</h2>
+
+<div class="container">
+    <h4>Evaluation queue</h4>
+
+    <dl class="row">
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.OrderDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.OrderDTO.Cipher)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.BuyerDTO)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.BuyerDTO.Email)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTO)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.IsAddedComment)
+        </dt>
+
+        @if (Model.IsAddedComment == true)
+        {
+            <dd class="col-sm-9">
+                yes
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                no
+            </dd>
+        }
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.IsRateProduct)
+        </dt>
+
+        @if (Model.IsRateProduct)
+        {
+            <dd class="col-sm-9">
+                yes
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                no
+            </dd>
+        }
+
+
+    </dl>
+
+</div>
+
+<p>
+
+    @Html.ActionLink("Back to List", "Index")
+</p>

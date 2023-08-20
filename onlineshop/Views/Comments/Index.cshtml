@@ -1,0 +1,97 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.CommentDTO>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Comments</h2>
+
+<table class="table">
+
+    <thead>
+
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.AuthorDTOId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Text)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.CreationTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.ModificationTime)
+            </th>
+            <th colspan="3">
+                Details &nbsp; Edit &nbsp; Delete
+            </th>
+        </tr>
+
+    </thead>
+    <tbody>
+
+        @if (ViewBag.flag == true)
+        {
+           
+            @foreach (var item in Model)
+            {
+                
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Title)
+                    </td>
+                    @if (item.AuthorDTO != null)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem=>item.AuthorDTO.UserName)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            unknown user
+                        </td>
+                    }
+                   
+                    <td>
+                        @Html.DisplayFor(modelitem=>item.Text)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.CreationTime)
+                    </td>
+                    @if (item.ModificationTime != null)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem=>item.ModificationTime)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            not set
+                        </td>
+                    }
+                    <td colspan="3">
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+                        @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                    </td>
+                </tr>
+
+            }
+
+        }
+        else
+        {
+            <tr>
+                <td colspan="8">no data</td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

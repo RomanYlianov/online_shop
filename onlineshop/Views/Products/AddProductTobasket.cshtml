@@ -1,0 +1,78 @@
+﻿@model onlineshop.Services.DTO.BasketDTO
+
+@{
+    ViewBag.Title = "Add to basket";
+}
+
+<h2>Product</h2>
+
+@using (Html.BeginForm("AddProductTobasket", "Products", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+
+    <div class="container">
+        <h4>Add product to basket</h4>
+        <br />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model=>model.ProductDTO.Id)
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.ProductDTO.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProductDTO.Name, new { htmlAttributes = new { @class = "form-control", disabled = "disabled", @readonly = "readonly" } })
+                
+                @Html.ValidationMessageFor(model => model.ProductDTO.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--category-->
+
+      
+        <div class="form-group row">
+            @Html.LabelFor(model => model.ProductDTO.CategoryDTO, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProductDTO.CategoryDTO.Name, new { htmlAttributes = new { @class = "form-control", disabled = "disabled", @readonly = "readonly" } })
+
+                @Html.ValidationMessageFor(model => model.ProductDTO.CategoryDTO.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--suppler firm-->
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.ProductDTO.SupplerFirmDTOId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProductDTO.SupplerFirmDTO.Name, new { htmlAttributes = new { @class = "form-control", disabled = "disabled", @readonly = "readonly" } })
+
+                @Html.ValidationMessageFor(model => model.ProductDTO.SupplerFirmDTO.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.ProductDTO.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.ProductDTO.Price, new { htmlAttributes = new { @class = "form-control", disabled = "disabled", @readonly = "readonly" } })
+                @Html.ValidationMessageFor(model => model.ProductDTO.Price, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.Count, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Count, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Count, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+       
+
+        <div class="form-group row">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add to basket" class="btn btn-default" />
+            </div>
+        </div>
+
+    </div>
+}

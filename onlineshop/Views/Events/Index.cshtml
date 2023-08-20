@@ -1,0 +1,102 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.EventDTO>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Events list</h2>
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.ProductDTOId)
+            </th>
+            
+            <th>
+                @Html.DisplayNameFor(model=>model.CreationTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.ExpirationTime)
+            </th>
+            <th>
+                Details
+            </th>
+            @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+            {
+                <th>
+                    Edit
+                </th>
+                <th>
+                    Delete
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag == true)
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.ProductDTO.Name)
+                    </td>
+                    
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.CreationTime)
+                    </td>
+
+                    @if (item.ExpirationTime != null)
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem=>item.ExpirationTime.Value)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            not set
+                        </td>
+                    }
+                    <td>
+                        @Html.ActionLink("Details", "Details", new { id=item.Id })
+                    </td>
+                    
+                    @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+                    {
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id=item.Id })
+                        </td>
+                        <td>
+                            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                        </td>
+                    }
+
+                </tr>
+            }
+        }
+        else
+        {
+            @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+            {
+                <tr>
+                    <td colspan="7">no data</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5">no data</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

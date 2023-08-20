@@ -1,0 +1,87 @@
+﻿@model onlineshop.Services.DTO.CommentDTO
+
+@{
+    ViewBag.Title = "Comment details";
+}
+
+<h2>Comment details</h2>
+
+<div class="container">
+    <h4>Comment</h4>
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayFor(model=>model.Title)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Title)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayFor(model=>model.AuthorDTOId)
+        </dt>
+
+        @if (Model.AuthorDTO != null)
+        {
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model=>model.AuthorDTO.UserName)
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                unknown user
+            </dd>
+        }
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Text)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Text)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.CreationTime)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.CreationTime)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ModificationTime)
+        </dt>
+
+        @if (Model.ModificationTime != null)
+        {
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model=>model.ModificationTime.Value)
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                not set
+            </dd>
+        }
+
+    </dl>
+
+</div>
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    @Html.ActionLink("Back to List", "Index",  new {pid = ViewBag.rootId})
+</p>

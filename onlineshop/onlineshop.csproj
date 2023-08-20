@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>aspnet-onlineshop-15895690-06c1-41b2-90c1-f542fed0cd04</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20230803232037_Init-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230803232037_Init-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230807110829_Init-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230807110829_Init-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230807111652_Init-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230807111652_Init-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230807113448_Init-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230807113448_Init-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230807170714_Init-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230807170714_Init-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230816125714_Update-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230816125714_Update-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230817102013_Update-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230817102013_Update-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230818014429_Update-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230818014429_Update-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230818122601_Update-Database-Structure.cs" />
+    <Compile Remove="Data\Migrations\20230818122601_Update-Database-Structure.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.32" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Mapper\Implimentation\" />
+    <Folder Include="Views\Comments\" />
+  </ItemGroup>
+
+</Project>

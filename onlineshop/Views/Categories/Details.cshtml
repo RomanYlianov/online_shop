@@ -1,0 +1,45 @@
+﻿@model onlineshop.Services.DTO.CategoryDTO
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>category details</h2>
+
+<div class="container">
+    <h4>Category</h4>
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Name)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Description)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Description)
+        </dd>
+
+    </dl>
+</div>
+
+@if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+{
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id })
+    </p>
+
+}
+
+<br/>
+
+<p>
+   
+    @Html.ActionLink("Back to List", "Index")
+</p>

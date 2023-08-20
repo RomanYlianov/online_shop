@@ -1,0 +1,130 @@
+﻿@model onlineshop.Services.DTO.OrderDTO
+
+@{
+    ViewBag.Title = "Order details";
+}
+
+<h2>Order details</h2>
+
+<div class="container">
+    <h4>Order</h4>
+    <br/>
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Cipher)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Cipher)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.BuyerDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.BuyerDTO.FullName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOs)
+        </dt>
+
+        <dd class="col-sm-9">
+            <ul>
+                @foreach (var item in Model.ProductDTOs)
+                {
+                    <li>@item.Name</li>
+                }
+            </ul>
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Count)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Count)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Price)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Price)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.DeliveryMethodDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.DeliveryMethodDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.PaymentMethodDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.PaymentMethodDTO.PaymentType)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.OrderStatus)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.OrderStatus.Value)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Mark)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Mark)
+        </dd>
+        
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ReceiptCode)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ReceiptCode)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.TrackNumber)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.TrackNumber)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.CreationTime)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.CreationTime)
+        </dd>
+
+    </dl>
+
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+        @Html.ActionLink("Back to MyOrders", "MyOrders")
+    </p>
+
+    @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+    {
+        <p>
+            @Html.ActionLink("Back to All orders", "AllOrders")
+        </p>
+    }
+
+</div>

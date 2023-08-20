@@ -1,0 +1,118 @@
+﻿@model IEnumerable<onlineshop.Services.DTO.OrderDTO>
+
+@{
+    ViewBag.Title = "All orders";
+}
+
+<h2>List of orders</h2>
+
+@using (Html.BeginForm("AllOrders", "Orders", FormMethod.Get))
+{
+    <div class="form-group">
+        <label for="cid">Cipher</label>
+        <input type="text" class="form-control" name="cipher" id="cid" />
+    </div>
+
+    <div class="form-group">
+        <label for="eid">Buyer email</label>
+        <input type="text" class="form-control" name="email" id="eid"/>
+    </div>
+
+    <div class="form-group">
+        <label for="pmid">Payment type</label>
+        @Html.DropDownList("type", Html.GetEnumSelectList(typeof(PaymentType)), "select type",new { @id="pmid", @class = "form-control"})
+    </div>
+
+    <div class="form-group">
+        <label for="dmid">Delivery method</label>
+        @Html.DropDownList("method", ViewBag.DeliveryMethods as IEnumerable<SelectListItem>, "select method", new { @class = "form-control", @id="dmid"})
+    </div>
+
+    <div class="form-group">
+        <label for="cts">Creation time start</label>
+        <input type="date" class="form-control" id="cts" name="creationTimeStart"/>
+    </div>
+
+    <div class="form-group">
+        <label for="cte">Creation time end</label>
+        <input type="date" class="form-control" id="cte" name="creationTimeEnd" />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">send</button>
+    </div>
+
+}
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.Cipher)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Count)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.OrderStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.CreationTime)
+            </th>
+            <th colspan="2">
+                Details &nbsp; Update
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.flag == true)
+        {
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayNameFor(modelItem=>item.Cipher)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Count)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Price)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.OrderStatus)
+                    </td>
+
+                    <td>
+                        @Html.DisplayNameFor(modelItem=>item.CreationTime)
+                    </td>
+
+                    <td colspan="2">
+                        @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                        @Html.ActionLink("Edit", "RootEdit", new { id=item.Id })
+                    </td>
+
+                </tr>
+            }
+
+            
+        }
+        else
+        {
+            <tr>
+                <td colspan="7">
+                    no data
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>

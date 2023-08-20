@@ -1,0 +1,121 @@
+﻿@model onlineshop.Services.DTO.UserDTO
+
+@{
+    ViewBag.Title = "Current";
+}
+
+<h2>Current User</h2>
+
+<div class="container">
+
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.UserName)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.UserName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Email)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Email)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.PhoneNumber)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.PhoneNumber)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.KeyWord)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.KeyWord)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.FullName)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.FullName)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Birthday)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Birthday)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Address)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Address)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Country)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Country)
+        </dd>
+
+
+        @if (Model.IsVIP == true)
+        {
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model=>model.IsVIP)
+            </dt>
+
+            <dd class="col-sm-9">
+                VIP user
+            </dd>
+        }
+       
+       
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.CreationTime)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.CreationTime)
+        </dd>
+
+        <dt class="col-sm-3">
+            User roles
+        </dt>
+
+        <dd class="col-sm-9">
+            <ul>
+                @foreach (var item in ViewBag.UserRoles)
+                {
+                    <li>@item.Name</li>
+                }
+            </ul>
+
+        </dd>
+
+    </dl>
+
+</div>
+
+<p>
+    
+    @Html.ActionLink("Back", "Index", "Home")
+</p>

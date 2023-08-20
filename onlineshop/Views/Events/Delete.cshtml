@@ -1,0 +1,77 @@
+﻿@model onlineshop.Services.DTO.EventDTO
+
+@{
+    ViewBag.Title = "Event";
+}
+
+<h2>Event</h2>
+
+<h3>Are you sure you want to remove this?</h3>
+
+<div class="container">
+    <h4>Event</h4>
+    <br/>
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Title)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Title)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ProductDTOId)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.ProductDTO.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.Text)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.Text)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.CreationTime)
+        </dt>
+
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.CreationTime)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.ExpirationTime)
+        </dt>
+
+        @if (Model.ExpirationTime != null)
+        {
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model=>model.ExpirationTime)
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                not set
+            </dd>
+        }
+
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+
+</div>
