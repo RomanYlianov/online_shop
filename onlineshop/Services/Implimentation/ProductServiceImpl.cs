@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ActionConstraints;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using onlineshop.Data;
 using onlineshop.Models;
@@ -17,30 +16,26 @@ namespace onlineshop.Services.Implimentation
 {
     public class ProductServiceImpl : IProductService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly IProductMapper PMapper;
-        
+
         private readonly ILogger logger;
 
         public ProductServiceImpl(ApplicationDbContext context, IProductMapper mapper)
         {
-
             this.context = context;
-            this.PMapper = mapper;        
+            this.PMapper = mapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<ProductServiceImpl>();
-
         }
 
         public async Task<List<ProductDTO>> GetAll()
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
-            List<Product> list = await context.ProductsCtx.Include(p=>p.Category).Include(p=>p.SupplerFirm).ToListAsync();
+            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).ToListAsync();
 
             List<ProductDTO> result = new List<ProductDTO>();
 
@@ -68,7 +63,6 @@ namespace onlineshop.Services.Implimentation
 
                         result.Add(dto);
                     }
-                   
                 }
             }
             else
@@ -78,14 +72,13 @@ namespace onlineshop.Services.Implimentation
             }
 
             return result;
-
         }
 
         public async Task<List<ProductDTO>> GetProductsInCatalog()
         {
             logger.LogInformation(GetType().Name + " : GetProductsInCatalog");
 
-            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p=>p.CountThis > 0).ToListAsync();
+            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0).ToListAsync();
 
             List<ProductDTO> result = new List<ProductDTO>();
 
@@ -126,13 +119,11 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<ProductDTO>> GetProductsInBasket(string email)
         {
-
             logger.LogInformation(GetType().Name + " : GetProductsInBasket");
 
             if (email != null)
             {
-                List<Guid> list = await context.BasketCtx.Include(b => b.Buyer).Include(b => b.Product).Where(b => b.Buyer.NormalizedEmail.Equals(email.ToUpper())).Select(b=>b.Product.Id).ToListAsync();
-
+                List<Guid> list = await context.BasketCtx.Include(b => b.Buyer).Include(b => b.Product).Where(b => b.Buyer.NormalizedEmail.Equals(email.ToUpper())).Select(b => b.Product.Id).ToListAsync();
 
                 string message = string.Empty;
 
@@ -157,7 +148,6 @@ namespace onlineshop.Services.Implimentation
                         Product entity = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).FirstOrDefaultAsync(p => p.Id.Equals(item));
 
                         result.Add(PMapper.ToDTO(entity));
-
                     }
                 }
                 else
@@ -165,8 +155,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Product>("GetProductsInBasket", message, HttpStatusCode.NotFound);
                 }
-
-
             }
             else
             {
@@ -176,27 +164,23 @@ namespace onlineshop.Services.Implimentation
             }
 
             throw new NotImplementedException();
-
         }
 
         public async Task<ProductDTO> GetById(string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (id != null)
-            {                
+            {
                 try
                 {
                     Product entity = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).FirstOrDefaultAsync(p => p.Id.Equals(Guid.Parse(id)));
-                    
+
                     if (entity != null)
                     {
-
                         ProductDTO dto = PMapper.ToDTO(entity);
 
                         return dto;
-
                     }
                     else
                     {
@@ -204,7 +188,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Product>("GetById", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -212,9 +195,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Product>("GetById", message, HttpStatusCode.InternalServerError);
                 }
-
-                
-
             }
             else
             {
@@ -222,17 +202,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogInformation(GetType().Name + " : " + message);
                 throw new HttpException<Product>("GetById", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<ProductDTO> LoadProduct(ClaimsPrincipal currentUser, string eqId)
         {
-
             logger.LogInformation(GetType().Name + " : LoadProduct");
 
             if (eqId != null)
             {
-
                 try
                 {
                     string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -240,14 +217,11 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-
                         if (entity.BuyerId.ToString().Equals(uid))
                         {
-
                             ProductDTO dto = PMapper.ToDTO(entity.Product);
 
                             return dto;
-
                         }
                         else
                         {
@@ -255,8 +229,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<EvaluationQueue>("LoadProduct", message, HttpStatusCode.Forbidden);
                         }
-
-                      
                     }
                     else
                     {
@@ -271,8 +243,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<EvaluationQueue>("LoadProduct", message, HttpStatusCode.InternalServerError);
                 }
-               
-
             }
             else
             {
@@ -280,22 +250,18 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("LoadProduct", message, HttpStatusCode.BadRequest);
             }
-
         }
 
-        public async Task<ProductDTO> RateProduct(ClaimsPrincipal currentUser,string eqId, ProductDTO dto)
+        public async Task<ProductDTO> RateProduct(ClaimsPrincipal currentUser, string eqId, ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : RateProduct");
 
             if (eqId != null)
             {
-
                 if (dto != null)
                 {
                     try
                     {
-
                         string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
                         Product entity = await context.ProductsCtx.FindAsync(Guid.Parse(dto.Id));
@@ -304,40 +270,32 @@ namespace onlineshop.Services.Implimentation
 
                         if (entity != null)
                         {
-
                             if (eqEntity != null)
                             {
-
                                 if (eqEntity.BuyerId.ToString().Equals(uid) && eqEntity.ProductId.ToString().Equals(dto.Id))
                                 {
-
                                     entity.Rating = (entity.Rating + dto.Rating) / (entity.MarksCount + 1);
                                     entity.MarksCount++;
 
                                     context.Entry(entity).State = EntityState.Modified;
                                     context.Set<Product>().Update(entity);
-                                    await context.SaveChangesAsync();                                  
-                                  
+                                    await context.SaveChangesAsync();
 
                                     if (eqEntity.IsAddedComment)
                                     {
-
                                         context.Entry(eqEntity).State = EntityState.Deleted;
                                         context.Set<EvaluationQueue>().Remove(eqEntity);
-
                                     }
                                     else
                                     {
                                         eqEntity.IsRateProduct = true;
                                         context.Entry(eqEntity).State = EntityState.Modified;
                                         context.Set<EvaluationQueue>().Update(eqEntity);
-
                                     }
 
                                     await context.SaveChangesAsync();
 
                                     return dto;
-
                                 }
                                 else
                                 {
@@ -345,7 +303,6 @@ namespace onlineshop.Services.Implimentation
                                     logger.LogError(GetType().Name + " : " + message);
                                     throw new HttpException<EvaluationQueue>("RateProduct", message, HttpStatusCode.Forbidden);
                                 }
-
                             }
                             else
                             {
@@ -353,7 +310,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<EvaluationQueue>("RateProduct", message, HttpStatusCode.NotFound);
                             }
-
                         }
                         else
                         {
@@ -361,24 +317,20 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Product>("RateProduct", message, HttpStatusCode.NotFound);
                         }
-
-
                     }
                     catch (FormatException ex)
                     {
-                        string message = "convert id " +dto.Id + " or (and) " + eqId + " failed: " + ex.Message;
+                        string message = "convert id " + dto.Id + " or (and) " + eqId + " failed: " + ex.Message;
                         logger.LogInformation(GetType().Name + " : " + message);
                         throw new HttpException<Product>("Update", message, HttpStatusCode.InternalServerError);
                     }
-
                 }
                 else
                 {
                     string message = "dto parameter is mandatory";
                     logger.LogError(GetType().Name + " : " + message);
-                    throw new HttpException<Product>("RateProduct",  message, HttpStatusCode.BadRequest);
+                    throw new HttpException<Product>("RateProduct", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -386,17 +338,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<EvaluationQueue>("RateProduct", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<ProductDTO> Add(ProductDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
             if (item != null)
             {
-
                 if (!item.Name.Equals("removed product"))
                 {
                     //generate cipher
@@ -429,32 +378,24 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("Add", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<ProductDTO> Update(ProductDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
-
-               
-
                 try
                 {
                     Product entity = await context.ProductsCtx.FindAsync(Guid.Parse(item.Id));
 
                     if (entity != null)
                     {
-
                         if (!entity.Name.Equals("removed product"))
                         {
-
-
                             entity = PMapper.ToEntity(item);
-                            
+
                             //sync count
                             if (entity.CountAll < entity.CountThis)
                             {
@@ -472,16 +413,13 @@ namespace onlineshop.Services.Implimentation
                             item = PMapper.ToDTO(entity);
 
                             return item;
-
                         }
                         else
                         {
                             string message = "product with name \"removed product\" cant be modify";
-                            logger.LogError(GetType().Name+" : "+message);
+                            logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
                         }
-
-
                     }
                     else
                     {
@@ -503,27 +441,21 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + message);
                 throw new HttpException<Product>("Update", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         [Obsolete]
         public async Task Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (id != null)
             {
-
                 try
                 {
-                    
                     Product entity = await context.ProductsCtx.FindAsync(Guid.Parse(id));
 
                     if (entity != null)
                     {
-
-
                         if (!entity.Name.Equals("removed product"))
                         {
                             //replace depends link
@@ -531,9 +463,7 @@ namespace onlineshop.Services.Implimentation
 
                             if (list != null)
                             {
-                                Guid removedProductId = await context.ProductsCtx.Where(p => p.Name.Equals("removed product")).Select(p => p.Id).FirstOrDefaultAsync();
-
-                                //Product removedProduct = await context.ProductsCtx.Where(p => p.Name.Equals("removed product")).FirstOrDefaultAsync();
+                                Guid removedProductId = await context.ProductsCtx.Where(p => p.Name.Equals("removed product")).Select(p => p.Id).FirstOrDefaultAsync();                                
 
                                 foreach (var item in list)
                                 {
@@ -546,13 +476,6 @@ namespace onlineshop.Services.Implimentation
                                 }
 
                                 list = await context.OrderProductCtx.Where(op => op.ProductId.Equals(entity.Id)).ToListAsync();
-
-                                //foreach (var item in list)
-                                //{
-                                //    item.ProductId = removedProductId;
-                                //    context.OrderProductCtx.Update(item);
-                                //    await context.SaveChangesAsync();
-                                //}
                             }
 
                             context.ProductsCtx.Remove(entity);
@@ -571,7 +494,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Product>("Delete", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -579,7 +501,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : : " + message);
                     throw new HttpException<Product>("Update", message, HttpStatusCode.InternalServerError);
                 }
-
             }
             else
             {
@@ -587,17 +508,24 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("Delete", message, HttpStatusCode.BadRequest);
             }
-
         }
 
-        public async Task<List<ProductDTO>> FindByName(string name)
+        public async Task<List<ProductDTO>> FindByName(string name, bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : FindByname");
 
             if (name != null)
             {
-                List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(name.ToUpper())).ToListAsync();
+                List<Product> list = new List<Product>();
+
+                if (isRoot)
+                {
+                    list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(name.ToUpper()) && !p.Name.Equals("removed product")).ToListAsync();
+                }
+                else
+                {
+                    list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(name.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                }
 
                 string message = string.Empty;
 
@@ -619,7 +547,6 @@ namespace onlineshop.Services.Implimentation
 
                     foreach (var item in list)
                     {
-
                         ProductDTO dto = PMapper.ToDTO(item);
 
                         result.Add(dto);
@@ -632,32 +559,35 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("FindByName", message, HttpStatusCode.NotFound);
                 }
-
             }
             else
             {
                 string message = "name parameter is mandatory";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("FindByName", message, HttpStatusCode.BadRequest);
-
             }
-
         }
 
-
-        public async Task<List<ProductDTO>> FindByCategory(string category)
+        public async Task<List<ProductDTO>> FindByCategory(string category, bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : FindByCategory");
 
             if (category != null)
             {
-
                 Category cEntity = await context.CategoriesCtx.FirstOrDefaultAsync(c => c.Name.ToUpper().Contains(category.ToUpper()));
 
                 if (cEntity != null)
                 {
-                    List<Product> list = await context.ProductsCtx.Include(p=>p.Category).Include(p=>p.SupplerFirm).Where(p => p.Category.Name.ToUpper().Contains(category.ToUpper())).ToListAsync();
+                    List<Product> list = new List<Product>();
+
+                    if (isRoot)
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Category.Name.ToUpper().Contains(category.ToUpper()) && !p.Name.Equals("removed product")).ToListAsync();
+                    }
+                    else
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Category.Name.ToUpper().Contains(category.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                    }
 
                     string message = string.Empty;
 
@@ -685,14 +615,12 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         return result;
-
                     }
                     else
                     {
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<User>("FindByCategory", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 else
                 {
@@ -707,22 +635,28 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("FindByCategory", message, HttpStatusCode.BadRequest);
             }
-
         }
-               
-        public async Task<List<ProductDTO>> FindBySupplerFirm(string firm)
-        {
 
+        public async Task<List<ProductDTO>> FindBySupplerFirm(string firm, bool isRoot = false)
+        {
             logger.LogInformation(GetType().Name + " : FindBySupplerFirm");
 
             if (firm != null)
             {
-
                 SupplerFirm sfEntity = await context.SupplerFirmsCtx.FirstOrDefaultAsync(sf => sf.Name.ToUpper().Contains(firm.ToUpper()));
 
                 if (sfEntity != null)
                 {
-                    List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.SupplerFirm.Name.ToUpper().Contains(firm.ToUpper())).ToListAsync();
+                    List<Product> list = new List<Product>();
+
+                    if (isRoot)
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.SupplerFirm.Name.ToUpper().Contains(firm.ToUpper()) && !p.Name.Equals("removed product")).ToListAsync();
+                    }
+                    else
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.SupplerFirm.Name.ToUpper().Contains(firm.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                    }
 
                     string message = string.Empty;
 
@@ -744,13 +678,12 @@ namespace onlineshop.Services.Implimentation
 
                         foreach (var item in list)
                         {
-                            ProductDTO dto = PMapper.ToDTO(item);                          
+                            ProductDTO dto = PMapper.ToDTO(item);
 
                             result.Add(dto);
                         }
 
                         return result;
-
                     }
                     else
                     {
@@ -771,14 +704,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("FindByCategory", message, HttpStatusCode.BadRequest);
             }
-
         }
 
-      
-
-        public async Task<List<ProductDTO>> FindByPrice(double? lowestPrice, double? higestPrice)
+        public async Task<List<ProductDTO>> FindByPrice(double? lowestPrice, double? higestPrice, bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : FindByPrice");
 
             if (lowestPrice == null && higestPrice == null)
@@ -789,43 +718,49 @@ namespace onlineshop.Services.Implimentation
             }
             else
             {
-
                 List<ProductDTO> result = new List<ProductDTO>();
 
                 bool flag = true;
 
                 if (lowestPrice != null)
                 {
-
                     List<Product> list = new List<Product>();
 
                     flag = false;
 
                     if (higestPrice != null)
                     {
-                        
-                        await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice).ToListAsync();
+                        if (isRoot)
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice && !p.Name.Equals("removed product")).ToListAsync();
+                        }
+                        else
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        }
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice).ToListAsync();
+                        if (isRoot)
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && !p.Name.Equals("removed product")).ToListAsync();
+                        }
+                        else
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        }
                     }
 
                     if (list.Count > 0)
                     {
-
-                        
-
                         foreach (var item in list)
                         {
-                            
                             ProductDTO dto = PMapper.ToDTO(item);
-                         
+
                             result.Add(dto);
                         }
 
                         return result;
-
                     }
                     else
                     {
@@ -833,40 +768,31 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " :" + message);
                         throw new HttpException<Product>("FindByPrice", message, HttpStatusCode.NotFound);
                     }
-
                 }
 
                 if (higestPrice != null && flag)
                 {
-
-                   
-
                     List<Product> list = new List<Product>();
 
                     if (higestPrice != null)
                     {
-                        await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice && !p.Name.Equals("removed product")).ToListAsync();
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && !p.Name.Equals("removed product")).ToListAsync();
                     }
 
                     if (list.Count > 0)
                     {
-
-                      
-
                         foreach (var item in list)
                         {
-                          
                             ProductDTO dto = PMapper.ToDTO(item);
-                           
+
                             result.Add(dto);
                         }
 
                         return result;
-
                     }
                     else
                     {
@@ -877,14 +803,11 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return result;
-
             }
-            
         }
 
-        public async Task<List<ProductDTO>> FindByRating(double? lowestRating, double? higestRating)
+        public async Task<List<ProductDTO>> FindByRating(double? lowestRating, double? higestRating, bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : FinbByRating");
 
             if (lowestRating == null && higestRating == null)
@@ -895,43 +818,49 @@ namespace onlineshop.Services.Implimentation
             }
             else
             {
-
                 List<ProductDTO> result = new List<ProductDTO>();
 
                 bool flag = true;
 
                 if (lowestRating != null)
                 {
-
                     List<Product> list = new List<Product>();
 
                     flag = false;
 
                     if (higestRating != null)
                     {
-
-                        await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating).ToListAsync();
+                        if (isRoot)
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating && !p.Name.Equals("removed product")).ToListAsync();
+                        }
+                        else
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        }
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating).ToListAsync();
+                        if (isRoot)
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && !p.Name.Equals("removed product")).ToListAsync();
+                        }
+                        else
+                        {
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        }
                     }
 
                     if (list.Count > 0)
                     {
-
-
-
                         foreach (var item in list)
                         {
-                           
                             ProductDTO dto = PMapper.ToDTO(item);
-                           
+
                             result.Add(dto);
                         }
 
                         return result;
-
                     }
                     else
                     {
@@ -939,41 +868,31 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " :" + message);
                         throw new HttpException<Product>("FindByRating", message, HttpStatusCode.NotFound);
                     }
-
                 }
 
                 if (higestRating != null && flag)
                 {
-
-
-
                     List<Product> list = new List<Product>();
 
                     if (higestRating != null)
                     {
-                        await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating).ToListAsync();
+                        await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating && !p.Name.Equals("removed product")).ToListAsync();
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && !p.Name.Equals("removed product")).ToListAsync();
                     }
 
                     if (list.Count > 0)
                     {
-
-
-
                         foreach (var item in list)
                         {
-                           
-
                             ProductDTO dto = PMapper.ToDTO(item);
-                          
+
                             result.Add(dto);
                         }
 
                         return result;
-
                     }
                     else
                     {
@@ -984,18 +903,23 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return result;
-
             }
-
         }
 
-
-        public async Task<List<ProductDTO>> FindHot()
+        public async Task<List<ProductDTO>> FindHot(bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : FindHot");
 
-            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.IsHot == true).ToListAsync();
+            List<Product> list = new List<Product>();
+
+            if (isRoot)
+            {
+                list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.IsHot == true && !p.Name.Equals("removed product")).ToListAsync();
+            }
+            else
+            {
+                list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0 && (p.IsHot == true) && !p.Name.Equals("removed product")).ToListAsync();
+            }
 
             string message = string.Empty;
 
@@ -1017,14 +941,12 @@ namespace onlineshop.Services.Implimentation
 
                 foreach (var item in list)
                 {
-                   
                     ProductDTO dto = PMapper.ToDTO(item);
-                   
+
                     result.Add(dto);
                 }
 
                 return result;
-
             }
             else
             {
@@ -1032,11 +954,9 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<Product>("FindHot", message, HttpStatusCode.NotFound);
             }
         }
-       
-        public async Task<List<ProductDTO>> Search(ProductSearchDTO dto)
+
+        public async Task<List<ProductDTO>> Search(ProductSearchDTO dto, bool isRoot = false)
         {
-
-
             logger.LogInformation(GetType().Name + " : Search");
 
             if (dto != null)
@@ -1045,37 +965,42 @@ namespace onlineshop.Services.Implimentation
 
                 List<Product> list = new List<Product>();
 
-               
-
                 if (!string.IsNullOrEmpty(dto.Name))
                 {
-
                     logger.LogInformation(GetType().Name + " : #0 - search by Name parameter (is main)");
 
-                    list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(dto.Name.ToUpper())).ToListAsync();
-
+                    if (isRoot)
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(dto.Name.ToUpper()) && !p.Name.Equals("removed product")).ToListAsync();
+                    }
+                    else
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(dto.Name.ToUpper()) && (p.CountThis > 0) && !p.Name.Equals("removed product")).ToListAsync();
+                    }
                 }
                 else
                 {
                     logger.LogInformation(GetType().Name + " : #0 - get all records (is main)");
 
-                    list = await context.ProductsCtx.ToListAsync();
+                    if (isRoot)
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).ToListAsync();
+                    }
+                    else
+                    {
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0).ToListAsync();
+                    }
                 }
 
-               
-
-                if (!string.IsNullOrEmpty(dto.CategoryName))
+                if (!string.IsNullOrEmpty(dto.CategoryId))
                 {
-
                     logger.LogInformation(GetType().Name + " : #1 - search by CategoryName parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-                      
-
-                        if (item.Category.Name.ToUpper().Contains(dto.CategoryName.ToUpper()))
+                        if (item.CategoryId.ToString().Equals(dto.CategoryId))
                         {
                             temp.Add(item);
                         }
@@ -1084,135 +1009,109 @@ namespace onlineshop.Services.Implimentation
                     list = temp;
                 }
 
-              
-
-                if (!string.IsNullOrEmpty(dto.SupplerFirmName))
+                if (dto.SupplerFirmIds != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #2 - search by SupplerFirmName parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-                        
-
-                        if (item.SupplerFirm.Name.ToUpper().Contains(dto.SupplerFirmName.ToUpper()))
+                        foreach (string sfid in dto.SupplerFirmIds)
                         {
-                            temp.Add(item);
+                            if (item.SupplerFirmId.ToString().Equals(sfid))
+                            {
+                                temp.Add(item);
+                                break;
+                            }
                         }
 
                         list = temp;
-
                     }
                 }
 
-         
-
                 if (dto.LowestPrice != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #3 - search by Price (lowest) parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-                       
-
                         if (item.Price >= dto.LowestPrice)
                         {
                             temp.Add(item);
                         }
 
                         list = temp;
-
                     }
                 }
 
-           
-
                 if (dto.HigestPrice != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #4 - search by Price (higest) parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-
-
                         if (item.Price <= dto.HigestPrice)
                         {
                             temp.Add(item);
                         }
 
                         list = temp;
-
                     }
                 }
 
                 if (dto.LowestRating != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #5 - search by Rating (lowest) parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-
-
                         if (item.Rating >= dto.LowestRating)
                         {
                             temp.Add(item);
                         }
 
                         list = temp;
-
                     }
                 }
 
                 if (dto.HigestRating != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #6 - search by Rating (higest) parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-
-
                         if (item.Rating <= dto.HigestRating)
                         {
                             temp.Add(item);
                         }
 
                         list = temp;
-
                     }
                 }
 
                 if (dto.IsHot != null)
                 {
-
                     logger.LogInformation(GetType().Name + " : #7 - search by IsHot parameter");
 
                     List<Product> temp = new List<Product>();
 
                     foreach (var item in list)
                     {
-
-
                         if (item.IsHot)
                         {
                             temp.Add(item);
                         }
 
                         list = temp;
-
                     }
                 }
 
@@ -1243,7 +1142,6 @@ namespace onlineshop.Services.Implimentation
 
         private string GenerateProductCipher()
         {
-
             logger.LogInformation(GetType().Name + " : GenerateProductCipher");
 
             string result = "P#";
@@ -1253,13 +1151,11 @@ namespace onlineshop.Services.Implimentation
 
             for (int i = 0; i < 20; i++)
             {
-
                 int arg0 = 1;
                 if (i > 6)
                 {
                     arg0 = RandomNumberGenerator.GetInt32(3);
                 }
-
 
                 int rand = -1;
                 switch (arg0)
@@ -1268,29 +1164,26 @@ namespace onlineshop.Services.Implimentation
                         {
                             //0-9
                             rand = RandomNumberGenerator.GetInt32(48, 58);
-
                         }
                         break;
+
                     case 1:
                         {
                             rand = RandomNumberGenerator.GetInt32(65, 91);
                         }
                         //A-Z
                         break;
+
                     case 2:
                         {
-
                             rand = RandomNumberGenerator.GetInt32(97, 123);
                         }
                         //a-z
                         break;
                 }
                 result += Convert.ToChar(rand);
-
             }
             return result;
         }
-
-       
     }
 }

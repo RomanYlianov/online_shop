@@ -5,13 +5,10 @@ namespace onlineshop.Services.Mapper
 {
     public interface IOrderMapper
     {
-
-        OrderDTO ToDTO(Order entity);
-
         Order ToEntity(OrderDTO dto);
 
         Order ToEntity(Order entity, OrderDTO dto);
 
-
+        OrderDTO ToDTO(Order entity);
     }
 }

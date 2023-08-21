@@ -4,21 +4,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace onlineshop.Models 
+namespace onlineshop.Models
 {
     [Table("user")]
-    public class User: IdentityUser<Guid>
+    public class User : IdentityUser<Guid>
     {
-       
-        public User(): base() { }
+        public User() : base()
+        {
+        }
 
         [Column("fullname")]
         public string FullName { get; set; }
 
         [Column("KeyWord")]
         public string KeyWord { get; set; }
-
-        //public byte[] Photo { get; set; }
 
         [DataType(DataType.Date)]
         [Column("birthday")]
@@ -39,22 +38,18 @@ namespace onlineshop.Models
 
         public User(bool isGeneratedPk = false)
         {
-            
             if (isGeneratedPk)
             {
                 this.Id = Guid.NewGuid();
             }
-
-
         }
 
         public virtual List<PaymentMethod> PaymentMethods { get; set; }
 
         public virtual List<Basket> Baskets { get; set; }
 
-        public virtual List<Order> Orders { get; set; } 
+        public virtual List<Order> Orders { get; set; }
 
         public virtual List<EvaluationQueue> EvaluationQueues { get; set; }
-
     }
 }

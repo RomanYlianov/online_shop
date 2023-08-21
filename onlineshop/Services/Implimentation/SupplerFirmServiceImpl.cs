@@ -6,8 +6,6 @@ using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
-using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,7 +13,6 @@ namespace onlineshop.Services.Implimentation
 {
     public class SupplerFirmServiceImpl : ISupplerFirmService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly ISupperFirmMapper SFMapper;
@@ -33,7 +30,6 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<SupplerFirmDTO>> GetAll()
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
             List<SupplerFirm> list = await context.SupplerFirmsCtx.ToListAsync();
@@ -47,12 +43,11 @@ namespace onlineshop.Services.Implimentation
                 if (list.Count == 0)
                 {
                     message = "supperfirm enitiy is empty";
-                }              
+                }
             }
             else
             {
                 message = "supperfirm enitiy is empty";
-                
             }
 
             if (string.IsNullOrEmpty(message))
@@ -74,7 +69,6 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<SupplerFirmDTO> GetById(string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (id != null)
@@ -93,7 +87,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<SupplerFirm>("GetById", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -108,15 +101,13 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<SupplerFirm>("GetById", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<SupplerFirmDTO> Add(SupplerFirmDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
-            if (item!=null)
+            if (item != null)
             {
                 SupplerFirm entity = SFMapper.ToEntity(item);
 
@@ -135,8 +126,7 @@ namespace onlineshop.Services.Implimentation
                     string message = "invalid supplerfirm name";
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<SupplerFirm>("Add", message, HttpStatusCode.BadRequest);
-                }                
-
+                }
             }
             else
             {
@@ -144,25 +134,21 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<SupplerFirm>("Add", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<SupplerFirmDTO> Update(SupplerFirmDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
-               // SupplerFirm entity = SFMapper.ToEntity(item);
+                
                 try
                 {
-
                     SupplerFirm entity = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(item.Id));
 
                     if (entity != null)
                     {
-
                         if (!entity.Name.Equals("root supplerfirm"))
                         {
                             context.SupplerFirmsCtx.Update(entity);
@@ -175,12 +161,9 @@ namespace onlineshop.Services.Implimentation
                         else
                         {
                             string message = "supplerfirm with name \"root supplerfirm\" cant be modify";
-                            logger.LogError(GetType().Name+" : " + message);
+                            logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.Forbidden);
                         }
-
-                        
-
                     }
                     else
                     {
@@ -198,29 +181,24 @@ namespace onlineshop.Services.Implimentation
             }
             else
             {
-
                 string message = "item parameter is mandatory";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Category>("Update", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (id != null)
             {
                 try
                 {
-
                     SupplerFirm entity = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(id));
 
                     if (entity != null)
                     {
-                        
                         if (!entity.Name.Equals("root supplerfirm"))
                         {
                             context.SupplerFirmsCtx.Remove(entity);
@@ -232,18 +210,13 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<SupplerFirm>("Delete", message, HttpStatusCode.Forbidden);
                         }
-
-                       
-
                     }
                     else
                     {
                         string message = "supplerfirm with id " + id + " was not found";
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<SupplerFirm>("Delete", message, HttpStatusCode.NotFound);
-
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -258,9 +231,6 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Category>("Delete", message, HttpStatusCode.BadRequest);
             }
-
         }
-
-       
     }
 }

@@ -1,15 +1,13 @@
-﻿using System.Security.Policy;
-
-namespace onlineshop.Services.DTO
+﻿namespace onlineshop.Services.DTO
 {
     public class ProductSearchDTO
     {
-        //main parameter
+   
         public string Name { get; set; }
 
-        public string CategoryName { get; set; }
+        public string CategoryId { get; set; }
 
-        public string SupplerFirmName { get; set; }
+        public string[] SupplerFirmIds { get; set; }
 
         public double? LowestPrice { get; set; }
 
@@ -18,7 +16,6 @@ namespace onlineshop.Services.DTO
         public double? LowestRating { get; set; }
 
         public double? HigestRating { get; set; }
-
 
         public bool? IsHot { get; set; }
     }

@@ -14,7 +14,6 @@ namespace onlineshop.Controllers
     [Route("categories")]
     public class CategoriesController : Controller
     {
-
         private readonly ICategoryService CtService;
 
         private readonly IBasketService BService;
@@ -23,7 +22,6 @@ namespace onlineshop.Controllers
 
         public CategoriesController(ICategoryService service, IBasketService bService)
         {
-
             CtService = service;
             BService = bService;
 
@@ -34,7 +32,6 @@ namespace onlineshop.Controllers
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -45,8 +42,7 @@ namespace onlineshop.Controllers
 
             try
             {
-                 list = await CtService.GetAll();
-
+                list = await CtService.GetAll();
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Category>)
             {
@@ -60,7 +56,6 @@ namespace onlineshop.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -78,10 +73,11 @@ namespace onlineshop.Controllers
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
+
+            await Inicialize();
 
             return View();
         }
@@ -90,7 +86,6 @@ namespace onlineshop.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create(CategoryDTO dto)
         {
-            
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
@@ -101,10 +96,9 @@ namespace onlineshop.Controllers
                 {
                     if (Validate(dto))
                     {
-
                         ModelState.Clear();
 
-                        dto = await CtService.Add(dto);                        
+                        dto = await CtService.Add(dto);
 
                         return RedirectToAction("Index");
                     }
@@ -112,8 +106,7 @@ namespace onlineshop.Controllers
                     {
                         ModelState.AddModelError("Name", "category with name \"root category\" not allowed");
                         return View();
-                    }                 
-
+                    }
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Category> ex)
                 {
@@ -122,9 +115,7 @@ namespace onlineshop.Controllers
                     ViewBag.error = ex.Code;
 
                     return RedirectToAction("Error", "Home");
-                    
                 }
-
             }
             else
             {
@@ -136,7 +127,6 @@ namespace onlineshop.Controllers
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -151,14 +141,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, CategoryDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit(POST)");
 
             await Inicialize();
@@ -167,23 +155,19 @@ namespace onlineshop.Controllers
             {
                 try
                 {
-
                     if (Validate(dto))
                     {
-
                         ModelState.Clear();
 
                         dto = await CtService.Update(dto);
 
                         return RedirectToAction("Index");
-
                     }
                     else
                     {
                         ModelState.AddModelError("Name", "name \"root category\" not allowed");
                         return View();
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Category> ex)
                 {
@@ -200,18 +184,15 @@ namespace onlineshop.Controllers
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
 
             try
             {
-
                 CategoryDTO dto = await CtService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Category> ex)
             {
@@ -223,12 +204,10 @@ namespace onlineshop.Controllers
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, CategoryDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             try
             {
-
                 await CtService.Delete(id);
                 return RedirectToAction("Index");
             }
@@ -236,35 +215,30 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
-        
+
         private bool Validate(CategoryDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Validate");
-            
+
             bool flag = !dto.Name.Equals("root category");
             return flag;
         }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -288,7 +262,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -305,31 +278,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

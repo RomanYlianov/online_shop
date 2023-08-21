@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace onlineshop.Services
 {
-    public interface ICrud <T, TID> 
+    public interface ICrud<T, TID>
     {
         Task<List<T>> GetAll();
 
@@ -14,6 +14,5 @@ namespace onlineshop.Services
         Task<T> Update(T item);
 
         Task Delete(TID id);
-
     }
 }

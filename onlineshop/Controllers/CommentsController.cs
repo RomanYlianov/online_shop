@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using onlineshop.Services.DTO;
 using onlineshop.Services;
+using onlineshop.Services.DTO;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using Microsoft.AspNetCore.Authorization;
 
 namespace onlineshop.Controllers
 {
@@ -24,19 +23,16 @@ namespace onlineshop.Controllers
 
         public CommentsController(ICommentService cService, IBasketService bService)
         {
-
             this.CService = cService;
             this.BService = bService;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<CommentsController>();
-
         }
 
         [HttpGet("Index/{pid}")]
         public async Task<IActionResult> Index(string pid)
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -62,13 +58,11 @@ namespace onlineshop.Controllers
 
             ViewBag.flag = isExists;
             return View(list);
-
         }
 
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -80,7 +74,6 @@ namespace onlineshop.Controllers
                 ViewBag.rootId = productId;
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
@@ -92,7 +85,6 @@ namespace onlineshop.Controllers
         [HttpGet("Create/{eqId}")]
         public async Task<IActionResult> Create(string eqId)
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
@@ -103,13 +95,10 @@ namespace onlineshop.Controllers
                 CommentDTO dto = await CService.Inicialize(User, eqId);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
-
                 return ExceptionHandler(ex.Message, ex.Code);
-               
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
@@ -123,14 +112,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Create/{eqId}")]
         public async Task<IActionResult> Create(string eqId, CommentDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Craeate (POST)");
 
             await Inicialize();
@@ -139,11 +126,9 @@ namespace onlineshop.Controllers
             {
                 if (ModelState.IsValid)
                 {
-
                     await CService.Add(User, eqId, dto);
 
                     return RedirectToAction("Index", new { pid = dto.ProductDTOId });
-
                 }
                 else
                 {
@@ -152,7 +137,6 @@ namespace onlineshop.Controllers
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
-
                 if (ex.Code == HttpStatusCode.Forbidden)
                 {
                     ModelState.AddModelError("", ex.Message);
@@ -163,21 +147,17 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -187,34 +167,28 @@ namespace onlineshop.Controllers
                 CommentDTO dto = await CService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, CommentDTO dto)
         {
-
             logger.LogInformation(GetType().Name + ": Edit (POST)");
 
             await Inicialize();
 
             try
             {
-
                 if (ModelState.IsValid)
                 {
-
                     dto = await CService.Update(User, dto);
 
                     return RedirectToAction("Index", new { pid = productId });
-
                 }
                 else
                 {
@@ -230,14 +204,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Delete/{id}")]
-        public async Task<IActionResult> Delete(string pid, string id)
+        public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
@@ -247,33 +219,26 @@ namespace onlineshop.Controllers
                 CommentDTO dto = await CService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Delete/{id}")]
-        public async Task<IActionResult> Detele(string pid, string id, CommentDTO dto)
+        public async Task<IActionResult> Detele(string id, CommentDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             await Inicialize();
 
             try
             {
-
                 await CService.Delete(User, id);
 
-
-
-                return RedirectToAction("Index", new {pid = productId} );
-
+                return RedirectToAction("Index", new { pid = productId });
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Comment> ex)
             {
@@ -287,21 +252,18 @@ namespace onlineshop.Controllers
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -325,7 +287,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -342,30 +303,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
     }
 }

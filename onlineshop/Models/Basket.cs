@@ -11,8 +11,6 @@ namespace onlineshop.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-
-        //[ForeignKey("productId")]
         public Product Product { get; set; }
 
         [Column("product_id")]
@@ -28,7 +26,5 @@ namespace onlineshop.Models
 
         [Column("intermediate_cost")]
         public double IntermediateCost { get; set; }
-
-
     }
 }

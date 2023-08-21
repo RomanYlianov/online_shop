@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using onlineshop.Models;
-using onlineshop.Services.DTO;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace onlineshop.Data
 {
@@ -33,20 +30,13 @@ namespace onlineshop.Data
 
         public DbSet<PaymentMethod> PaymentMethodsCtx { get; set; }
 
-        public DbSet<Product> ProductsCtx { get; set; }       
+        public DbSet<Product> ProductsCtx { get; set; }
 
         public DbSet<SupplerFirm> SupplerFirmsCtx { get; set; }
-        
-
-        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
             //add roles (cant be edit/removed)
-
-
-
 
             //builder.Entity<Role>().HasData(
             //    new Role("admin", "online shop admin", true),
@@ -55,10 +45,7 @@ namespace onlineshop.Data
             //    new Role("buyer", "online shop buyer", true)
             //);
 
-           
-
             //add user (root) with owner role (full access) (cant be edit/removed)
-
 
             //associate with enums
 
@@ -76,7 +63,7 @@ namespace onlineshop.Data
             builder.Entity<OrderProduct>().HasKey(op => new { op.OrderId, op.ProductId });
 
             builder.Entity<OrderProduct>().HasOne<Order>(op => op.Order).WithMany(o => o.OrderProducts).HasForeignKey(o => o.OrderId);
-            builder.Entity<OrderProduct>().HasOne<Product>(op=>op.Product).WithMany(p => p.OrderProducts).HasForeignKey(o => o.ProductId);
+            builder.Entity<OrderProduct>().HasOne<Product>(op => op.Product).WithMany(p => p.OrderProducts).HasForeignKey(o => o.ProductId);
 
             builder.Entity<Event>().HasOne(e => e.Product).WithMany(p => p.Events).HasForeignKey(e => e.ProductId).IsRequired();
 
@@ -94,6 +81,5 @@ namespace onlineshop.Data
 
             base.OnModelCreating(builder);
         }
-
     }
 }

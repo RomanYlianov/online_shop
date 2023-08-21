@@ -17,7 +17,6 @@ namespace onlineshop.Controllers
     [Route("orders")]
     public class OrdersController : Controller
     {
-
         private readonly IOrderService OService;
 
         private readonly IBasketService BService;
@@ -30,7 +29,6 @@ namespace onlineshop.Controllers
 
         public OrdersController(IOrderService oService, IBasketService bService, IDeliveryMethodService dMService, IPaymentMethodService pMService)
         {
-
             this.OService = oService;
             this.BService = bService;
 
@@ -39,7 +37,6 @@ namespace onlineshop.Controllers
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<OrdersController>();
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
@@ -49,12 +46,9 @@ namespace onlineshop.Controllers
             PaymentType? type, OrderStatus? status,
             DateTime? creationTimeStart, DateTime? creationTimeEnd)
         {
-
             logger.LogInformation(GetType().Name + " : AllOrders");
 
             await Inicialize();
-
-            
 
             List<OrderDTO> list = new List<OrderDTO>();
 
@@ -66,17 +60,12 @@ namespace onlineshop.Controllers
             {
                 if (dto != null)
                 {
-
-
                     list = await OService.Search(User, dto);
                 }
                 else
                 {
                     list = await OService.GetAll();
                 }
-
-               
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order>)
             {
@@ -89,17 +78,15 @@ namespace onlineshop.Controllers
             ViewBag.flag = isExists;
 
             return View(list);
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("MyOrders")]
         public async Task<IActionResult> MyOrders(
-            string cipher, string method, PaymentType? type, 
+            string cipher, string method, PaymentType? type,
             OrderStatus? status, DateTime? creationTimeStart, DateTime? creationTimeEnd
             )
         {
-
             logger.LogInformation(GetType().Name + " : MyOrders");
 
             await Inicialize();
@@ -112,17 +99,14 @@ namespace onlineshop.Controllers
 
             try
             {
-
                 if (dto != null)
                 {
-
                     list = await OService.Search(User, dto);
                 }
                 else
                 {
                     list = await OService.GetOrdersForUser(User);
                 }
-                
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order>)
             {
@@ -138,23 +122,19 @@ namespace onlineshop.Controllers
             ViewBag.flag = isExists;
 
             return View(list);
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             try
             {
-
                 OrderDTO dto = await OService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -164,14 +144,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
@@ -187,7 +165,7 @@ namespace onlineshop.Controllers
             if (TempData.ContainsKey("arg0"))
             {
                 val1 = TempData["arg0"].ToString();
-                basketIds = DeserializeToListOfString(val1);         
+                basketIds = DeserializeToListOfString(val1);
             }
 
             if (TempData.ContainsKey("arg1"))
@@ -201,13 +179,11 @@ namespace onlineshop.Controllers
             TempData.Add("arg0", val1);
             TempData.Add("arg1", val2);
 
-
             OrderDTO dto = new OrderDTO();
 
             try
             {
-                dto = await OService.InicializeOrder(User, basketIds, productCounts);                
-
+                dto = await OService.InicializeOrder(User, basketIds, productCounts);
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -219,7 +195,6 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-                
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
             {
@@ -233,8 +208,6 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-         
 
             List<SelectListItem> deliveryMethods = await InitSelectListOfDeliveryMethods();
 
@@ -250,7 +223,6 @@ namespace onlineshop.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create(OrderDTO dto)
         {
-
             //get request call in basket/checkout
             logger.LogInformation(GetType().Name + " : Create (POST");
 
@@ -285,14 +257,11 @@ namespace onlineshop.Controllers
 
             if (ModelState.IsValid)
             {
-
                 try
                 {
-
                     dto = await OService.Add(User, dto, basketIds, productCounts);
 
                     return RedirectToAction("MyOrders");
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
                 {
@@ -305,7 +274,6 @@ namespace onlineshop.Controllers
                     {
                         return ExceptionHandler(ex.Message, ex.Code);
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
                 {
@@ -318,32 +286,27 @@ namespace onlineshop.Controllers
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
-                }                
-
+                }
             }
             else
             {
                 return View();
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
 
             try
             {
-
                 OrderDTO dto = await OService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -353,14 +316,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, OrderDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
@@ -369,7 +330,6 @@ namespace onlineshop.Controllers
 
             try
             {
-
                 if (ValidateOrder(dto))
                 {
                     await OService.Update(User, dto);
@@ -380,7 +340,6 @@ namespace onlineshop.Controllers
                 {
                     return View(oViewDTO);
                 }
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -393,31 +352,26 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-              
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("RootEdit/{id}")]
         public async Task<IActionResult> RootEdit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : RootEdit (GET)");
 
             await Inicialize();
 
             try
             {
-
-                OrderDTO dto = await OService.GetById(User, id);               
+                OrderDTO dto = await OService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -427,14 +381,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("RootEdit/{id}")]
         public async Task<IActionResult> RootEdit(string id, OrderDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : RootEdit (POST)");
 
             await Inicialize();
@@ -443,7 +395,6 @@ namespace onlineshop.Controllers
 
             try
             {
-
                 if (ValidateOrder(dto, true))
                 {
                     await OService.Update(User, dto, true);
@@ -454,7 +405,6 @@ namespace onlineshop.Controllers
                 {
                     return View(oViewDTO);
                 }
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -467,20 +417,17 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Return/{id}")]
         public async Task<IActionResult> Return(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Return (GET)");
 
             await Inicialize();
@@ -490,7 +437,6 @@ namespace onlineshop.Controllers
                 List<ProductDTO> list = await OService.GetProductsFromOrder(User, id);
 
                 return View(list);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -500,23 +446,19 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Return/{id}")]
         public async Task<IActionResult> Return(string id, List<ProductDTO> list)
         {
-
             logger.LogInformation(GetType().Name + " : Return (POST)");
 
             try
-            {               
-
+            {
                 await OService.Delete(User, id, list);
 
                 return RedirectToAction("myOrders");
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
             {
@@ -529,19 +471,15 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
-               
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
-        private async Task<List<SelectListItem>> InitSelectListOfDeliveryMethods(string selected =  null)
+        private async Task<List<SelectListItem>> InitSelectListOfDeliveryMethods(string selected = null)
         {
-
             logger.LogInformation(GetType().Name + " : InitSelectListOfDeliveryMethods");
 
             List<DeliveryMethodDTO> DTOs = await DMSercice.GetAll();
@@ -571,12 +509,10 @@ namespace onlineshop.Controllers
             }
 
             return items;
-
         }
 
         private async Task<List<SelectListItem>> InitListOfPaymentMethods(string selected = null)
         {
-
             logger.LogInformation(GetType().Name + " : InitListOfPaymentMethods");
 
             List<PaymentMethodDTO> DTOs = await PMService.GetAll(User);
@@ -606,24 +542,17 @@ namespace onlineshop.Controllers
             }
 
             return items;
-
         }
 
         private bool ValidateOrder(OrderDTO order, bool isRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : validateOrderMark");
 
             bool flag = false;
 
             if (order != null)
             {
-
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                
-
-                
 
                 if (isRoot)
                 {
@@ -636,16 +565,13 @@ namespace onlineshop.Controllers
                 {
                     flag = order.Mark > 0 && order.Mark <= 10;
                 }
-                
             }
 
             return flag;
-
         }
 
         private List<int> DeserializeTolistOfInt(string value, char divider = '$')
         {
-
             logger.LogInformation(GetType().Name + " : DeserializeToListOfInt");
 
             List<int> list = new List<int>();
@@ -673,19 +599,16 @@ namespace onlineshop.Controllers
             }
 
             return list;
-
         }
 
         private List<string> DeserializeToListOfString(string value, char divider = '$')
         {
-
             logger.LogInformation(GetType().Name + " : DeserializeToListOfString");
 
             List<string> list = new List<string>();
 
             if (value != null)
             {
-
                 list = value.Split(divider).ToList();
             }
             else
@@ -694,19 +617,16 @@ namespace onlineshop.Controllers
             }
 
             return list;
-
         }
-
 
         private OrderSearchDTO FormOrderSearchDTO(
             string cipher, string email, string deliveyMethod,
             PaymentType? type, OrderStatus? status,
             DateTime? creationTimeStart, DateTime? creationTimeEnd)
         {
-
             logger.LogInformation(GetType().Name + " : FormOrderSearchDTO");
 
-            OrderSearchDTO dto =  null;
+            OrderSearchDTO dto = null;
 
             bool isInit = false;
 
@@ -778,26 +698,22 @@ namespace onlineshop.Controllers
             }
 
             return dto;
-
         }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -821,7 +737,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -838,31 +753,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

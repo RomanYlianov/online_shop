@@ -2,7 +2,7 @@
 
 namespace onlineshop.Services
 {
-    public interface IDeliveryMethodService :ICrud<DeliveryMethodDTO, string>
+    public interface IDeliveryMethodService : ICrud<DeliveryMethodDTO, string>
     {
     }
 }

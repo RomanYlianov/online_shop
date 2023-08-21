@@ -7,7 +7,6 @@ namespace onlineshop.Services
 {
     public interface ICommentService
     {
-
         Task<List<CommentDTO>> GetAll(string productId);
 
         Task<CommentDTO> GetById(string id);
@@ -19,6 +18,5 @@ namespace onlineshop.Services
         Task<CommentDTO> Update(ClaimsPrincipal currentUser, CommentDTO item);
 
         Task Delete(ClaimsPrincipal currentUser, string id);
-
     }
 }

@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +14,6 @@ using onlineshop.Services.Implimentation;
 using onlineshop.Services.Mapper;
 using onlineshop.Services.Mapper.Implimentation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -58,18 +54,16 @@ namespace onlineshop
             .AddDefaultUI().AddDefaultTokenProviders();
 
             //configure path
-            
-
-            
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(
                     CookieAuthenticationDefaults.AuthenticationScheme,
-                    options => {
-                        options.LoginPath = "/Users/Login";
-                        options.LogoutPath = "/Users/Logout";
-                        options.AccessDeniedPath = "/Users/Login";
-                        options.ReturnUrlParameter = "/Home/Index";
+                    options =>
+                    {
+                        options.LoginPath = "Users/Login";
+                        options.LogoutPath = "Users/Logout";
+                        options.AccessDeniedPath = "Users/Login";
+                        options.ReturnUrlParameter = "Home/Index";
                     }
                 );
 
@@ -125,7 +119,6 @@ namespace onlineshop
                 {
                     policy.RequireRole("seller", "owner");
                 });
-
             });
 
             //add session
@@ -134,8 +127,6 @@ namespace onlineshop
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
             });
-
-            
 
             //register DI contaioners
             //mapper
@@ -151,7 +142,6 @@ namespace onlineshop
             services.AddScoped<IRoleMapper, RoleMapperImpl>();
             services.AddScoped<ISupperFirmMapper, SupplerFirmMapperImpl>();
             services.AddScoped<IUserMapper, UserMapperImpl>();
-            
 
             services.Configure<PasswordHasherOptions>(options =>
                 options.CompatibilityMode = PasswordHasherCompatibilityMode.IdentityV2
@@ -215,7 +205,6 @@ namespace onlineshop
 
             // app.UseStatusCodePages("text/plain", "Error. Status code : {0}");
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -223,8 +212,6 @@ namespace onlineshop
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
-
-
         }
     }
 }

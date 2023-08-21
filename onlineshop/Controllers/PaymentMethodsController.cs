@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using onlineshop.Services;
 using onlineshop.Services.DTO;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -14,7 +13,6 @@ namespace onlineshop.Controllers
     [Route("paymentmethods")]
     public class PaymentMethodsController : Controller
     {
-
         private readonly IPaymentMethodService PMService;
 
         private readonly IBasketService BService;
@@ -28,14 +26,11 @@ namespace onlineshop.Controllers
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<PaymentMethodsController>();
-           
-
         }
 
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -59,16 +54,14 @@ namespace onlineshop.Controllers
                 return RedirectToAction("Error", "Home");
             }
 
-
             ViewBag.flag = isExists;
 
             return View(list);
         }
 
         [HttpGet("Details/{id}")]
-        public async Task<IActionResult> Details(string id) 
+        public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -87,28 +80,23 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-           
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
 
             return View();
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Create")]
         public async Task<IActionResult> Create(PaymentMethodDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
@@ -117,16 +105,13 @@ namespace onlineshop.Controllers
 
             if (ModelState.IsValid && flag)
             {
-
                 try
                 {
-
                     dto = await PMService.Add(User, dto);
 
                     ModelState.Clear();
 
                     return RedirectToAction("Index");
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.PaymentMethod> ex)
                 {
@@ -141,15 +126,12 @@ namespace onlineshop.Controllers
             {
                 return View();
             }
-
-            
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -174,7 +156,6 @@ namespace onlineshop.Controllers
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, PaymentMethodDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
@@ -187,11 +168,9 @@ namespace onlineshop.Controllers
 
                 try
                 {
-
                     dto = await PMService.Update(User, dto);
 
                     return RedirectToAction("Index");
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.PaymentMethod> ex)
                 {
@@ -212,7 +191,6 @@ namespace onlineshop.Controllers
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
@@ -237,12 +215,10 @@ namespace onlineshop.Controllers
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, PaymentMethodDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             try
             {
-
                 await PMService.Delete(User, id);
 
                 return RedirectToAction("Index");
@@ -255,10 +231,8 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
-       
         private bool ValidateData(PaymentMethodDTO dto)
         {
             logger.LogInformation(GetType().Name + " : validation");
@@ -267,10 +241,8 @@ namespace onlineshop.Controllers
 
             if (dto.PaymentType != null)
             {
-
                 if (dto.PaymentType == onlineshop.Models.PaymentType.BANK_CARD)
                 {
-
                     if (dto.ExpirationDate == null)
                     {
                         ModelState.AddModelError("ExpirationDate", "ExpirationDate is required");
@@ -282,31 +254,27 @@ namespace onlineshop.Controllers
                         ModelState.AddModelError("CVV", "CVV is required");
                         flag = false;
                     }
-
                 }
             }
 
             logger.LogInformation(GetType().Name + " : validation result is " + flag);
             return flag;
         }
-       
+
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -330,7 +298,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -347,30 +314,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
     }
 }

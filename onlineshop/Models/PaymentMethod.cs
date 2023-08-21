@@ -8,7 +8,6 @@ namespace onlineshop.Models
     [Table("paymentmethod")]
     public class PaymentMethod
     {
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
@@ -16,10 +15,10 @@ namespace onlineshop.Models
         [Column("name")]
         public string Name { get; set; }
 
+        public User User { get; set; }
+
         [Column("user_id")]
         public Guid UserId { get; set; }
-
-        public User User { get; set; }
 
         [Column("payment_type")]
         public PaymentType PaymentType { get; set; }
@@ -37,7 +36,5 @@ namespace onlineshop.Models
         public int? CVV { get; set; }
 
         public virtual List<Order> Orders { get; set; }
-
-
     }
 }

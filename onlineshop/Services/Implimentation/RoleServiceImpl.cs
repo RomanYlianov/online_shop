@@ -7,8 +7,6 @@ using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -16,20 +14,19 @@ namespace onlineshop.Services.Implimentation
 {
     public class RoleServiceImpl : IRoleService
     {
-
         private readonly ApplicationDbContext context;
-
-        private RoleManager<Role> manager;
 
         private readonly IRoleMapper RMapper;
 
-        private readonly ILogger logger;       
+        private RoleManager<Role> RManager;
 
-        public RoleServiceImpl(ApplicationDbContext context,RoleManager<Role> manager,IRoleMapper mapper)
+        private readonly ILogger logger;
+
+        public RoleServiceImpl(ApplicationDbContext context, RoleManager<Role> manager, IRoleMapper mapper)
         {
             this.context = context;
-            this.manager = manager;
-            this.RMapper = mapper;        
+            this.RManager = manager;
+            this.RMapper = mapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<RoleServiceImpl>();
@@ -37,7 +34,6 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<RoleDTO>> GetAll()
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
             List<Role> list = await context.Roles.ToListAsync();
@@ -65,13 +61,17 @@ namespace onlineshop.Services.Implimentation
                     result.Add(RMapper.ToDTO(item));
                 }
             }
+            else
+            {
+                logger.LogError(GetType().Name + " : " + message);
+                throw new HttpException<Role>("GetAll", message, HttpStatusCode.NotFound);
+            }
 
             return result;
         }
 
         public async Task<RoleDTO> GetById(string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (id != null)
@@ -96,7 +96,7 @@ namespace onlineshop.Services.Implimentation
                     string message = "convert id " + id + " failed: " + ex.Message;
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Role>("GetById", message, HttpStatusCode.InternalServerError);
-                }             
+                }
             }
             else
             {
@@ -108,26 +108,17 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<RoleDTO> Add(RoleDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
             if (item != null)
             {
                 Role entity = RMapper.ToEntity(item);
 
-
-
-                await manager.CreateAsync(entity);
-
-
+                await RManager.CreateAsync(entity);
 
                 item = RMapper.ToDTO(entity);
 
                 return item;
-
-                
-
-                
             }
             else
             {
@@ -135,33 +126,25 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Role>("Add", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<RoleDTO> Update(RoleDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
                 try
                 {
-
                     if (!IsSystemRole(item.Name))
                     {
-
                         if (await context.Roles.FindAsync(Guid.Parse(item.Id)) != null)
                         {
-
-
-                            Role entity = await manager.FindByIdAsync(item.Id);
-
+                            Role entity = await RManager.FindByIdAsync(item.Id);
 
                             entity = RMapper.ToEntity(entity, item);
-                            
 
-                             await manager.UpdateAsync(entity);                           
+                            await RManager.UpdateAsync(entity);
 
                             item = RMapper.ToDTO(entity);
 
@@ -180,8 +163,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Role>("Add", message, HttpStatusCode.Forbidden);
                     }
-
-                   
                 }
                 catch (FormatException ex)
                 {
@@ -189,7 +170,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Role>("GetById", message, HttpStatusCode.InternalServerError);
                 }
-               
             }
             else
             {
@@ -197,12 +177,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Role>("Update", message, HttpStatusCode.BadRequest);
             }
-            
         }
 
         public async Task Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (id != null)
@@ -213,12 +191,9 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-
                         if (!IsSystemRole(entity.Name))
                         {
-
-                            await manager.DeleteAsync(entity);
-
+                            await RManager.DeleteAsync(entity);
                         }
                         else
                         {
@@ -247,12 +222,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Role>("Delete", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<bool> CheckName(string name)
         {
-
             logger.LogInformation(GetType().Name + " : CheckName");
 
             if (name != null)
@@ -266,13 +239,11 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Role>("ChekName", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         private bool IsSystemRole(string role)
         {
             return role.Equals("admin") || role.Equals("owner") || role.Equals("seller") || role.Equals("buyer");
         }
-       
     }
 }

@@ -7,30 +7,64 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class PaymentMethodMapperImpl : IPaymentMethodMapper
     {
-
         private readonly IUserMapper UMapper;
 
         private readonly ILogger logger;
 
         public PaymentMethodMapperImpl(IUserMapper uMapper)
         {
-
             UMapper = uMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<PaymentMethodMapperImpl>();
         }
 
+        public PaymentMethod ToEntity(PaymentMethod entity, PaymentMethodDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            if (dto != null && entity != null)
+            {
+                entity = AssignData(entity, dto);
+            }
+
+            return entity;
+        }
+
+        public PaymentMethod ToEntity(PaymentMethodDTO dto)
+        {
+            logger.LogInformation((GetType().Name + " : convert DTO to entity"));
+
+            PaymentMethod entity = new PaymentMethod();
+
+            try
+            {
+                if (dto != null)
+                {
+                    if (dto.Id != null)
+                    {
+                        entity.Id = Guid.Parse(dto.Id);
+                    }
+
+                    entity = AssignData(entity, dto);
+                }
+            }
+            catch (FormatException ex)
+            {
+                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
+            }
+
+            return entity;
+        }
+
         public PaymentMethodDTO ToDTO(PaymentMethod entity)
         {
-
             logger.LogInformation(GetType().Name + " : convert entity to DTO");
 
             PaymentMethodDTO dto = new PaymentMethodDTO();
 
             if (entity != null)
-            { 
-
+            {
                 if (entity.Id != null)
                 {
                     dto.Id = entity.Id.ToString();
@@ -43,9 +77,8 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                 if (entity.User != null)
                 {
-                    dto.userDTO = UMapper.ToDTO(entity.User);
+                    dto.UserDTO = UMapper.ToDTO(entity.User);
                 }
-
 
                 if (entity.Name != null)
                 {
@@ -76,65 +109,16 @@ namespace onlineshop.Services.Mapper.Implimentation
                         dto.CVV = entity.CVV.Value;
                     }
                 }
-
-               
             }
 
             return dto;
         }
 
-        public PaymentMethod ToEntity(PaymentMethod entity, PaymentMethodDTO dto)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            if (dto != null && entity != null)
-            {
-                entity = AssignData(entity, dto);
-            }
-
-            return entity;
-
-        }
-
-        public PaymentMethod ToEntity(PaymentMethodDTO dto)
-        {
-            
-            logger.LogInformation((GetType().Name + " : convert DTO to entity"));
-
-            PaymentMethod entity = new PaymentMethod();
-
-            try
-            {
-                if (dto != null)
-                {
-
-                    if (dto.Id != null)
-                    {
-                        entity.Id = Guid.Parse(dto.Id);
-                    }
-
-                    entity = AssignData(entity, dto);
-
-                   
-                }
-            }
-            catch (FormatException ex)
-            {
-                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-            }
-
-           
-
-            return entity;
-        }
-
         private PaymentMethod AssignData(PaymentMethod entity, PaymentMethodDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : AssignData");
 
-            if (entity != null && dto!= null)
+            if (entity != null && dto != null)
             {
                 try
                 {
@@ -148,16 +132,15 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.UserId = Guid.Parse(dto.UserDTOId);
                     }
 
-                    if (dto.userDTO != null)
+                    if (dto.UserDTO != null)
                     {
-                        entity.User = UMapper.ToEntity(dto.userDTO);
+                        entity.User = UMapper.ToEntity(dto.UserDTO);
                     }
 
                     if (dto.PaymentType != null)
                     {
                         entity.PaymentType = dto.PaymentType.Value;
                     }
-
 
                     if (dto.Provider != null)
                     {
@@ -189,8 +172,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             }
 
             return entity;
-
         }
-
     }
 }

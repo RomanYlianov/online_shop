@@ -3,7 +3,6 @@ using onlineshop.Models;
 using onlineshop.Services.DTO;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace onlineshop.Services.Mapper.Implimentation
 {
@@ -17,109 +16,8 @@ namespace onlineshop.Services.Mapper.Implimentation
             logger = logFactory.CreateLogger<UserMapperImpl>();
         }
 
-        public UserDTO ToDTO(User entity)
-        {
-          
-            logger.LogInformation(GetType().Name+" : convert entity to DTO");
-
-            UserDTO dto = new UserDTO();
-
-            if (entity != null)
-            {
-                if (entity.Id != null)
-                {
-                    dto.Id = entity.Id.ToString();
-                }
-
-                if (entity.UserName != null)
-                {
-                    dto.UserName = entity.UserName;
-                }
-
-                if (entity.NormalizedUserName != null)
-                {
-                    dto.NormalizedUserName = entity.NormalizedUserName;
-                }
-
-                if (entity.Email != null)
-                {
-                    dto.Email = entity.Email;
-                }
-
-                if (entity.NormalizedEmail != null)
-                {
-                    dto.NormailzedEmail = entity.NormalizedEmail;
-                }
-
-                dto.EmailConfirmed = entity.EmailConfirmed;
-
-                if (entity.PasswordHash != null)
-                {
-                    dto.PasswordHash = entity.PasswordHash;
-                }
-                
-                if (entity.KeyWord != null)
-                {
-                    dto.KeyWord = entity.KeyWord;
-                }
-
-                if (entity.FullName != null)
-                {
-                    dto.FullName = entity.FullName;
-                }
-
-                dto.Birthday = entity.Birthday;
-
-                if (entity.Address != null)
-                {
-                    dto.Address = entity.Address;
-                }
-
-                if (entity.Country != null)
-                {
-                    dto.Country = entity.Country;
-                }
-
-                dto.IsVIP = entity.IsVIP;
-                dto.CreationTime = entity.CreationTime;
-
-                if (entity.SecurityStamp != null)
-                {
-                    dto.SecurityStamp = entity.SecurityStamp;
-                }
-
-                if (entity.ConcurrencyStamp != null)
-                {
-                    dto.ConcurrencyStamp = entity.ConcurrencyStamp;
-                }
-
-                if (entity.PhoneNumber != null)
-                {
-                    dto.PhoneNumber = entity.PhoneNumber;
-                }
-
-                dto.PhoneNumberConfirmed = entity.PhoneNumberConfirmed;
-
-                dto.TwoFactorEnabled = entity.TwoFactorEnabled;
-
-                if (entity.LockoutEnd != null)
-                {
-                    dto.LookOutEnd = entity.LockoutEnd.Value;
-                }
-
-                dto.LookOutEnabled = entity.LockoutEnabled;
-
-                dto.AccessFailedCount = entity.AccessFailedCount;
-
-            }
-
-
-            return dto;
-        }
-
         public User ToEntity(UserDTO dto)
         {
-            
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             User entity = new User();
@@ -128,7 +26,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -216,7 +113,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     entity.LockoutEnabled = dto.LookOutEnabled;
 
                     entity.AccessFailedCount = dto.AccessFailedCount;
-
                 }
             }
             catch (FormatException ex)
@@ -224,19 +120,15 @@ namespace onlineshop.Services.Mapper.Implimentation
                 logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
             }
 
-          
-
             return entity;
         }
 
         public User ToEntity(User entity, UserUpdateDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             if (dto != null)
             {
-                
                 if (dto.UserName != null)
                 {
                     entity.UserName = dto.UserName;
@@ -285,33 +177,31 @@ namespace onlineshop.Services.Mapper.Implimentation
                 }
 
                 entity.IsVIP = dto.IsVIP;
-
             }
 
-          
-            
             return entity;
         }
 
         public User ToEntity(UserLoginDTO dto, LoginType type)
         {
-            
             logger.LogInformation(GetType().Name + " : convert LoginDTO to entity");
 
             User entity = new User();
 
-            if (dto!=null)
+            if (dto != null)
             {
-                if (dto.Login!=null)
+                if (dto.Login != null)
                 {
                     switch (type)
                     {
                         case LoginType.Email:
                             entity.Email = dto.Login;
                             break;
+
                         case LoginType.UserName:
                             entity.UserName = dto.Login;
                             break;
+
                         case LoginType.PhoneNumber:
                             entity.PhoneNumber = dto.Login;
                             break;
@@ -321,9 +211,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                 if (dto.Password != null)
                 {
                     entity.PasswordHash = dto.Password;
-                    
                 }
-
             }
 
             return entity;
@@ -331,10 +219,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
         public User ToEntity(UserRegisterDTO dto)
         {
-            
             logger.LogInformation(GetType().Name + " : convert entity to RegisterDTO");
-
-           
 
             User entity = new User();
 
@@ -342,7 +227,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -350,7 +234,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                     if (dto.UserName != null)
                     {
-                        entity.UserName =  dto.UserName;
+                        entity.UserName = dto.UserName;
                         entity.NormalizedUserName = dto.UserName.ToUpper();
                     }
 
@@ -368,7 +252,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     if (dto.Password != null)
                     {
                         entity.PasswordHash = dto.Password;
-                       
                     }
 
                     if (dto.KeyWord != null)
@@ -397,7 +280,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     }
 
                     entity.IsVIP = dto.IsVIP;
-
                 }
             }
             catch (FormatException ex)
@@ -405,28 +287,124 @@ namespace onlineshop.Services.Mapper.Implimentation
                 logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
             }
 
-            
-
             return entity;
+        }
+
+        public UserDTO ToDTO(User entity)
+        {
+            logger.LogInformation(GetType().Name + " : convert entity to DTO");
+
+            UserDTO dto = new UserDTO();
+
+            if (entity != null)
+            {
+                if (entity.Id != null)
+                {
+                    dto.Id = entity.Id.ToString();
+                }
+
+                if (entity.UserName != null)
+                {
+                    dto.UserName = entity.UserName;
+                }
+
+                if (entity.NormalizedUserName != null)
+                {
+                    dto.NormalizedUserName = entity.NormalizedUserName;
+                }
+
+                if (entity.Email != null)
+                {
+                    dto.Email = entity.Email;
+                }
+
+                if (entity.NormalizedEmail != null)
+                {
+                    dto.NormailzedEmail = entity.NormalizedEmail;
+                }
+
+                dto.EmailConfirmed = entity.EmailConfirmed;
+
+                if (entity.PasswordHash != null)
+                {
+                    dto.PasswordHash = entity.PasswordHash;
+                }
+
+                if (entity.KeyWord != null)
+                {
+                    dto.KeyWord = entity.KeyWord;
+                }
+
+                if (entity.FullName != null)
+                {
+                    dto.FullName = entity.FullName;
+                }
+
+                dto.Birthday = entity.Birthday;
+
+                if (entity.Address != null)
+                {
+                    dto.Address = entity.Address;
+                }
+
+                if (entity.Country != null)
+                {
+                    dto.Country = entity.Country;
+                }
+
+                dto.IsVIP = entity.IsVIP;
+                dto.CreationTime = entity.CreationTime;
+
+                if (entity.SecurityStamp != null)
+                {
+                    dto.SecurityStamp = entity.SecurityStamp;
+                }
+
+                if (entity.ConcurrencyStamp != null)
+                {
+                    dto.ConcurrencyStamp = entity.ConcurrencyStamp;
+                }
+
+                if (entity.PhoneNumber != null)
+                {
+                    dto.PhoneNumber = entity.PhoneNumber;
+                }
+
+                dto.PhoneNumberConfirmed = entity.PhoneNumberConfirmed;
+
+                dto.TwoFactorEnabled = entity.TwoFactorEnabled;
+
+                if (entity.LockoutEnd != null)
+                {
+                    dto.LookOutEnd = entity.LockoutEnd.Value;
+                }
+
+                dto.LookOutEnabled = entity.LockoutEnabled;
+
+                dto.AccessFailedCount = entity.AccessFailedCount;
+            }
+
+            return dto;
         }
 
         public UserLoginDTO ToLoginDTO(User entiny, LoginType type)
         {
-            
             logger.LogInformation(GetType().Name + " : convert entity to LoginDTO");
 
             UserLoginDTO dto = new UserLoginDTO();
 
-            if (entiny!=null)
+            if (entiny != null)
             {
                 switch (type)
                 {
                     case LoginType.Email:
                         dto.Login = entiny.Email;
                         break;
+
                     case LoginType.UserName:
                         dto.Login = entiny.UserName;
                         break;
+
                     case LoginType.PhoneNumber:
                         dto.Login = entiny.PhoneNumber;
                         break;
@@ -443,14 +421,12 @@ namespace onlineshop.Services.Mapper.Implimentation
 
         public UserRegisterDTO ToRegisterDTO(User entity)
         {
-           
             logger.LogInformation(GetType().Name + " : convert entity to RegisterDTO");
 
             UserRegisterDTO dto = new UserRegisterDTO();
 
             if (entity != null)
             {
-                
                 if (entity.UserName != null)
                 {
                     dto.UserName = entity.UserName;
@@ -468,7 +444,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                 if (entity.PasswordHash != null)
                 {
-                    dto.Password = dto.PasswordConfirm = entity.PasswordHash;                    
+                    dto.Password = dto.PasswordConfirm = entity.PasswordHash;
                 }
 
                 if (entity.KeyWord != null)
@@ -486,18 +462,17 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.Birthday = entity.Birthday;
                 }
 
-                if (entity.Address!=null)
+                if (entity.Address != null)
                 {
                     dto.Address = entity.Address;
                 }
 
-                if (entity.Country!=null)
+                if (entity.Country != null)
                 {
                     dto.Country = entity.Country;
                 }
 
                 dto.IsVIP = entity.IsVIP;
-
             }
 
             return dto;
@@ -505,14 +480,12 @@ namespace onlineshop.Services.Mapper.Implimentation
 
         public UserUpdateDTO ToUpdateDTO(UserDTO dto, List<RoleDTO> userRoles, List<RoleDTO> otherRoles)
         {
-           
             logger.LogInformation(GetType().Name + "ToUpdateDTO");
 
             UserUpdateDTO updateDTO = new UserUpdateDTO();
 
             if (updateDTO != null)
             {
-
                 if (dto.Id != null)
                 {
                     updateDTO.Id = dto.Id;
@@ -565,7 +538,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                 updateDTO.IsVIP = dto.IsVIP;
 
-                 //set roles
+                //set roles
 
                 if (userRoles != null)
                 {
@@ -580,7 +553,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                 if (otherRoles != null)
                 {
-
                     List<string> values = new List<string>();
 
                     foreach (var item in otherRoles)
@@ -589,12 +561,9 @@ namespace onlineshop.Services.Mapper.Implimentation
                     }
 
                     updateDTO.OtherRoles = values;
-
                 }
-
             }
             return updateDTO;
         }
-
     }
 }

@@ -4,19 +4,15 @@ using onlineshop.Data;
 using onlineshop.Models;
 using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
-using onlineshop.Services.Mapper.Implimentation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 namespace onlineshop.Services.Implimentation
 {
     public class DeliveryMethodServiceImpl : IDeliveryMethodService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly IDeliveryMethodMapper DmMapper;
@@ -34,9 +30,8 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<DeliveryMethodDTO>> GetAll()
         {
-            
             logger.LogInformation(GetType().Name + " : GetAll");
-           
+
             List<DeliveryMethod> list = await context.DeliveryMethodsCtx.ToListAsync();
 
             List<DeliveryMethodDTO> result = new List<DeliveryMethodDTO>();
@@ -49,12 +44,10 @@ namespace onlineshop.Services.Implimentation
                 {
                     message = "deliverymethods entity is empty";
                 }
-               
             }
             else
             {
                 message = "deliverymethods entity is empty";
-                
             }
 
             if (string.IsNullOrEmpty(message))
@@ -75,12 +68,10 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<DeliveryMethodDTO> GetById(string id)
         {
-           
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (id != null)
             {
-
                 try
                 {
                     DeliveryMethod entity = await context.DeliveryMethodsCtx.FindAsync(Guid.Parse(id));
@@ -93,9 +84,7 @@ namespace onlineshop.Services.Implimentation
                         string message = "deliverymethod with id " + id + " was not found";
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<DeliveryMethod>("GetById", message, HttpStatusCode.NotFound);
-
                     }
-                  
                 }
                 catch (FormatException ex)
                 {
@@ -110,17 +99,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<DeliveryMethod>("GetById", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<DeliveryMethodDTO> Add(DeliveryMethodDTO item)
         {
-            
             logger.LogInformation(GetType().Name + " : Add");
-            
+
             if (item != null)
             {
-                
                 DeliveryMethod entity = DmMapper.ToEntity(item);
 
                 await context.DeliveryMethodsCtx.AddAsync(entity);
@@ -137,19 +123,16 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<DeliveryMethod>("Add", message, HttpStatusCode.BadRequest);
             }
-
-          
         }
 
         public async Task<DeliveryMethodDTO> Update(DeliveryMethodDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
                 DeliveryMethod entity = DmMapper.ToEntity(item);
-                
+
                 try
                 {
                     if (await context.DeliveryMethodsCtx.FindAsync(Guid.Parse(item.Id)) != null)
@@ -175,8 +158,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : : " + message);
                     throw new HttpException<DeliveryMethod>("Update", message, HttpStatusCode.InternalServerError);
                 }
-               
-                
             }
             else
             {
@@ -184,12 +165,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<DeliveryMethod>("Update", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task Delete(string id)
         {
-           
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (id != null)
@@ -209,7 +188,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<DeliveryMethod>("Delete", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -224,8 +202,6 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<DeliveryMethod>("Delete", message, HttpStatusCode.BadRequest);
             }
-                
         }
-        
     }
 }

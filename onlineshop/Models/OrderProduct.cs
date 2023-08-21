@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace onlineshop.Models
 {
-
     [Table("OrderProduct")]
     public class OrderProduct
     {
@@ -19,6 +18,5 @@ namespace onlineshop.Models
 
         [Column("products_count")]
         public int ProductsCount { get; set; }
-
     }
 }

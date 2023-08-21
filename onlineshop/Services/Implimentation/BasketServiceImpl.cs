@@ -10,42 +10,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace onlineshop.Services.Implimentation
 {
     public class BasketServiceImpl : IBasketService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly IBasketMapper BMapper;
 
         private readonly IUserService UService;
 
-        private readonly IUserMapper UMapper;
-
         private readonly IProductService PService;
-
-        private readonly IProductMapper PMapper;
 
         private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
-        public BasketServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketMapper bMapper, IProductService pService, IProductMapper pMapper, IUserService uService, IUserMapper uMapper)
+        public BasketServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketMapper bMapper, IProductService pService, IUserService uService)
         {
-
             this.context = context;
 
             this.SINManager = sINManager;
 
             this.BMapper = bMapper;
             this.UService = uService;
-            this.UMapper = uMapper;
+
             this.PService = pService;
-            this.PMapper = pMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<BasketServiceImpl>();
@@ -53,19 +45,16 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<Tuple<BasketDTO, List<BasketDTO>, List<BasketDTO>>> GetAll(ClaimsPrincipal currentUser)
         {
-            
             logger.LogInformation(GetType().Name + " : GetAll");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = GetCurrentUserId(currentUser);
 
                 if (uid != null)
                 {
                     try
                     {
-
                         UserDTO currentDTO = await UService.GetById(currentUser, uid);
 
                         List<Basket> list = await context.BasketCtx.Include(b => b.Product).Include(b => b.Buyer).Where(b => b.Buyer.Id.Equals(Guid.Parse(uid))).ToListAsync();
@@ -78,12 +67,10 @@ namespace onlineshop.Services.Implimentation
 
                         if (list != null)
                         {
-
                             if (list.Count == 0)
                             {
                                 message = "basket entity is empty";
                             }
-
                         }
                         else
                         {
@@ -117,13 +104,11 @@ namespace onlineshop.Services.Implimentation
                                     }
 
                                     avaliableItems.Add(BMapper.ToDTO(item));
-
                                 }
                                 else
                                 {
                                     notAvaliableItems.Add(BMapper.ToDTO(item));
                                 }
-
                             }
                         }
                         else
@@ -134,12 +119,10 @@ namespace onlineshop.Services.Implimentation
 
                         Tuple<BasketDTO, List<BasketDTO>, List<BasketDTO>> tuple = new Tuple<BasketDTO, List<BasketDTO>, List<BasketDTO>>(new BasketDTO(), avaliableItems, notAvaliableItems);
                         return tuple;
-
                     }
                     catch (HttpException<User> ex)
                     {
                         throw ex;
-
                     }
                     catch (FormatException ex)
                     {
@@ -154,7 +137,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("GetAll", message, HttpStatusCode.Forbidden);
                 }
-
             }
             else
             {
@@ -162,25 +144,20 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetAll", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         public async Task<List<BasketDTO>> GetAvaliableProducts(ClaimsPrincipal currentUser)
         {
-
             logger.LogInformation(GetType().Name + " : GetAvaliableProducts");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = GetCurrentUserId(currentUser);
 
                 if (uid != null)
                 {
-
                     try
                     {
-
                         UserDTO currentDTO = await UService.GetById(currentUser, uid);
 
                         List<Basket> list = await context.BasketCtx.Include(b => b.Product).Include(b => b.Buyer).Where(b => b.Buyer.Id.Equals(Guid.Parse(uid))).ToListAsync();
@@ -203,7 +180,6 @@ namespace onlineshop.Services.Implimentation
 
                         if (string.IsNullOrEmpty(message))
                         {
-
                             foreach (var item in list)
                             {
                                 if (item.Count > 0)
@@ -228,7 +204,6 @@ namespace onlineshop.Services.Implimentation
                                     }
 
                                     avaliableProducts.Add(BMapper.ToDTO(temp));
-
                                 }
                             }
 
@@ -239,7 +214,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Basket>("GetAvaliableProducts", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (HttpException<User> ex)
                     {
@@ -250,9 +224,7 @@ namespace onlineshop.Services.Implimentation
                         string message = "convert id " + uid + " failed: " + ex.Message;
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<User>("GetAll", message, HttpStatusCode.InternalServerError);
-
                     }
-
                 }
                 else
                 {
@@ -260,32 +232,27 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("GetAvaliableProducts", message, HttpStatusCode.Forbidden);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetAvaliableProducts", message, HttpStatusCode.Forbidden);
-            }            
-
+            }
         }
 
-        public async Task<BasketDTO> GetById(ClaimsPrincipal currentUser,string id)
+        public async Task<BasketDTO> GetById(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
                     string uid = GetCurrentUserId(currentUser);
 
                     if (uid != null)
                     {
-
                         try
                         {
                             Basket entity = await context.BasketCtx.Include(b => b.Product).Include(b => b.Buyer).FirstOrDefaultAsync(b => b.Id == Guid.Parse(id));
@@ -317,7 +284,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<User>("GetById", message, HttpStatusCode.InternalServerError);
                         }
-
                     }
                     else
                     {
@@ -332,36 +298,29 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Basket>("GetById", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
-            }            
-
+            }
         }
 
-        public async Task<BasketDTO> AddProductToBasket(ClaimsPrincipal currentUser,BasketDTO item)
+        public async Task<BasketDTO> AddProductToBasket(ClaimsPrincipal currentUser, BasketDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : AddProductToBasket");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (item != null)
                 {
-
                     string uid = GetCurrentUserId(currentUser);
 
                     if (uid != null)
                     {
-
                         try
                         {
-
                             ProductDTO productDTO = await PService.GetById(item.ProductDTO.Id);
 
                             UserDTO userDTO = await UService.GetById(currentUser, uid);
@@ -377,7 +336,6 @@ namespace onlineshop.Services.Implimentation
 
                                 context.Update(entity);
                                 await context.SaveChangesAsync();
-
                             }
                             else
                             {
@@ -403,7 +361,6 @@ namespace onlineshop.Services.Implimentation
                             item = BMapper.ToDTO(entity);
 
                             return item;
-
                         }
                         catch (HttpException<Product> ex)
                         {
@@ -419,7 +376,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Basket>("AddProductTobasket", message, HttpStatusCode.InternalServerError);
                         }
-
                     }
                     else
                     {
@@ -434,7 +390,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Basket>("AddProductToBasket", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -442,57 +397,44 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("AddProductToBasket", message, HttpStatusCode.Forbidden);
             }
-           
         }
 
-        public async Task<BasketDTO> Update(ClaimsPrincipal currentUser,BasketDTO item)
+        public async Task<BasketDTO> Update(ClaimsPrincipal currentUser, BasketDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (item != null)
                 {
-
                     string uid = GetCurrentUserId(currentUser);
 
                     if (uid != null)
                     {
                         try
                         {
-
                             Basket entity = await context.BasketCtx.Include(b => b.Product).Include(b => b.Buyer).FirstOrDefaultAsync(b => b.Id.Equals(Guid.Parse(item.Id)));
 
                             if (entity != null)
                             {
-
                                 if (item.Count == 0)
                                 {
-
-
                                     context.BasketCtx.Remove(entity);
                                     await context.SaveChangesAsync();
                                     entity = null;
-
                                 }
                                 else
                                 {
-
                                     entity.Count = item.Count;
                                     entity.IntermediateCost = item.Count * entity.Product.Price;
 
                                     context.Update(entity);
 
                                     await context.SaveChangesAsync();
-
                                 }
 
                                 item = BMapper.ToDTO(entity);
                                 return item;
-
-
                             }
                             else
                             {
@@ -500,7 +442,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Basket>("Update", message, HttpStatusCode.NotFound);
                             }
-
                         }
                         catch (FormatException ex)
                         {
@@ -515,9 +456,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
                     }
-
-
-
                 }
                 else
                 {
@@ -525,7 +463,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Basket>("Update", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -533,19 +470,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
             }
-
-           
-
         }
 
-        public async Task Delete(ClaimsPrincipal currentUser,string id)
+        public async Task Delete(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
                     string uid = GetCurrentUserId(currentUser);
@@ -576,7 +508,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Basket>("Delete", message, HttpStatusCode.NotFound);
                             }
-
                         }
                         catch (FormatException ex)
                         {
@@ -598,7 +529,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Basket>("Delete", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -606,26 +536,20 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
             }
-
-            
-
         }
 
         public async Task<int> GetCountOfProductsInBasket(ClaimsPrincipal currentUser)
         {
-
             logger.LogInformation(GetType().Name + " : GetCountOfProductsInBasket");
 
             int count = 0;
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
-                string uid = GetCurrentUserId(currentUser);                
+                string uid = GetCurrentUserId(currentUser);
 
                 try
                 {
-
                     List<Basket> list = await context.BasketCtx.Where(b => b.BuyerId.Equals(Guid.Parse(uid))).ToListAsync();
 
                     string message = string.Empty;
@@ -645,14 +569,11 @@ namespace onlineshop.Services.Implimentation
                     if (string.IsNullOrEmpty(message))
                     {
                         count = list.Count;
-                        //return count;
                     }
                     else
                     {
                         logger.LogWarning(GetType().Name + " : " + message);
-                        //throw new HttpException<Basket>("GetCountOfProductsInBasket", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -660,25 +581,18 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Basket>("GetCountOfProductsInBasket", message, HttpStatusCode.InternalServerError);
                 }
-
-                
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogWarning(GetType().Name + " : " + message);
-                //throw new HttpException<User>("GetCountOfProductsInBasket", message, HttpStatusCode.Forbidden);
             }
 
             return count;
-
         }
-       
 
         private double CalculatePrice(int count, double price)
         {
-
             logger.LogInformation(GetType().Name + " : CalculatePrice");
 
             return count * price;
@@ -686,7 +600,6 @@ namespace onlineshop.Services.Implimentation
 
         private string GetCurrentUserId(ClaimsPrincipal currentUser)
         {
-
             logger.LogInformation(GetType().Name + " : GetCurrentUserId");
 
             if (currentUser != null)
@@ -699,6 +612,5 @@ namespace onlineshop.Services.Implimentation
                 return null;
             }
         }
-
     }
 }

@@ -7,7 +7,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class RoleMapperImpl : IRoleMapper
     {
-
         private readonly ILogger logger;
 
         public RoleMapperImpl()
@@ -16,16 +15,49 @@ namespace onlineshop.Services.Mapper.Implimentation
             logger = logFactory.CreateLogger<RoleMapperImpl>();
         }
 
+        public Role ToEntity(RoleDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            Role entity = new Role();
+
+            try
+            {
+                if (dto != null)
+                {
+                    if (dto.Id != null)
+                    {
+                        entity.Id = Guid.Parse(dto.Id);
+                    }
+
+                    entity = AssignData(entity, dto);
+                }
+            }
+            catch (FormatException ex)
+            {
+                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
+            }
+
+            return entity;
+        }
+
+        public Role ToEntity(Role entity, RoleDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            entity = AssignData(entity, dto);
+
+            return entity;
+        }
+
         public RoleDTO ToDTO(Role entity)
         {
-          
             logger.LogInformation(GetType().Name + " : convert entity to DTO");
 
             RoleDTO dto = new RoleDTO();
 
-            if (entity!=null)
+            if (entity != null)
             {
-
                 if (entity.Id != null)
                 {
                     dto.Id = entity.Id.ToString();
@@ -40,57 +72,13 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     dto.Description = entity.Description;
                 }
-
             }
 
             return dto;
         }
 
-        public Role ToEntity(RoleDTO dto)
-        {
-            
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            Role entity = new Role();
-
-            try
-            {
-                if (dto != null)
-                {
-
-                    if (dto.Id != null)
-                    {
-                        entity.Id = Guid.Parse(dto.Id);
-                    }
-
-                    entity = AssignData(entity, dto);
-
-                }
-            }
-            catch (FormatException ex)
-            {
-                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-            }
-          
-
-            return entity;
-        }
-
-
-        public Role ToEntity(Role entity, RoleDTO dto)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            entity = AssignData(entity, dto);
-
-            return entity;
-
-        }
-
         private Role AssignData(Role entity, RoleDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : AssignData");
 
             if (entity != null && dto != null)
@@ -105,12 +93,9 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     entity.Description = dto.Description;
                 }
-
-                
             }
 
             return entity;
         }
-
     }
 }

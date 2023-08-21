@@ -7,35 +7,67 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class OrderMapperImpl : IOrderMapper
     {
+        private readonly IDeliveryMethodMapper DMMapper;
 
-        private readonly IDeliveryMethodMapper DmMapper;
+        private readonly IPaymentMethodMapper PMMapper;
 
-        private readonly IPaymentMethodMapper PmMapper;
-
-        private readonly IUserMapper UserMapper;
+        private readonly IUserMapper UMapper;
 
         private readonly ILogger logger;
 
-        public OrderMapperImpl(IDeliveryMethodMapper DmMapper, IPaymentMethodMapper PmMapper, IUserMapper UsMapper)
+        public OrderMapperImpl(IDeliveryMethodMapper dMMapper, IPaymentMethodMapper pMMapper, IUserMapper uMapper)
         {
-            this.DmMapper = DmMapper;
-            this.PmMapper = PmMapper;
-            this.UserMapper = UsMapper;
+            this.DMMapper = dMMapper;
+            this.PMMapper = pMMapper;
+            this.UMapper = uMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<BasketMapperImpl>();
         }
 
+        public Order ToEntity(OrderDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            Order entity = new Order();
+
+            try
+            {
+                if (dto != null)
+                {
+                    if (dto.Id != null)
+                    {
+                        entity.Id = Guid.Parse(dto.Id);
+                    }
+
+                    entity = AssignData(entity, dto);
+                }
+            }
+            catch (FormatException ex)
+            {
+                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
+            }
+
+            return entity;
+        }
+
+        public Order ToEntity(Order entity, OrderDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            entity = AssignData(entity, dto);
+
+            return entity;
+        }
+
         public OrderDTO ToDTO(Order entity)
         {
-           
             logger.LogInformation(GetType().Name + " : convert entity to DTO");
 
             OrderDTO dto = new OrderDTO();
 
             if (entity != null)
             {
-
                 if (entity.Id != null)
                 {
                     dto.Id = entity.Id.ToString();
@@ -46,8 +78,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.Cipher = entity.Cipher;
                 }
 
-               
-
                 if (entity.Count > 0)
                 {
                     dto.Count = entity.Count;
@@ -57,10 +87,10 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     dto.Price = entity.Price;
                 }
-                
+
                 if (entity.DeliveryMethod != null)
                 {
-                    dto.DeliveryMethodDTO = DmMapper.ToDTO(entity.DeliveryMethod);
+                    dto.DeliveryMethodDTO = DMMapper.ToDTO(entity.DeliveryMethod);
                 }
 
                 if (entity.DeliveryMethodId != null)
@@ -68,10 +98,9 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.DeliveryMethodDTOId = entity.DeliveryMethodId.ToString();
                 }
 
-
                 if (entity.PaymentMethod != null)
                 {
-                    dto.PaymentMethodDTO = PmMapper.ToDTO(entity.PaymentMethod);
+                    dto.PaymentMethodDTO = PMMapper.ToDTO(entity.PaymentMethod);
                 }
 
                 if (entity.PaymentMethodId != null)
@@ -81,7 +110,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                 if (entity.Buyer != null)
                 {
-                    dto.BuyerDTO = UserMapper.ToDTO(entity.Buyer);
+                    dto.BuyerDTO = UMapper.ToDTO(entity.Buyer);
                 }
 
                 if (entity.BuyerId != null)
@@ -110,70 +139,23 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     dto.CreationTime = entity.CreationTime;
                 }
-
             }
 
             return dto;
         }
 
-        public Order ToEntity(OrderDTO dto)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            Order entity = new Order();
-
-            try
-            {
-                if (dto != null)
-                {
-
-                    if (dto.Id != null)
-                    {
-                        entity.Id = Guid.Parse(dto.Id);
-                    }
-
-                    entity = AssignData(entity, dto);
-
-                }
-            }
-            catch (FormatException ex)
-            {
-                logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-            }
-
-            return entity;
-        }
-
-
-        public Order ToEntity(Order entity, OrderDTO dto)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            entity = AssignData(entity, dto);
-
-            return entity;
-
-        }
-
         private Order AssignData(Order entity, OrderDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : AssignData");
 
             try
             {
-
                 if (entity != null && dto != null)
                 {
-
                     if (dto.Cipher != null)
                     {
                         entity.Cipher = dto.Cipher;
                     }
-
-                    
 
                     if (dto.Count > 0)
                     {
@@ -187,7 +169,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                     if (dto.DeliveryMethodDTO != null)
                     {
-                        entity.DeliveryMethod = DmMapper.ToEntity(dto.DeliveryMethodDTO);
+                        entity.DeliveryMethod = DMMapper.ToEntity(dto.DeliveryMethodDTO);
                     }
 
                     if (dto.DeliveryMethodDTOId != null)
@@ -197,7 +179,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                     if (dto.PaymentMethodDTO != null)
                     {
-                        entity.PaymentMethod = PmMapper.ToEntity(dto.PaymentMethodDTO);
+                        entity.PaymentMethod = PMMapper.ToEntity(dto.PaymentMethodDTO);
                     }
 
                     if (dto.PaymentMethodDTOId != null)
@@ -207,7 +189,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                     if (dto.BuyerDTO != null)
                     {
-                        entity.Buyer = UserMapper.ToEntity(dto.BuyerDTO);
+                        entity.Buyer = UMapper.ToEntity(dto.BuyerDTO);
                     }
 
                     if (dto.BuyerDTOId != null)
@@ -219,8 +201,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.OrderStatus = dto.OrderStatus.Value;
                     }
-
-                   
 
                     if (dto.Mark >= 0 && dto.Mark <= 10)
                     {
@@ -241,17 +221,14 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.CreationTime = dto.CreationTime;
                     }
-
                 }
-
             }
             catch (FormatException ex)
             {
                 logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-            }            
+            }
 
             return entity;
-
         }
     }
 }

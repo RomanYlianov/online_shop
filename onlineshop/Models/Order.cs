@@ -1,5 +1,4 @@
-﻿using onlineshop.Services.DTO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,19 +23,16 @@ namespace onlineshop.Models
         [Column("final_price")]
         public double Price { get; set; }
 
-        //[ForeignKey("pay_method")]
         public DeliveryMethod DeliveryMethod { get; set; }
 
         [Column("deliverymethod_id")]
         public Guid DeliveryMethodId { get; set; }
 
-        //[ForeignKey("delivery_method")]
         public PaymentMethod PaymentMethod { get; set; }
 
         [Column("paymentmethod_id")]
         public Guid PaymentMethodId { get; set; }
 
-        //[ForeignKey("buyer")]
         public User Buyer { get; set; }
 
         [Column("buyer_id")]
@@ -49,7 +45,7 @@ namespace onlineshop.Models
         public double Mark { get; set; }
 
         [Column("receipt_code")]
-        public Int16 ReceiptCode { get; set;  }
+        public Int16 ReceiptCode { get; set; }
 
         [Column("track_number")]
         public string TrackNumber { get; set; }
@@ -58,9 +54,6 @@ namespace onlineshop.Models
         [Column("creation_time")]
         public DateTime CreationTime { get; set; }
 
-
         public virtual List<EvaluationQueue> EvaluationQueues { get; set; }
-
-       
     }
 }

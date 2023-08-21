@@ -5,10 +5,8 @@ namespace onlineshop.Services.Mapper
 {
     public interface ISupperFirmMapper
     {
-
-        SupplerFirmDTO ToDTO(SupplerFirm entity);
-
         SupplerFirm ToEntity(SupplerFirmDTO dto);
 
+        SupplerFirmDTO ToDTO(SupplerFirm entity);
     }
 }

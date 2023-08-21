@@ -12,7 +12,6 @@ namespace onlineshop.Data.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     Name = table.Column<string>(maxLength: 256, nullable: true),
 
@@ -20,7 +19,6 @@ namespace onlineshop.Data.Migrations
 
                     NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(nullable: true)
-
                 },
                 constraints: table =>
                 {
@@ -38,7 +36,7 @@ namespace onlineshop.Data.Migrations
                     NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     PasswordHash = table.Column<string>(nullable: false),
-                    KeyWord = table.Column<string>(type : "nvarchar(50)", nullable: false),
+                    KeyWord = table.Column<string>(type: "nvarchar(50)", nullable: false),
 
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Birthday = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -127,7 +125,7 @@ namespace onlineshop.Data.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type : "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

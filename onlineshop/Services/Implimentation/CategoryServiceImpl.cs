@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using onlineshop.Data;
 using onlineshop.Models;
@@ -7,7 +6,6 @@ using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -15,7 +13,6 @@ namespace onlineshop.Services.Implimentation
 {
     public class CategoryServiceImpl : ICategoryService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly ICategoryMapper CtMapper;
@@ -33,7 +30,6 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<CategoryDTO>> GetAll()
         {
-            
             logger.LogInformation(GetType().Name + " : GetAll");
 
             List<Category> list = await context.CategoriesCtx.ToListAsync();
@@ -44,17 +40,15 @@ namespace onlineshop.Services.Implimentation
 
             if (list != null)
             {
-
                 if (list.Count == 0)
                 {
                     message = "categories entity is emplty";
-                }               
+                }
             }
             else
             {
                 message = "categories entity is emplty";
             }
-
 
             if (string.IsNullOrEmpty(message))
             {
@@ -74,15 +68,14 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<CategoryDTO> GetById(string id)
         {
-            
             logger.LogInformation(GetType().Name + " : GetById");
 
-            if (id!=null)
+            if (id != null)
             {
                 try
                 {
                     Category entity = await context.CategoriesCtx.FindAsync(Guid.Parse(id));
-                    
+
                     if (entity != null)
                     {
                         return CtMapper.ToDTO(entity);
@@ -93,7 +86,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Category>("GetById", message, System.Net.HttpStatusCode.NotFound);
                     }
-                   
                 }
                 catch (FormatException ex)
                 {
@@ -108,18 +100,16 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Category>("GetById", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<CategoryDTO> Add(CategoryDTO item)
         {
-            
             logger.LogInformation(GetType().Name + " : Add");
 
             if (item != null)
             {
                 Category entity = CtMapper.ToEntity(item);
-                
+
                 if (!entity.Name.Equals("root category"))
                 {
                     await context.CategoriesCtx.AddAsync(entity);
@@ -134,8 +124,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Category>("Add", message, HttpStatusCode.BadRequest);
                 }
-
-               
             }
             else
             {
@@ -147,16 +135,13 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<CategoryDTO> Update(CategoryDTO item)
         {
-            
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
-                //Category entity = CtMapper.ToEntity(item);
-                
+              
                 try
                 {
-
                     Category entity = await context.CategoriesCtx.FindAsync(Guid.Parse(item.Id));
 
                     if (entity != null)
@@ -185,7 +170,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Category>("Update", message, HttpStatusCode.NotFound);
                     }
-                    
                 }
                 catch (FormatException ex)
                 {
@@ -197,15 +181,13 @@ namespace onlineshop.Services.Implimentation
             else
             {
                 string message = "item parameter is mandatory";
-                logger.LogError(GetType().Name+" : "+ message);
+                logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Category>("Update", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task Delete(string id)
         {
-             
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (id != null)
@@ -216,7 +198,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-
                         if (!entity.Name.Equals("root category"))
                         {
                             context.CategoriesCtx.Remove(entity);
@@ -228,8 +209,7 @@ namespace onlineshop.Services.Implimentation
                             string message = "category with name \"root name\" cant be removed";
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Category>("Delete", message, HttpStatusCode.Forbidden);
-                        }                  
-
+                        }
                     }
                     else
                     {
@@ -237,7 +217,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Category>("Delete", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -253,6 +232,5 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<Category>("Delete", message, HttpStatusCode.BadRequest);
             }
         }
-
     }
 }

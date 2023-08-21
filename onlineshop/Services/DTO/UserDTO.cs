@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace onlineshop.Services.DTO
 {
-    public class UserDTO: AbstractUserDTO
+    public class UserDTO : AbstractUserDTO
     {
-
         public string NormalizedUserName { get; set; }
 
         public string NormailzedEmail { get; set; }
@@ -35,10 +33,8 @@ namespace onlineshop.Services.DTO
         [Required(ErrorMessage = "AccessFailedCount is required")]
         public int AccessFailedCount { get; set; }
 
-        //[Required(ErrorMessage = "CreationTime is required")]
         [DataType(DataType.DateTime), Required(ErrorMessage = "CreationTime is require")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd hh:mm:ss}", ApplyFormatInEditMode = true)]
         public DateTime CreationTime { get; set; }
-
     }
 }

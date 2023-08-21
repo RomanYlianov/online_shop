@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace onlineshop.Services.DTO
 {
@@ -7,8 +6,10 @@ namespace onlineshop.Services.DTO
     {
         [Display(Name = "nickname")]
         UserName,
+
         [Display(Name = "email")]
         Email,
+
         [Display(Name = "phone")]
         PhoneNumber
     }

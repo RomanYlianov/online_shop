@@ -7,7 +7,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class SupplerFirmMapperImpl : ISupperFirmMapper
     {
-
         private readonly ILogger logger;
 
         public SupplerFirmMapperImpl()
@@ -16,61 +15,8 @@ namespace onlineshop.Services.Mapper.Implimentation
             logger = logFactory.CreateLogger<SupplerFirmMapperImpl>();
         }
 
-        public SupplerFirmDTO ToDTO(SupplerFirm entity)
-        {
-           
-            logger.LogInformation(GetType().Name + " : convert entity to DTO");
-
-            SupplerFirmDTO dto = new SupplerFirmDTO();
-
-            if (entity != null)
-            {
-
-                if (entity.Id != null)
-                {
-                    dto.Id = entity.Id.ToString();
-                }
-
-                if (entity.Name != null)
-                {
-                    dto.Name = entity.Name;
-                }
-
-                if (entity.Address!=null)
-                {
-                    dto.Address = entity.Address;
-                }
-
-                if (entity.Country!=null)
-                {
-                    
-                    
-                    dto.Country = entity.Country;
-                }
-
-                if (entity.RegisterDate != null)
-                {
-                    dto.RegisterDate = entity.RegisterDate;
-                }
-
-                if (entity.Rating >= 0 && entity.Rating <= 10)
-                {
-                    dto.Rating = entity.Rating;
-                }
-
-                if (entity.Description != null)
-                {
-                    dto.Description = entity.Description;
-                }
-
-            }
-
-            return dto;
-        }
-
         public SupplerFirm ToEntity(SupplerFirmDTO dto)
         {
-          
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             SupplerFirm entity = new SupplerFirm();
@@ -79,7 +25,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -114,7 +59,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.Description = dto.Description;
                     }
-
                 }
             }
             catch (FormatException ex)
@@ -123,6 +67,53 @@ namespace onlineshop.Services.Mapper.Implimentation
             }
 
             return entity;
+        }
+
+        public SupplerFirmDTO ToDTO(SupplerFirm entity)
+        {
+            logger.LogInformation(GetType().Name + " : convert entity to DTO");
+
+            SupplerFirmDTO dto = new SupplerFirmDTO();
+
+            if (entity != null)
+            {
+                if (entity.Id != null)
+                {
+                    dto.Id = entity.Id.ToString();
+                }
+
+                if (entity.Name != null)
+                {
+                    dto.Name = entity.Name;
+                }
+
+                if (entity.Address != null)
+                {
+                    dto.Address = entity.Address;
+                }
+
+                if (entity.Country != null)
+                {
+                    dto.Country = entity.Country;
+                }
+
+                if (entity.RegisterDate != null)
+                {
+                    dto.RegisterDate = entity.RegisterDate;
+                }
+
+                if (entity.Rating >= 0 && entity.Rating <= 10)
+                {
+                    dto.Rating = entity.Rating;
+                }
+
+                if (entity.Description != null)
+                {
+                    dto.Description = entity.Description;
+                }
+            }
+
+            return dto;
         }
     }
 }

@@ -18,19 +18,16 @@ namespace onlineshop.Models
         [Column("name")]
         public string Name { get; set; }
 
-        //[ForeignKey("category")]
         public Category Category { get; set; }
 
         [Column("category_id")]
         public Guid CategoryId { get; set; }
 
-        //[ForeignKey("suppler_firm")]
         public SupplerFirm SupplerFirm { get; set; }
-        
+
         [Column("supplerfirm_id")]
         public Guid SupplerFirmId { get; set; }
 
-        //public byte[] Photo { get; set; }
 
         [Column("count_all")]
         public int CountAll { get; set; }
@@ -47,22 +44,20 @@ namespace onlineshop.Models
         [Column("marks_count")]
         public long MarksCount { get; set; }
 
-
         [Column("is_hot")]
         public bool IsHot { get; set; }
 
         [Column("description")]
         public string Description { get; set; }
 
-        public virtual List<Comment> Comments { get; set; } 
+        public virtual List<Comment> Comments { get; set; }
 
-        public virtual List<Event> Events { get; set; } 
+        public virtual List<Event> Events { get; set; }
 
-        public virtual List<Basket> Baskets { get; set; } 
+        public virtual List<Basket> Baskets { get; set; }
 
         public virtual List<EvaluationQueue> EvaluationQueues { get; set; }
 
         public List<OrderProduct> OrderProducts { get; set; }
-
     }
 }

@@ -4,13 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using onlineshop.Services;
 using onlineshop.Services.DTO;
-using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
-using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -19,7 +15,6 @@ namespace onlineshop.Controllers
     [Route("basket")]
     public class BasketController : Controller
     {
-
         private readonly IBasketService BService;
 
         private readonly IOrderService OService;
@@ -39,7 +34,6 @@ namespace onlineshop.Controllers
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -60,20 +54,18 @@ namespace onlineshop.Controllers
                 isAvaliableExists = isNotAvaliableExists = false;
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
-            {  
+            {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
             ViewBag.flag1 = isAvaliableExists;
             ViewBag.flag2 = isNotAvaliableExists;
             return View(tuple);
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -83,7 +75,6 @@ namespace onlineshop.Controllers
                 BasketDTO dto = await BService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
             {
@@ -93,16 +84,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-           
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -121,15 +108,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-           
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, BasketDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : edit (POST)");
 
             await Inicialize();
@@ -140,7 +124,6 @@ namespace onlineshop.Controllers
             {
                 try
                 {
-
                     ModelState.Clear();
 
                     dto = await BService.Update(User, dto);
@@ -155,22 +138,17 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
-               
             }
             else
             {
-               
                 return View();
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
@@ -180,7 +158,6 @@ namespace onlineshop.Controllers
                 BasketDTO dto = await BService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
             {
@@ -190,15 +167,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-            
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, BasketDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete(POST)");
 
             try
@@ -206,7 +180,6 @@ namespace onlineshop.Controllers
                 await BService.Delete(User, id);
 
                 return RedirectToAction("Index");
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
             {
@@ -216,16 +189,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-          
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Checkout")]
         public async Task<IActionResult> Checkout()
         {
-
             logger.LogInformation(GetType().Name + " : Chechout (GET)");
 
             await Inicialize();
@@ -236,9 +205,7 @@ namespace onlineshop.Controllers
 
             try
             {
-
                 list = await BService.GetAvaliableProducts(User);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket>)
             {
@@ -249,19 +216,15 @@ namespace onlineshop.Controllers
                 return ExceptionHandler(ex.Message, ex.Code);
             }
 
-
             ViewBag.flag = isExists;
 
             return View(list);
-
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Checkout")]
         public async Task<IActionResult> Checkout(List<BasketDTO> list)
         {
-
             logger.LogInformation(GetType().Name + " : Checkout (POST)");
 
             await Inicialize();
@@ -270,12 +233,7 @@ namespace onlineshop.Controllers
 
             try
             {
-                
-
-                await ValidateItem(list);                
-
-
-                int t = 0;
+                await ValidateItem(list);
 
                 List<string> basketIds = new List<string>();
 
@@ -287,8 +245,6 @@ namespace onlineshop.Controllers
                     basketIds.Add(item.Id);
                 }
 
-
-
                 string par1 = SerializeList<string>(basketIds);
 
                 string par2 = SerializeList<int>(productCounts);
@@ -296,9 +252,8 @@ namespace onlineshop.Controllers
                 TempData.Clear();
                 TempData.Add("arg0", par1);
                 TempData.Add("arg1", par2);
-               
-                return RedirectToAction("Create", "Orders");
 
+                return RedirectToAction("Create", "Orders");
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket> ex)
             {
@@ -312,14 +267,11 @@ namespace onlineshop.Controllers
             {
                 ModelState.AddModelError("", ex.Message);
                 return View(list);
-
             }
-
         }
 
         private string SerializeList<T>(List<T> list, char divider = '$')
         {
-
             logger.LogInformation(GetType().Name + " : SerializeListOfString");
 
             string result = "";
@@ -342,14 +294,10 @@ namespace onlineshop.Controllers
             }
 
             return result;
-
         }
-
-       
 
         private async Task<bool> ValidateItem(List<BasketDTO> list)
         {
-
             logger.LogInformation(GetType().Name + ": validateItem");
 
             bool flag = true;
@@ -380,7 +328,6 @@ namespace onlineshop.Controllers
 
                         if (!flag)
                             break;
-
                     }
                 }
                 else
@@ -394,37 +341,10 @@ namespace onlineshop.Controllers
             }
 
             return flag;
-
         }
 
-
-        private List<SelectListItem> FormListOfProducts(List<BasketDTO> products)
-        {
-
-            logger.LogInformation(GetType().Name + " : FormListOfProducts");
-
-            List<SelectListItem> result = new List<SelectListItem>();
-
-            if (products != null)
-            {
-                if (products.Count > 0)
-                {
-                    foreach (var item in products)
-                    {
-                        string text = item.ProductDTO.Name + " (" + item.Count + "), cost = " + item.IntermediateCost;
-                        result.Add(new SelectListItem(text: text, value: item.Id, selected: false));
-                    }
-                }
-            }
-
-            return result;
-
-        }
-
-       
         private async Task<bool> ValidateItem(BasketDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : ValidateItem");
 
             bool isValid = true;
@@ -450,7 +370,6 @@ namespace onlineshop.Controllers
                         ModelState.AddModelError("Count", "Count must be positive or zero");
                     }
                 }
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Basket>)
             {
@@ -464,25 +383,41 @@ namespace onlineshop.Controllers
             return isValid;
         }
 
-        
+        private List<SelectListItem> FormListOfProducts(List<BasketDTO> products)
+        {
+            logger.LogInformation(GetType().Name + " : FormListOfProducts");
+
+            List<SelectListItem> result = new List<SelectListItem>();
+
+            if (products != null)
+            {
+                if (products.Count > 0)
+                {
+                    foreach (var item in products)
+                    {
+                        string text = item.ProductDTO.Name + " (" + item.Count + "), cost = " + item.IntermediateCost;
+                        result.Add(new SelectListItem(text: text, value: item.Id, selected: false));
+                    }
+                }
+            }
+
+            return result;
+        }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -506,7 +441,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -523,32 +457,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
-
     }
 }

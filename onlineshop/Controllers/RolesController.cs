@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using onlineshop.Services;
 using onlineshop.Services.DTO;
 using System.Collections.Generic;
-using System.Diagnostics.SymbolStore;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ namespace onlineshop.Controllers
     [Route("Roles")]
     public class RolesController : Controller
     {
-
         private readonly IRoleService RService;
 
         private readonly IBasketService BService;
@@ -30,15 +28,12 @@ namespace onlineshop.Controllers
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<RolesController>();
-           
-
         }
 
         [Authorize(Roles = "ADMIN, OWNER")]
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -59,14 +54,12 @@ namespace onlineshop.Controllers
             ViewBag.flag = isExists;
 
             return View(list);
-
         }
 
         [Authorize(Roles = "ADMIN, OWNER")]
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -80,15 +73,15 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "ADMIN, OWNER")]
         [HttpGet("Create")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
+
+            await Inicialize();
 
             return View();
         }
@@ -96,7 +89,6 @@ namespace onlineshop.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create(RoleDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
@@ -120,9 +112,6 @@ namespace onlineshop.Controllers
 
                         return RedirectToAction("Index");
                     }
-
-
-                  
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Role> ex)
                 {
@@ -133,14 +122,12 @@ namespace onlineshop.Controllers
             {
                 return View();
             }
-
         }
 
         [Authorize(Roles = "ADMIN, OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " Edit (GET)");
 
             await Inicialize();
@@ -154,14 +141,13 @@ namespace onlineshop.Controllers
             catch (onlineshop.Models.HttpException<onlineshop.Models.Role> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
-            }           
+            }
         }
 
         [Authorize(Roles = "ADMIN, OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, RoleDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
@@ -185,9 +171,6 @@ namespace onlineshop.Controllers
 
                         return RedirectToAction("Index");
                     }
-
-                  
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Role> ex)
                 {
@@ -204,18 +187,15 @@ namespace onlineshop.Controllers
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
 
             try
             {
-                
                 RoleDTO dto = await RService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Role> ex)
             {
@@ -227,7 +207,6 @@ namespace onlineshop.Controllers
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, RoleDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             try
@@ -239,27 +218,22 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
-               
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -283,7 +257,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -300,36 +273,28 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
 
         //[AcceptVerbs("Get", "Post")]
         //public async Task<IActionResult> CheckName(string name)
         //{
-
         //    logger.LogInformation(GetType().Name + " : Checkname");
 
         //    bool flag = false;
@@ -348,6 +313,5 @@ namespace onlineshop.Controllers
         //    }
 
         //}
-
     }
 }

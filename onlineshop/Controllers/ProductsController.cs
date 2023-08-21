@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using onlineshop.Services;
 using onlineshop.Services.DTO;
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
@@ -15,7 +14,6 @@ namespace onlineshop.Controllers
     [Route("products")]
     public class ProductsController : Controller
     {
-
         private readonly IProductService PService;
 
         private readonly IBasketService BService;
@@ -28,7 +26,6 @@ namespace onlineshop.Controllers
 
         public ProductsController(IProductService pService, IBasketService bService, ICategoryService CService, ISupplerFirmService SFService)
         {
-            
             this.PService = pService;
             this.BService = bService;
             this.CService = CService;
@@ -36,34 +33,32 @@ namespace onlineshop.Controllers
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<ProductsController>();
-
         }
 
         [HttpGet("Index")]
         [Authorize(Roles = "SELLER, OWNER")]
         public async Task<IActionResult> Index(
-            string name, string categoryName, string supplerFirmName,
+            string name, string category, string[] supplerFirmIds,
             double? lowestPrice, double? higestPrice,
             double? lowestRating, double? higestRating,
             string isHot
             )
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
 
             List<ProductDTO> list = new List<ProductDTO>();
 
-            ProductSearchDTO dto = FormProductSearchDTO(name, categoryName, supplerFirmName, lowestPrice, higestPrice, lowestRating, higestRating, isHot);
+            ProductSearchDTO dto = FormProductSearchDTO(name, category, supplerFirmIds, lowestPrice, higestPrice, lowestRating, higestRating, isHot);
 
-            bool isExists = true;            
+            bool isExists = true;
 
             try
             {
                 if (dto != null)
                 {
-                    list = await PService.Search(dto);
+                    list = await PService.Search(dto, true);
                 }
                 else
                 {
@@ -73,30 +68,35 @@ namespace onlineshop.Controllers
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product>)
             {
                 isExists = false;
-            }          
+            }
+
+            List<SelectListItem> categories = await InitSelectListOfCategories();
+
+            List<SelectListItem> supplerFirms = await InitSelectListOfSupplerFirms();
+
+            ViewBag.Categories = new SelectList(categories, "Value", "Text");
+            ViewBag.SupplerFirms = new MultiSelectList(supplerFirms, "Value", "Text");
 
             ViewBag.flag = isExists;
 
             return View(list);
-
         }
 
         [HttpGet("Catalog")]
         public async Task<IActionResult> Catalog(
-            string name, string categoryName, string supplerFirmName,
+            string name, string category, string[] supplerFirmIds,
             double? lowestPrice, double? higestPrice,
             double? lowestRating, double? higestRating,
             string isHot
             )
         {
-            
             logger.LogInformation(GetType().Name + " : Catalog");
 
             await Inicialize();
 
             List<ProductDTO> list = new List<ProductDTO>();
 
-            ProductSearchDTO dto = FormProductSearchDTO(name, categoryName, supplerFirmName, lowestPrice, higestPrice, lowestRating, higestRating, isHot);
+            ProductSearchDTO dto = FormProductSearchDTO(name, category, supplerFirmIds, lowestPrice, higestPrice, lowestRating, higestRating, isHot);
 
             bool isExists = true;
 
@@ -116,6 +116,13 @@ namespace onlineshop.Controllers
                 isExists = false;
             }
 
+            List<SelectListItem> categories = await InitSelectListOfCategories();
+
+            List<SelectListItem> supplerFirms = await InitSelectListOfSupplerFirms();
+
+            ViewBag.Categories = new SelectList(categories, "Value", "Text");
+            ViewBag.SupplerFirms = new MultiSelectList(supplerFirms, "Value", "Text");
+
             ViewBag.flag = isExists;
 
             return View(list);
@@ -124,17 +131,14 @@ namespace onlineshop.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
 
             try
             {
-
                 ProductDTO dto = await PService.GetById(id);
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
@@ -142,13 +146,10 @@ namespace onlineshop.Controllers
             }
         }
 
-
-
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
@@ -160,16 +161,13 @@ namespace onlineshop.Controllers
             ViewBag.Categories = new SelectList(categories, "Value", "Text");
             ViewBag.SupplerFirms = new SelectList(supplerFirms, "Value", "Text");
 
-
             return View();
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Create")]
         public async Task<IActionResult> Create(ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
@@ -183,7 +181,6 @@ namespace onlineshop.Controllers
 
             if (Validate(dto))
             {
-
                 ModelState.Clear();
 
                 try
@@ -191,29 +188,23 @@ namespace onlineshop.Controllers
                     dto = await PService.Add(dto);
 
                     return RedirectToAction("Index");
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
             }
             else
             {
                 ModelState.AddModelError("Name", "name \"removed product\" not allowed");
                 return View();
             }
-
-           
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -235,26 +226,22 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
 
             if (Validate(dto))
             {
-
                 ModelState.Clear();
 
                 try
                 {
-
                     List<SelectListItem> categories = await InitSelectListOfCategories(dto.CategoryDTOId);
 
                     List<SelectListItem> supplerFirms = await InitSelectListOfSupplerFirms(dto.SupplerFirmDTOId);
@@ -270,45 +257,38 @@ namespace onlineshop.Controllers
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
-
             }
             else
             {
                 ModelState.AddModelError("Name", "name \"removed product\" not allowed");
                 return View();
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
 
             try
             {
-                
                 ProductDTO dto = await PService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             try
@@ -321,21 +301,18 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("RateProduct/{id}")]
         public async Task<IActionResult> RateProduct(string id)
         {
-
             logger.LogInformation(GetType().Name + " : RateProduct (GET)");
 
             await Inicialize();
 
             try
             {
-
                 ProductDTO dto = await PService.LoadProduct(User, id);
                 dto.Rating = 0;
 
@@ -343,25 +320,21 @@ namespace onlineshop.Controllers
 
                 TempData.Add("productId", dto.Id);
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("RateProduct/{id}")]
         public async Task<IActionResult> RateProduct(string id, ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : RateProduct (POST)");
 
             if (ValidateMark(dto))
             {
-
                 try
                 {
                     ModelState.Clear();
@@ -380,8 +353,6 @@ namespace onlineshop.Controllers
                     dto = await PService.RateProduct(User, id, dto);
 
                     return RedirectToAction("Catalog");
-
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
                 {
@@ -389,7 +360,6 @@ namespace onlineshop.Controllers
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.EvaluationQueue> ex)
                 {
-
                     if (ex.Code == HttpStatusCode.Forbidden)
                     {
                         ModelState.AddModelError("Mark", ex.Message);
@@ -401,46 +371,38 @@ namespace onlineshop.Controllers
                         return ExceptionHandler(ex.Message, ex.Code);
                     }
                 }
-
-
             }
             else
             {
                 return View(dto);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("AddProductToBasket/{id}")]
         public async Task<IActionResult> AddProductTobasket(string id)
         {
-
             logger.LogInformation(GetType().Name + " : AddProductToBasket (GET)");
 
             try
             {
-
                 ProductDTO dto = await PService.GetById(id);
 
                 BasketDTO Bdto = new BasketDTO();
                 Bdto.ProductDTO = dto;
 
                 return View(Bdto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("AddProductToBasket/{id}")]
         public async Task<IActionResult> AddProductToBasket(string id, BasketDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : AddProductTobasket (POST)");
 
             try
@@ -453,17 +415,13 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
-
 
         private async Task<List<SelectListItem>> InitSelectListOfCategories(string selected = null)
         {
-
             logger.LogInformation(GetType().Name + " : InitSelectListOFCategories");
 
             List<CategoryDTO> DTOs = await CService.GetAll();
-
 
             List<SelectListItem> items = new List<SelectListItem>();
 
@@ -471,7 +429,6 @@ namespace onlineshop.Controllers
             {
                 foreach (var item in DTOs)
                 {
-
                     if (item.Id.Equals(selected))
                     {
                         items.Add(new SelectListItem(text: item.Name, value: item.Id, selected: true));
@@ -480,7 +437,6 @@ namespace onlineshop.Controllers
                     {
                         items.Add(new SelectListItem(text: item.Name, value: item.Id));
                     }
-                  
                 }
             }
             else
@@ -492,12 +448,10 @@ namespace onlineshop.Controllers
             }
 
             return items;
-
         }
 
         private async Task<List<SelectListItem>> InitSelectListOfSupplerFirms(string selected = null)
         {
-
             logger.LogInformation(GetType().Name + " : InitSelectListOfSupplerFirms");
 
             List<SupplerFirmDTO> DTOs = await SFService.GetAll();
@@ -530,13 +484,12 @@ namespace onlineshop.Controllers
         }
 
         private ProductSearchDTO FormProductSearchDTO(
-            string name, string categoryName, string supplerFirmName,
+            string name, string categoryId, string[] supplerFirmIds,
             double? lowestPrice, double? higestPrice,
             double? lowestRating, double? higestRating,
             string isHot
             )
         {
-
             logger.LogInformation(GetType().Name + " : FormProductSearchDTO");
 
             ProductSearchDTO dto = null;
@@ -550,22 +503,32 @@ namespace onlineshop.Controllers
                 dto.Name = name;
             }
 
-            if (!string.IsNullOrEmpty(categoryName))
+            if (!string.IsNullOrEmpty(categoryId))
             {
                 if (!isInit)
                 {
                     dto = new ProductSearchDTO();
                 }
-                dto.CategoryName = categoryName;
+                dto.CategoryId = categoryId;
             }
 
-            if (!string.IsNullOrEmpty(supplerFirmName))
+            if (supplerFirmIds.Length > 0)
             {
                 if (!isInit)
                 {
                     dto = new ProductSearchDTO();
                 }
-                dto.SupplerFirmName = supplerFirmName;
+                if (supplerFirmIds.Length == 1)
+                {
+                    if (supplerFirmIds[0] != null)
+                    {
+                        dto.SupplerFirmIds = supplerFirmIds;
+                    }
+                }
+                else
+                {
+                    dto.SupplerFirmIds = supplerFirmIds;
+                }
             }
 
             if (lowestPrice != null)
@@ -618,39 +581,32 @@ namespace onlineshop.Controllers
 
         private bool Validate(ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Validate");
             bool flag = !dto.Name.Equals("removed product");
             return flag;
-
         }
 
         private bool ValidateMark(ProductDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : ValidateMark");
 
             return dto.Rating > 0 && dto.Rating <= 10;
-
         }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -674,7 +630,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -691,31 +646,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

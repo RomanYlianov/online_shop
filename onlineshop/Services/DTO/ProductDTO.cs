@@ -18,9 +18,7 @@ namespace onlineshop.Services.DTO
         [Required(ErrorMessage = "CategoryDTO is requres")]
         public CategoryDTO CategoryDTO { get; set; }
 
-
         [Required(ErrorMessage = "CategoryDTOId is required")]
-        //[Range(1, int.MaxValue, ErrorMessage = "CategoryDTOId must be positive")]
         public string CategoryDTOId { get; set; }
 
         [Display(Name = "suppler firm")]
@@ -28,7 +26,6 @@ namespace onlineshop.Services.DTO
         public SupplerFirmDTO SupplerFirmDTO { get; set; }
 
         [Required(ErrorMessage = "SupperFirmDTOId is required")]
-        //[Range(1, int.MaxValue, ErrorMessage = "SupplerFirmDTOId must be positive")]
         public string SupplerFirmDTOId { get; set; }
 
         [Required(ErrorMessage = "CountAll is required")]
@@ -43,9 +40,9 @@ namespace onlineshop.Services.DTO
         [Range(0, double.MaxValue, ErrorMessage = "Price must be positive or zero")]
         public double Price { get; set; }
 
-        //[Required(ErrorMessage = "Rating is required")]
-        //[Range(0, 10, ErrorMessage = "Rating must be positive or zero")]
         public double Rating { get; set; }
+
+        public long MarksCount { get; set; }
 
         [Required(ErrorMessage = "IsHot is required")]
         public bool IsHot { get; set; }
@@ -55,6 +52,5 @@ namespace onlineshop.Services.DTO
         public string Description { get; set; }
 
         public List<OrderDTO> OrderDTOs { get; set; }
-
     }
 }

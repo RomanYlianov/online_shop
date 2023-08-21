@@ -7,7 +7,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class EventMapperImpl : IEventMapper
     {
-
         private readonly IProductMapper PrMapper;
 
         private readonly ILogger logger;
@@ -19,59 +18,8 @@ namespace onlineshop.Services.Mapper.Implimentation
             logger = logFactory.CreateLogger<EventMapperImpl>();
         }
 
-        public EventDTO ToDTO(Event entity)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert entity to DTO");
-
-            EventDTO dto = new EventDTO();
-
-            if (entity != null) 
-            {
-                
-                if (entity.Id != null)
-                {
-                    dto.Id = entity.Id.ToString();
-                }
-
-                if (entity.Tittle != null)
-                {
-                    dto.Title = entity.Tittle;
-                }
-
-                if (entity.Product != null)
-                {
-                    dto.ProductDTO = PrMapper.ToDTO(entity.Product);
-                }
-
-                if (entity.ProductId != null)
-                {
-                    dto.ProductDTOId = entity.ProductId.ToString();
-                }
-
-                if (entity.Text != null)
-                {
-                    dto.Text = entity.Text;
-                }
-
-                if (entity.CreationTime != null)
-                {
-                    dto.CreationTime = entity.CreationTime;
-                }
-
-                if (entity.ExpirationTime != null)
-                {
-                    dto.ExpirationTime = entity.ExpirationTime.Value;
-                }
-
-            }
-
-            return dto;
-        }
-
         public Event ToEntity(EventDTO dto)
         {
-           
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             Event entity = new Event();
@@ -80,7 +28,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -88,7 +35,7 @@ namespace onlineshop.Services.Mapper.Implimentation
 
                     if (dto.Title != null)
                     {
-                        entity.Tittle = dto.Title;
+                        entity.Title = dto.Title;
                     }
 
                     if (dto.ProductDTO != null)
@@ -115,7 +62,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.ExpirationTime = dto.ExpirationTime.Value;
                     }
-
                 }
             }
             catch (FormatException ex)
@@ -124,6 +70,53 @@ namespace onlineshop.Services.Mapper.Implimentation
             }
 
             return entity;
+        }
+
+        public EventDTO ToDTO(Event entity)
+        {
+            logger.LogInformation(GetType().Name + " : convert entity to DTO");
+
+            EventDTO dto = new EventDTO();
+
+            if (entity != null)
+            {
+                if (entity.Id != null)
+                {
+                    dto.Id = entity.Id.ToString();
+                }
+
+                if (entity.Title != null)
+                {
+                    dto.Title = entity.Title;
+                }
+
+                if (entity.Product != null)
+                {
+                    dto.ProductDTO = PrMapper.ToDTO(entity.Product);
+                }
+
+                if (entity.ProductId != null)
+                {
+                    dto.ProductDTOId = entity.ProductId.ToString();
+                }
+
+                if (entity.Text != null)
+                {
+                    dto.Text = entity.Text;
+                }
+
+                if (entity.CreationTime != null)
+                {
+                    dto.CreationTime = entity.CreationTime;
+                }
+
+                if (entity.ExpirationTime != null)
+                {
+                    dto.ExpirationTime = entity.ExpirationTime.Value;
+                }
+            }
+
+            return dto;
         }
     }
 }

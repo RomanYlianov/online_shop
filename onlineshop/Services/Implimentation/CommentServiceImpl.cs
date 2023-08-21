@@ -10,14 +10,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace onlineshop.Services.Implimentation
 {
     public class CommentServiceImpl : ICommentService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly ICommentMapper CMapper;
@@ -28,46 +26,35 @@ namespace onlineshop.Services.Implimentation
 
         private readonly IProductService PService;
 
-        private readonly IProductMapper PMapper;
-
         private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
-        public CommentServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, ICommentMapper cMapper, IUserService uService, IUserMapper uMapper, IProductService pService, IProductMapper pMapper)
+        public CommentServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, ICommentMapper cMapper, IUserService uService, IUserMapper uMapper, IProductService pService)
         {
-
             this.context = context;
 
             this.SINManager = sINManager;
-
 
             this.CMapper = cMapper;
             this.UService = uService;
 
             this.UMapper = uMapper;
             this.PService = pService;
-            this.PMapper = pMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<CommentServiceImpl>();
-
         }
 
         public async Task<List<CommentDTO>> GetAll(string productId)
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
-
-          
 
             if (productId != null)
             {
-
                 try
                 {
-                    
-                    List<Comment> list = await context.CommentsCtx.Include(c=>c.Product).Where(c => c.ProductId.Equals(Guid.Parse(productId))).ToListAsync();
+                    List<Comment> list = await context.CommentsCtx.Include(c => c.Product).Where(c => c.ProductId.Equals(Guid.Parse(productId))).ToListAsync();
 
                     List<CommentDTO> result = new List<CommentDTO>();
 
@@ -87,7 +74,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (string.IsNullOrEmpty(message))
                     {
-
                         foreach (var item in list)
                         {
                             CommentDTO dto = CMapper.ToDTO(item);
@@ -100,19 +86,15 @@ namespace onlineshop.Services.Implimentation
                             }
 
                             result.Add(dto);
-
                         }
 
                         return result;
-
                     }
                     else
                     {
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<Comment>("GetAll", message, HttpStatusCode.NotFound);
                     }
-
-
                 }
                 catch (FormatException ex)
                 {
@@ -120,7 +102,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Product>("GetAll", message, HttpStatusCode.InternalServerError);
                 }
-
             }
             else
             {
@@ -128,21 +109,17 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Product>("GetAll", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<CommentDTO> GetById(string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (id != null)
             {
-
                 try
                 {
-
-                    Comment entity = await context.CommentsCtx.Include(p=>p.Product).FirstOrDefaultAsync(c=>c.Id.Equals(Guid.Parse(id)));
+                    Comment entity = await context.CommentsCtx.Include(p => p.Product).FirstOrDefaultAsync(c => c.Id.Equals(Guid.Parse(id)));
 
                     if (entity != null)
                     {
@@ -152,7 +129,6 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         return CMapper.ToDTO(entity);
-
                     }
                     else
                     {
@@ -167,27 +143,21 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Comment>("GetById", message, HttpStatusCode.InternalServerError);
                 }
-
             }
             else
             {
-
                 string message = "id parameter is mandatory";
                 logger.LogInformation(GetType().Name + " : " + message);
                 throw new HttpException<Comment>("GetById", message, HttpStatusCode.BadRequest);
-
             }
-
         }
 
         public async Task<CommentDTO> Inicialize(ClaimsPrincipal currentUser, string eqId)
         {
-
             logger.LogInformation(GetType().Name + " : Inicialize");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
@@ -196,7 +166,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-
                         CommentDTO dto = new CommentDTO();
 
                         ProductDTO pDTO = await PService.GetById(entity.ProductId.ToString());
@@ -205,12 +174,11 @@ namespace onlineshop.Services.Implimentation
 
                         dto.AuthorDTO = uDTO;
                         dto.AuthorDTOId = entity.BuyerId.ToString();
-                        
+
                         dto.ProductDTO = pDTO;
                         dto.ProductDTOId = entity.ProductId.ToString();
 
                         return dto;
-
                     }
                     else
                     {
@@ -218,7 +186,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<EvaluationQueue>("Inicialize", message, HttpStatusCode.NotFound);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -234,8 +201,6 @@ namespace onlineshop.Services.Implimentation
                 {
                     throw ex;
                 }
-               
-
             }
             else
             {
@@ -243,14 +208,12 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Inicialize", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         //can be added/changed/removed, if row exists in table evaluationQueue
         //author = null -> user was removed
         public async Task<CommentDTO> Add(ClaimsPrincipal currentUser, string eqId, CommentDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
             if (SINManager.IsSignedIn(currentUser))
@@ -263,14 +226,12 @@ namespace onlineshop.Services.Implimentation
 
                         if (entity != null)
                         {
-
                             if (!entity.IsAddedComment)
                             {
                                 Comment commentEntity = CMapper.ToEntity(item);
 
                                 if (currentUser != null)
                                 {
-
                                     string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
                                     commentEntity.AuthorId = Guid.Parse(uid);
                                     commentEntity.CreationTime = DateTime.Now;
@@ -279,13 +240,11 @@ namespace onlineshop.Services.Implimentation
                                     await context.Set<Comment>().AddAsync(commentEntity);
                                     await context.SaveChangesAsync();
 
-                                    
-
                                     if (entity.IsRateProduct)
                                     {
                                         context.Entry(entity).State = EntityState.Deleted;
                                         context.Set<EvaluationQueue>().Remove(entity);
-                                       
+
                                         await context.SaveChangesAsync();
                                     }
                                     else
@@ -293,13 +252,12 @@ namespace onlineshop.Services.Implimentation
                                         entity.IsAddedComment = true;
                                         context.Entry(entity).State = EntityState.Modified;
                                         context.Set<EvaluationQueue>().Update(entity);
-                                      
+
                                         await context.SaveChangesAsync();
                                     }
 
                                     item = CMapper.ToDTO(commentEntity);
                                     return item;
-
                                 }
                                 else
                                 {
@@ -314,7 +272,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Comment>("Add", message, HttpStatusCode.Forbidden);
                             }
-
                         }
                         else
                         {
@@ -322,7 +279,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Comment>("Add", message, HttpStatusCode.Forbidden);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -330,8 +286,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogInformation(GetType().Name + " : " + message);
                         throw new HttpException<Comment>("Add", message, HttpStatusCode.InternalServerError);
                     }
-
-
                 }
                 else
                 {
@@ -345,30 +299,23 @@ namespace onlineshop.Services.Implimentation
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Add", message, HttpStatusCode.Forbidden);
-            }            
-
+            }
         }
 
         public async Task<CommentDTO> Update(ClaimsPrincipal currentUser, CommentDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
-
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (item != null)
                 {
-
                     try
                     {
-
                         Comment entity = await context.CommentsCtx.FindAsync(Guid.Parse(item.Id));
 
                         if (entity != null)
                         {
-
                             if (CheckPermissions(currentUser, entity.AuthorId.ToString()))
                             {
                                 //change fields : title, text
@@ -387,7 +334,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Comment>("Update", message, HttpStatusCode.Forbidden);
                             }
-
                         }
                         else
                         {
@@ -395,7 +341,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Comment>("Update", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -403,8 +348,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogInformation(GetType().Name + " : " + message);
                         throw new HttpException<Comment>("Update", message, HttpStatusCode.InternalServerError);
                     }
-
-
                 }
                 else
                 {
@@ -412,7 +355,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Comment>("Update", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -420,22 +362,16 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
             }
-
-           
-
         }
 
         public async Task Delete(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
-
                     try
                     {
                         Comment entity = await context.CommentsCtx.FindAsync(Guid.Parse(id));
@@ -444,10 +380,8 @@ namespace onlineshop.Services.Implimentation
                         {
                             if (CheckPermissions(currentUser, entity.AuthorId.ToString()))
                             {
-
                                 context.CommentsCtx.Remove(entity);
                                 await context.SaveChangesAsync();
-
                             }
                             else
                             {
@@ -476,33 +410,28 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Comment>("Delete", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
-            }           
-
+            }
         }
 
         private bool CheckPermissions(ClaimsPrincipal currentUser, string uid)
         {
-
             logger.LogInformation(GetType().Name + " : CheckPermissions");
 
             bool flag = false;
 
-            if (currentUser != null && uid  != null)
+            if (currentUser != null && uid != null)
             {
                 string currentUid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
                 flag = uid.Equals(currentUid) || currentUser.IsInRole("OWNER");
             }
 
             return flag;
-
         }
-      
     }
 }

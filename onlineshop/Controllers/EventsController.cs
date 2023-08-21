@@ -13,7 +13,6 @@ namespace onlineshop.Controllers
     [Route("events")]
     public class EventsController : Controller
     {
-
         private readonly IEventService EService;
 
         private readonly IProductService PService;
@@ -24,20 +23,17 @@ namespace onlineshop.Controllers
 
         public EventsController(IEventService service, IBasketService bService, IProductService pService)
         {
-            
             this.EService = service;
             this.BService = bService;
             this.PService = pService;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<EventsController>();
-
         }
 
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -57,24 +53,20 @@ namespace onlineshop.Controllers
 
             ViewBag.flag = isExists;
             return View(list);
-
         }
 
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
 
             try
             {
-
                 EventDTO dto = await EService.GetById(id);
-                
-                return View(dto);
 
+                return View(dto);
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Event> ex)
             {
@@ -86,19 +78,16 @@ namespace onlineshop.Controllers
         [HttpGet("Create/{id}")]
         public async Task<IActionResult> Create(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
 
             try
             {
-
-                ProductDTO dto = await PService.GetById(id);            
+                ProductDTO dto = await PService.GetById(id);
 
                 if (dto != null)
                 {
-
                     EventDTO eventDTO = new EventDTO();
                     eventDTO.ProductDTO = dto;
                     eventDTO.ProductDTOId = dto.Id;
@@ -108,8 +97,7 @@ namespace onlineshop.Controllers
                 {
                     string message = $"product with id {id} was not foud";
                     return ExceptionHandler(message, HttpStatusCode.NotFound);
-                }                
-
+                }
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Product> ex)
             {
@@ -119,46 +107,38 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Create/{id}")]
         public async Task<IActionResult> Create(string id, EventDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
 
             if (ModelState.IsValid)
             {
-
                 await EService.Add(dto);
 
                 return RedirectToAction("Index");
-
             }
             else
             {
                 return View();
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
 
             try
             {
-
-                int y = 0;
                 EventDTO dto = await EService.GetById(id);
 
                 return View(dto);
@@ -167,14 +147,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, EventDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
@@ -188,14 +166,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
@@ -209,14 +185,12 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, EventDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
 
             try
@@ -228,27 +202,22 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
-
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -272,7 +241,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -289,30 +257,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
+
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

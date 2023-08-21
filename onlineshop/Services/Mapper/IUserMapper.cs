@@ -6,14 +6,6 @@ namespace onlineshop.Services.Mapper
 {
     public interface IUserMapper
     {
-        UserDTO ToDTO(User entity);
-
-        UserRegisterDTO ToRegisterDTO(User entity);
-
-        UserLoginDTO ToLoginDTO(User entiny, LoginType type);
-
-        UserUpdateDTO ToUpdateDTO(UserDTO dto, List<RoleDTO> userRoles, List<RoleDTO> otherRoles);
-
         User ToEntity(UserDTO dto);
 
         User ToEntity(User entity, UserUpdateDTO dto);
@@ -22,5 +14,12 @@ namespace onlineshop.Services.Mapper
 
         User ToEntity(UserRegisterDTO dto);
 
+        UserDTO ToDTO(User entity);
+
+        UserRegisterDTO ToRegisterDTO(User entity);
+
+        UserLoginDTO ToLoginDTO(User entiny, LoginType type);
+
+        UserUpdateDTO ToUpdateDTO(UserDTO dto, List<RoleDTO> userRoles, List<RoleDTO> otherRoles);
     }
 }

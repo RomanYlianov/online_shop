@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace onlineshop.Data.Migrations
 {
@@ -15,13 +15,12 @@ namespace onlineshop.Data.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     name = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_deliverymethod", x => x.id);
                 });
-
 
             migrationBuilder.CreateTable(
                 name: "paymentmethod",
@@ -58,7 +57,7 @@ namespace onlineshop.Data.Migrations
                     country = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     register_date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     rating = table.Column<double>(type: "float", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(255)", nullable: false)
+                    description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,7 +71,7 @@ namespace onlineshop.Data.Migrations
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     name = table.Column<string>(type: "nvarchar(50)", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(50)", nullable: false)
+                    description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,7 +94,7 @@ namespace onlineshop.Data.Migrations
                     rating = table.Column<double>(type: "float", defaultValueSql: "0.0"),
                     marks_count = table.Column<long>(type: "bigint", defaultValueSql: "0"),
                     is_hot = table.Column<bool>(type: "bit", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(50)", nullable: false)
+                    description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -220,7 +219,6 @@ namespace onlineshop.Data.Migrations
                {
                    table.PrimaryKey("PK_order", x => x.id);
 
-
                    table.ForeignKey(name: "FK_order_deliverymethod_deliverymethod_id",
                       column: v => v.deliverymethod_id,
                       principalTable: "deliverymethod",
@@ -253,7 +251,6 @@ namespace onlineshop.Data.Migrations
                 },
                 constraints: table =>
                 {
-
                     table.PrimaryKey("PK_OrderProduct", x => new { x.product_id, x.order_id });
 
                     table.ForeignKey(name: "FK_OrderProduct_order_id",
@@ -269,7 +266,6 @@ namespace onlineshop.Data.Migrations
                      principalColumn: "id",
                      onDelete: ReferentialAction.NoAction
                  );
-
                 });
 
             migrationBuilder.CreateTable(
@@ -304,7 +300,6 @@ namespace onlineshop.Data.Migrations
                        principalColumn: "id",
                        onDelete: ReferentialAction.NoAction
                    );
-
                 }
              );
         }

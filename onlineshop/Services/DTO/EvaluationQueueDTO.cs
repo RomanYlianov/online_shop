@@ -4,7 +4,6 @@ namespace onlineshop.Services.DTO
 {
     public class EvaluationQueueDTO
     {
-
         public string Id { get; set; }
 
         [Required(ErrorMessage = "UserDTO is required")]
@@ -17,7 +16,7 @@ namespace onlineshop.Services.DTO
         public ProductDTO ProductDTO { get; set; }
 
         [Required(ErrorMessage = "ProductDTOId is required")]
-        public string ProductDTOId { get; set;}
+        public string ProductDTOId { get; set; }
 
         [Required(ErrorMessage = "OrderDTO is required")]
         public OrderDTO OrderDTO { get; set; }
@@ -30,6 +29,5 @@ namespace onlineshop.Services.DTO
 
         [Required(ErrorMessage = "IsRateProduct ius required")]
         public bool IsRateProduct { get; set; }
-
     }
 }

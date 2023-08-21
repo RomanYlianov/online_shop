@@ -15,11 +15,9 @@ namespace onlineshop.Models
         [Column("name")]
         public string Name { get; set; }
 
-
         [Column("description")]
         public string Description { get; set; }
 
-        public virtual List<Order> Orders { get; set; } 
-
+        public virtual List<Order> Orders { get; set; }
     }
 }

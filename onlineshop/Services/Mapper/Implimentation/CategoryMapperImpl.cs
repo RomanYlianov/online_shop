@@ -7,7 +7,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class CategoryMapperImpl : ICategoryMapper
     {
-
         private readonly ILogger logger;
 
         public CategoryMapperImpl()
@@ -16,39 +15,8 @@ namespace onlineshop.Services.Mapper.Implimentation
             logger = logFactory.CreateLogger<CategoryMapperImpl>();
         }
 
-        public CategoryDTO ToDTO(Category entity)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert entity to DTO");
-
-            CategoryDTO dto = new CategoryDTO();
-
-            if (entity != null)
-            {
-
-                if (entity.Id != null)
-                {
-                    dto.Id = entity.Id.ToString();
-                }
-               
-                if (entity.Name != null)
-                {
-                    dto.Name = entity.Name;
-                }
-
-                if (entity.Description != null)
-                {
-                    dto.Description = entity.Description;
-                }
-
-            }
-
-            return dto;            
-        }
-
         public Category ToEntity(CategoryDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             Category entity = new Category();
@@ -57,7 +25,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -72,15 +39,41 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.Description = dto.Description;
                     }
-
                 }
             }
             catch (FormatException ex)
             {
                 logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-            }           
+            }
 
             return entity;
+        }
+
+        public CategoryDTO ToDTO(Category entity)
+        {
+            logger.LogInformation(GetType().Name + " : convert entity to DTO");
+
+            CategoryDTO dto = new CategoryDTO();
+
+            if (entity != null)
+            {
+                if (entity.Id != null)
+                {
+                    dto.Id = entity.Id.ToString();
+                }
+
+                if (entity.Name != null)
+                {
+                    dto.Name = entity.Name;
+                }
+
+                if (entity.Description != null)
+                {
+                    dto.Description = entity.Description;
+                }
+            }
+
+            return dto;
         }
     }
 }

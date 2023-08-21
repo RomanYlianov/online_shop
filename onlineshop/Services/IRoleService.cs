@@ -3,10 +3,8 @@ using System.Threading.Tasks;
 
 namespace onlineshop.Services
 {
-    public interface IRoleService: ICrud<RoleDTO, string>
+    public interface IRoleService : ICrud<RoleDTO, string>
     {
-
         Task<bool> CheckName(string name);
-
     }
 }

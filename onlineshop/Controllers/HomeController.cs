@@ -2,55 +2,41 @@
 using Microsoft.Extensions.Logging;
 
 using onlineshop.Services;
-using onlineshop.Services.DTO;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace onlineshop.Controllers
 {
-    
     public class HomeController : Controller
     {
-        private readonly ILogger logger;
-
         private readonly IBasketService BService;
 
-        
+        private readonly ILogger logger;
 
         public HomeController(IBasketService BService)
         {
             this.BService = BService;
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<HomeController>();
-
         }
 
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
             return View();
-            
         }
 
         public async Task<IActionResult> Privacy()
         {
-
             logger.LogInformation(GetType().Name + " : Privacy");
 
             await Inicialize();
 
             return View();
         }
-
-       
 
         //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         //public IActionResult Error()
@@ -61,38 +47,33 @@ namespace onlineshop.Controllers
         [HttpGet("/Error")]
         public async Task<IActionResult> Error(int? code = null)
         {
-
             logger.LogInformation(GetType().Name + " : Error");
 
             await Inicialize();
 
             if (code.HasValue)
-            {                
+            {
                 logger.LogWarning("error code " + code);
                 ViewBag.error = code;
             }
 
             return View();
-            
         }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
-                {                                     
-
+                {
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -116,7 +97,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -133,20 +113,13 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
-
-
     }
 }

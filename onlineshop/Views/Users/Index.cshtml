@@ -25,6 +25,11 @@
         <label for="pnid">phone number</label>
         <input type="text" class="form-control" id="pnid" name="phoneNumber" />
     </div>
+    <div class="form-group">
+        <label for="rid">Role</label>
+        @Html.DropDownList("roleIds", (MultiSelectList)ViewBag.Roles, new { multiple = "multiple", @class="form-control", @id="rid", @size="2"})
+
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">send</button>
@@ -59,7 +64,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (ViewBag.flag = true)
+        @if (ViewBag.flag == true)
         {
             @foreach (var item in Model)
             {

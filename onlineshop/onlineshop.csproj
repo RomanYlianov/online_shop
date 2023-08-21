@@ -24,6 +24,8 @@
     <Compile Remove="Data\Migrations\20230818014429_Update-Database-Structure.Designer.cs" />
     <Compile Remove="Data\Migrations\20230818122601_Update-Database-Structure.cs" />
     <Compile Remove="Data\Migrations\20230818122601_Update-Database-Structure.Designer.cs" />
+    <Compile Remove="Data\Migrations\20230819151048_UpdateDatabaseStructure.cs" />
+    <Compile Remove="Data\Migrations\20230819151048_UpdateDatabaseStructure.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

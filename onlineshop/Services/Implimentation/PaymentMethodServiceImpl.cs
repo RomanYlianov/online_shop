@@ -16,7 +16,6 @@ namespace onlineshop.Services.Implimentation
 {
     public class PaymentMethodServiceImpl : IPaymentMethodService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly IPaymentMethodMapper PMMapper;
@@ -37,20 +36,16 @@ namespace onlineshop.Services.Implimentation
             logger = logFactory.CreateLogger<PaymentMethodServiceImpl>();
         }
 
-
         public async Task<List<PaymentMethodDTO>> GetAll(ClaimsPrincipal currentUser)
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     List<PaymentMethod> list = await context.PaymentMethodsCtx.Include(p => p.User).Where(p => p.UserId.Equals(Guid.Parse(uid))).ToListAsync();
 
                     List<PaymentMethodDTO> result = new List<PaymentMethodDTO>();
@@ -90,7 +85,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : : " + message);
                     throw new HttpException<User>("GetAll", message, HttpStatusCode.InternalServerError);
                 }
-            
             }
             else
             {
@@ -98,15 +92,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetAll", message, HttpStatusCode.Forbidden);
             }
-
-            
-
-           
         }
 
         public async Task<PaymentMethodDTO> GetById(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (SINManager.IsSignedIn(currentUser))
@@ -119,7 +108,6 @@ namespace onlineshop.Services.Implimentation
 
                         if (entity != null)
                         {
-                            
                             if (CheckPermissions(currentUser, entity.UserId.ToString()))
                             {
                                 return PMMapper.ToDTO(entity);
@@ -130,8 +118,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
                             }
-
-                           
                         }
                         else
                         {
@@ -139,7 +125,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<PaymentMethod>("GetById", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -161,20 +146,16 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
             }
-           
-           
         }
 
         public async Task<PaymentMethodDTO> Add(ClaimsPrincipal currentUser, PaymentMethodDTO item)
         {
-            
             logger.LogInformation(GetType().Name + " : Add");
-            
+
             if (SINManager.IsSignedIn(currentUser))
             {
                 if (item != null)
                 {
-
                     if (currentUser != null)
                     {
                         string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -190,7 +171,6 @@ namespace onlineshop.Services.Implimentation
                         item = PMMapper.ToDTO(entity);
 
                         return item;
-
                     }
                     else
                     {
@@ -212,32 +192,24 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
             }
-
-           
         }
 
         public async Task<PaymentMethodDTO> Update(ClaimsPrincipal currentUser, PaymentMethodDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (item != null)
                 {
-
                     try
                     {
-
                         PaymentMethod entity = await context.PaymentMethodsCtx.FindAsync(Guid.Parse(item.Id));
 
                         if (entity != null)
                         {
-
                             if (CheckPermissions(currentUser, entity.UserId.ToString()))
                             {
-
                                 entity = PMMapper.ToEntity(entity, item);
 
                                 context.PaymentMethodsCtx.Update(entity);
@@ -261,7 +233,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<PaymentMethod>("Update", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -269,7 +240,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : : " + message);
                         throw new HttpException<PaymentMethod>("Update", message, HttpStatusCode.InternalServerError);
                     }
-
                 }
                 else
                 {
@@ -277,36 +247,29 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<PaymentMethod>("Update", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
-            }            
-
+            }
         }
 
         public async Task Delete(ClaimsPrincipal currentUser, string id)
         {
-            
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
-
                     try
                     {
-
                         PaymentMethod entity = await context.PaymentMethodsCtx.FindAsync(Guid.Parse(id));
 
                         if (entity != null)
                         {
-
                             if (CheckPermissions(currentUser, entity.UserId.ToString()))
                             {
                                 context.PaymentMethodsCtx.Remove(entity);
@@ -327,7 +290,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : " + message);
                         throw new HttpException<PaymentMethod>("Delete", message, HttpStatusCode.InternalServerError);
                     }
-
                 }
                 else
                 {
@@ -335,7 +297,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<PaymentMethod>("Delete", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -343,12 +304,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         private bool CheckPermissions(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : CheckPermissions");
 
             bool flag = false;
@@ -360,8 +319,6 @@ namespace onlineshop.Services.Implimentation
             }
 
             return flag;
-
         }
-       
     }
 }

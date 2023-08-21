@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace onlineshop.Models
 {
     [Table("evaluationQueue")]
     public class EvaluationQueue
     {
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
@@ -32,6 +31,5 @@ namespace onlineshop.Models
 
         [Column("is_rate_product")]
         public bool IsRateProduct { get; set; }
-
     }
 }

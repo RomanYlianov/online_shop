@@ -28,11 +28,9 @@ namespace onlineshop.Models
         [Column("rating")]
         public double Rating { get; set; }
 
-        
         [Column("description")]
         public string Description { get; set; }
 
-        public virtual List<Product> Products { get; set; } 
-
+        public virtual List<Product> Products { get; set; }
     }
 }

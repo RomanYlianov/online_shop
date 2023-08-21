@@ -176,7 +176,7 @@ namespace onlineshop.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AuthorId")
+                    b.Property<Guid?>("AuthorId")
                         .HasColumnName("user_id")
                         .HasColumnType("uniqueidentifier");
 
@@ -369,6 +369,10 @@ namespace onlineshop.Data.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnName("product_id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ProductsCount")
+                        .HasColumnName("products_count")
+                        .HasColumnType("int");
 
                     b.HasKey("OrderId", "ProductId");
 
@@ -709,9 +713,7 @@ namespace onlineshop.Data.Migrations
                 {
                     b.HasOne("onlineshop.Models.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AuthorId");
 
                     b.HasOne("onlineshop.Models.Product", "Product")
                         .WithMany("Comments")

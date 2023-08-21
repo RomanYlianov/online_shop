@@ -7,48 +7,16 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class DeliveryMethodMapperImpl : IDeliveryMethodMapper
     {
-
         private readonly ILogger logger;
 
         public DeliveryMethodMapperImpl()
         {
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
-           logger = logFactory.CreateLogger<DeliveryMethodMapperImpl>();
-        }
-
-        public DeliveryMethodDTO ToDTO(DeliveryMethod entity)
-        {
-         
-            logger.LogInformation(GetType().Name + " : convert entity to DTO");
-
-            DeliveryMethodDTO dto = new DeliveryMethodDTO();
-
-            if (entity != null)
-            {
-
-                if (entity.Id != null)
-                {
-                    dto.Id = entity.Id.ToString();
-                }
-
-                if (entity.Name != null)
-                {
-                    dto.Name = entity.Name;
-                }
-
-                if (entity.Description != null)
-                {
-                    dto.Description = entity.Description;
-                }
-
-            }
-
-            return dto;
+            logger = logFactory.CreateLogger<DeliveryMethodMapperImpl>();
         }
 
         public DeliveryMethod ToEntity(DeliveryMethodDTO dto)
         {
-            
             logger.LogInformation(GetType().Name + " : convert DTO to entity");
 
             DeliveryMethod entity = new DeliveryMethod();
@@ -57,7 +25,6 @@ namespace onlineshop.Services.Mapper.Implimentation
             {
                 if (dto != null)
                 {
-
                     if (dto.Id != null)
                     {
                         entity.Id = Guid.Parse(dto.Id);
@@ -72,7 +39,6 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.Description = dto.Description;
                     }
-
                 }
             }
             catch (FormatException ex)
@@ -80,9 +46,34 @@ namespace onlineshop.Services.Mapper.Implimentation
                 logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
             }
 
-            
-
             return entity;
+        }
+
+        public DeliveryMethodDTO ToDTO(DeliveryMethod entity)
+        {
+            logger.LogInformation(GetType().Name + " : convert entity to DTO");
+
+            DeliveryMethodDTO dto = new DeliveryMethodDTO();
+
+            if (entity != null)
+            {
+                if (entity.Id != null)
+                {
+                    dto.Id = entity.Id.ToString();
+                }
+
+                if (entity.Name != null)
+                {
+                    dto.Name = entity.Name;
+                }
+
+                if (entity.Description != null)
+                {
+                    dto.Description = entity.Description;
+                }
+            }
+
+            return dto;
         }
     }
 }

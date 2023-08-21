@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,48 +10,43 @@ using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Data;
 
 namespace onlineshop.Services.Implimentation
 {
     public class UserServiceImpl : IUserService
     {
-
         private readonly ApplicationDbContext context;
-
-        private readonly UserManager<User> manager;
-
-        private readonly SignInManager<User> SINManager;
 
         private readonly IUserMapper USmapper;
 
         private readonly IRoleMapper RMapper;
+
+        private readonly UserManager<User> USManager;
+
+        private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
         public UserServiceImpl(ApplicationDbContext context, UserManager<User> uManager, SignInManager<User> sinManeger, IUserMapper uMapper, IRoleMapper rMapper)
         {
             this.context = context;
-            this.manager = uManager;
+            this.USManager = uManager;
             this.SINManager = sinManeger;
             this.USmapper = uMapper;
             this.RMapper = rMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<UserServiceImpl>();
-
         }
-
 
         public async Task<List<UserDTO>> GetAll()
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
             List<User> list = await context.Users.ToListAsync();
@@ -63,7 +57,6 @@ namespace onlineshop.Services.Implimentation
 
             if (list != null)
             {
-
                 if (list.Count == 0)
                 {
                     message = "users entity is empty";
@@ -87,19 +80,15 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<User>("GetAll", message, HttpStatusCode.NotFound);
             }
             return result;
-
-            
         }
 
         //currentUser = this.User from controller
         public async Task<UserDTO> GetById(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
                     try
@@ -110,9 +99,6 @@ namespace onlineshop.Services.Implimentation
                         {
                             if (CheckPermissions(currentUser, entity))
                             {
-
-
-
                                 return USmapper.ToDTO(entity);
                             }
                             else
@@ -121,8 +107,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogInformation(GetType().Name + " : " + message);
                                 throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
                             }
-
-
                         }
                         else
                         {
@@ -130,7 +114,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<User>("GetById", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -145,7 +128,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("GetById", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -153,13 +135,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
             }
-
-                  
         }
 
         public async Task<UserDTO> GetByEmail(string email)
         {
-
             logger.LogInformation(GetType().Name + " : GetByEmail");
 
             if (email != null)
@@ -168,9 +147,7 @@ namespace onlineshop.Services.Implimentation
 
                 if (entity != null)
                 {
-
                     return USmapper.ToDTO(entity);
-
                 }
                 else
                 {
@@ -185,18 +162,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetByEmail", message, HttpStatusCode.BadRequest);
             }
-
         }
-     
 
         public async Task<UserDTO> Add(UserRegisterDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
             if (item != null)
             {
-
                 User entity = USmapper.ToEntity(item);
 
                 entity.PasswordHash = EncryptPassword(entity.PasswordHash);
@@ -209,15 +182,10 @@ namespace onlineshop.Services.Implimentation
 
                 await context.SaveChangesAsync();
 
-
-
                 entity = await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(entity.UserName));
-
-                
 
                 if (entity != null)
                 {
-
                     if (item.UserRoles == null)
                     {
                         Role role = await context.Roles.FirstOrDefaultAsync(r => r.NormalizedName.Equals("BUYER"));
@@ -229,7 +197,7 @@ namespace onlineshop.Services.Implimentation
                             await context.UserRoles.AddAsync(ur);
                             await context.SaveChangesAsync();
                         }
-                        //await manager.AddToRoleAsync(entity, "buyer");
+                        
                     }
                     else
                     {
@@ -242,10 +210,9 @@ namespace onlineshop.Services.Implimentation
                                 Role role = await context.Roles.FirstOrDefaultAsync(r => r.Id == Guid.Parse(rid));
                                 if (role != null)
                                 {
-
                                     UserRole ur = new UserRole(entity.Id, role.Id);
                                     urList.Add(ur);
-                                    //await manager.AddToRoleAsync(entity, role.Name);
+                                  
                                 }
                                 else
                                 {
@@ -267,7 +234,6 @@ namespace onlineshop.Services.Implimentation
                             await context.UserRoles.AddRangeAsync(urList);
                             await context.SaveChangesAsync();
                         }
-
                     }
                 }
                 else
@@ -278,7 +244,6 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return USmapper.ToDTO(entity);
-
             }
             else
             {
@@ -286,17 +251,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<Role>("Update", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<UserDTO> Update(ClaimsPrincipal currentUser, UserUpdateDTO item)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (item != null)
                 {
                     try
@@ -305,12 +267,10 @@ namespace onlineshop.Services.Implimentation
 
                         if (old != null)
                         {
-
                             User entity = await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(old.UserName)); //await manager.FindByNameAsync(old.UserName);
 
                             if (entity != null)
                             {
-
                                 if (!entity.NormalizedEmail.Equals("ROOT@MAIL.RU"))
                                 {
                                     if (CheckPermissions(currentUser, entity))
@@ -321,14 +281,11 @@ namespace onlineshop.Services.Implimentation
 
                                         entity.PasswordHash = EncryptPassword(entity.PasswordHash);
 
-                                        //var result = await manager.UpdateAsync(entity);
-
-
                                         context.Users.Update(entity);
 
                                         await context.SaveChangesAsync();
 
-                                        //get user roles 
+                                        //get user roles
 
                                         var list = await context.UserRoles.Where(ur => ur.UserId == entity.Id).ToListAsync();
 
@@ -338,7 +295,6 @@ namespace onlineshop.Services.Implimentation
 
                                         if (list != null)
                                         {
-
                                             foreach (var temp in list)
                                             {
                                                 rolesIds.Add(temp.RoleId.ToString());
@@ -347,12 +303,10 @@ namespace onlineshop.Services.Implimentation
                                             context.UserRoles.RemoveRange(list);
 
                                             await context.SaveChangesAsync();
-
                                         }
 
                                         if (rolesIds != null)
                                         {
-
                                             if (item.UserRoles != null)
                                             {
                                                 foreach (string rid in item.UserRoles)
@@ -374,9 +328,7 @@ namespace onlineshop.Services.Implimentation
                                                     }
                                                 }
                                             }
-
                                         }
-
 
                                         if (rolesIds != null)
                                         {
@@ -411,7 +363,6 @@ namespace onlineshop.Services.Implimentation
                                     logger.LogError(GetType().Name + " : " + message); ;
                                     throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
                                 }
-
                             }
                             else
                             {
@@ -419,8 +370,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<User>("Update", message, HttpStatusCode.NotFound);
                             }
-
-
                         }
                         else
                         {
@@ -442,7 +391,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Role>("Update", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -450,27 +398,22 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         public async Task Delete(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
                     try
                     {
-
                         User entity = await context.Users.FindAsync(Guid.Parse(id));
 
                         if (entity != null)
                         {
-
                             if (!entity.NormalizedEmail.Equals("ROOT@MAIL.RU"))
                             {
                                 if (CheckPermissions(currentUser, entity))
@@ -481,10 +424,8 @@ namespace onlineshop.Services.Implimentation
 
                                     if (orders != null)
                                     {
-
                                         context.OrdersCtx.RemoveRange(orders);
                                         await context.SaveChangesAsync();
-
                                     }
 
                                     context.Users.Remove(entity);
@@ -524,7 +465,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("Delete", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -532,12 +472,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         public async Task SignIn(string id, string login, LoginType type)
         {
-            
             logger.LogInformation(GetType().Name + " : SignIn");
 
             try
@@ -567,11 +505,13 @@ namespace onlineshop.Services.Implimentation
                             entity = await context.Users.FirstOrDefaultAsync(u => u.NormalizedEmail.Equals(login.ToUpper()));
                         }
                         break;
+
                     case LoginType.PhoneNumber:
                         {
                             entity = await context.Users.FirstOrDefaultAsync(u => u.PhoneNumber.Equals(login));
                         }
                         break;
+
                     case LoginType.UserName:
                         {
                             entity = await context.Users.FirstOrDefaultAsync(u => u.NormalizedUserName.Equals(login.ToUpper()));
@@ -588,39 +528,17 @@ namespace onlineshop.Services.Implimentation
             {
                 throw ex;
             }
-
         }
-
-        
 
         public async Task SignOut()
         {
-
             logger.LogInformation(GetType().Name + " : SignOut");
 
             await SINManager.SignOutAsync();
         }
 
-
-        //public async Task<User> GetUserEntity(string email)
-        //{
-        //    return await context.Users.FirstOrDefaultAsync(u => email.Equals(email));
-        //}
-
-        //public async Task<UserDTO> AddUserToRole(ClaimsPrincipal currentUser, string email, string role)
-        //{
-
-        //     throw new System.NotImplementedException();
-        //}
-
-        //public async Task<UserDTO> RemoveUserDromRole(ClaimsPrincipal currentUser, string email, string role)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
-
         public async Task<List<RoleDTO>> GetRolesForUser(string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetRolesForUser");
 
             List<RoleDTO> result = new List<RoleDTO>();
@@ -633,8 +551,7 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-
-                        var roles = await manager.GetRolesAsync(entity);
+                        var roles = await USManager.GetRolesAsync(entity);
                         foreach (string role in roles)
                         {
                             Role item = await context.Roles.FirstOrDefaultAsync(r => r.Name.Equals(role));
@@ -644,7 +561,6 @@ namespace onlineshop.Services.Implimentation
                                 result.Add(RMapper.ToDTO(item));
                             }
                         }
-
                     }
                     else
                     {
@@ -659,8 +575,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Role>("Delete", message, HttpStatusCode.InternalServerError);
                 }
-              
-
             }
             else
             {
@@ -674,12 +588,10 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null)
         {
-
             logger.LogInformation(GetType().Name + " : CheckEmail");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 bool flag = false;
 
                 if (email != null)
@@ -690,7 +602,6 @@ namespace onlineshop.Services.Implimentation
                     {
                         if (CheckPermissions(currentUser, entity))
                         {
-
                             if (modifyId != null)
                             {
                                 if (!entity.Id.ToString().Equals(modifyId))
@@ -702,7 +613,6 @@ namespace onlineshop.Services.Implimentation
                             {
                                 flag = true;
                             }
-
                         }
                         else
                         {
@@ -710,7 +620,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogInformation(GetType().Name + " : " + message);
 
                             flag = false;
-
                         }
                     }
                     else
@@ -718,7 +627,6 @@ namespace onlineshop.Services.Implimentation
                         string message = "user with Email " + email + " was not found";
                         logger.LogInformation(GetType().Name + " : " + message);
                         flag = false;
-
                     }
                 }
                 else
@@ -729,7 +637,6 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return flag;
-
             }
             else
             {
@@ -737,17 +644,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("CheckEmail", message, HttpStatusCode.Forbidden);
             }
-            
         }
 
         public async Task<bool> CheckUserName(ClaimsPrincipal currentUser, string uName, string modifyId = null)
         {
-
             logger.LogInformation(GetType().Name + " : CheckUserName");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 bool flag = false;
 
                 if (uName != null)
@@ -776,7 +680,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogInformation(GetType().Name + " : " + message);
 
                             flag = false;
-
                         }
                     }
                     else
@@ -785,7 +688,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogInformation(GetType().Name + " : " + message);
 
                         flag = false;
-
                     }
                 }
                 else
@@ -796,7 +698,6 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return flag;
-
             }
             else
             {
@@ -804,18 +705,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("CheckUserName", message, HttpStatusCode.Forbidden);
             }
-
-            
-
         }
 
-        public async Task<bool> CheckPhone(ClaimsPrincipal currentUser, string phone, string modifyId = null)
+        public async Task<bool> CheckPhoneNumber(ClaimsPrincipal currentUser, string phone, string modifyId = null)
         {
             logger.LogInformation(GetType().Name + " : ChecPhoneNumber");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 bool flag = false;
 
                 if (phone != null)
@@ -844,7 +741,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogInformation(GetType().Name + " : " + message);
 
                             flag = false;
-
                         }
                     }
                     else
@@ -853,7 +749,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogInformation(GetType().Name + " : " + message);
 
                         flag = false;
-
                     }
                 }
                 else
@@ -864,7 +759,6 @@ namespace onlineshop.Services.Implimentation
                 }
 
                 return flag;
-
             }
             else
             {
@@ -872,13 +766,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("CheckPhone", message, HttpStatusCode.Forbidden);
             }
-
-           
         }
 
         public async Task<UserDTO> CheckUser(UserLoginDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : CheckUser");
 
             if (dto != null)
@@ -892,11 +783,13 @@ namespace onlineshop.Services.Implimentation
                             entity = await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(dto.Login));
                         }
                         break;
+
                     case LoginType.PhoneNumber:
                         {
                             entity = await context.Users.FirstOrDefaultAsync(u => u.PhoneNumber.Equals(dto.Login));
                         }
                         break;
+
                     case LoginType.UserName:
                         {
                             entity = await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(dto.Login));
@@ -921,22 +814,17 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("CheckUser", message, HttpStatusCode.BadRequest);
             }
-
         }
 
         public async Task<List<UserDTO>> FindByEmail(ClaimsPrincipal currentUser, string email)
         {
-
             logger.LogInformation(GetType().Name + " : FindByEmail");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (email != null)
                 {
                     List<User> list = await context.Users.Where(u => u.NormalizedEmail.Contains(email.ToUpper())).ToListAsync();
-
-
 
                     string message = string.Empty;
 
@@ -954,7 +842,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (string.IsNullOrEmpty(message))
                     {
-
                         List<UserDTO> result = new List<UserDTO>();
 
                         if (currentUser != null)
@@ -987,7 +874,6 @@ namespace onlineshop.Services.Implimentation
                             {
                                 return result;
                             }
-
                         }
                         else
                         {
@@ -1008,7 +894,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("FindByEmail", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -1016,19 +901,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("FindByEmail", message, HttpStatusCode.Forbidden);
             }
-
-            
         }
 
         public async Task<List<UserDTO>> FindByUserName(ClaimsPrincipal currentUser, string uName)
         {
-
-
             logger.LogInformation(GetType().Name + " : FindByUserName");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (uName != null)
                 {
                     List<User> list = await context.Users.Where(u => u.NormalizedUserName.Contains(uName.ToUpper())).ToListAsync();
@@ -1049,7 +929,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (string.IsNullOrEmpty(message))
                     {
-
                         List<UserDTO> result = new List<UserDTO>();
 
                         if (currentUser != null)
@@ -1082,7 +961,6 @@ namespace onlineshop.Services.Implimentation
                             {
                                 return result;
                             }
-
                         }
                         else
                         {
@@ -1090,9 +968,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogInformation(GetType().Name + " : " + message);
                             throw new HttpException<User>("FindByUserName", message, HttpStatusCode.Forbidden);
                         }
-
-
-
                     }
                     else
                     {
@@ -1106,25 +981,21 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("FindByUserName", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("FindByUserName", message, HttpStatusCode.Forbidden);
-            }           
-
+            }
         }
 
         public async Task<List<UserDTO>> FindByPhoneNumber(ClaimsPrincipal currentUser, string phone)
         {
-
             logger.LogInformation(GetType().Name + " : FindByPhoneNumber");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (phone != null)
                 {
                     List<User> list = await context.Users.Where(u => u.PhoneNumber.Contains(phone)).ToListAsync();
@@ -1145,7 +1016,6 @@ namespace onlineshop.Services.Implimentation
 
                     if (string.IsNullOrEmpty(message))
                     {
-
                         List<UserDTO> result = new List<UserDTO>();
 
                         if (currentUser != null)
@@ -1198,7 +1068,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<User>("FindByPhoneNumber", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -1206,24 +1075,18 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("FindByPhoneNumber", message, HttpStatusCode.Forbidden);
             }
-
-           
-
         }
 
         public async Task<UserDTO> ResetPassword(UserResetPasswordDTO dto)
         {
-
             logger.LogInformation(GetType().Name + ": ResetPassword");
 
-            if (dto!= null)
+            if (dto != null)
             {
                 User entity = await context.Users.FirstOrDefaultAsync(u => u.NormalizedUserName.Equals(dto.UserName.ToUpper()));
 
                 if (entity != null)
                 {
-                    
-
                     if (!entity.UserName.Equals(dto.UserName))
                     {
                         string message = "UserName field doesn't match";
@@ -1242,14 +1105,10 @@ namespace onlineshop.Services.Implimentation
 
                     context.Users.Update(entity);
 
-                    await context.SaveChangesAsync();
-
-                    //await manager.UpdateAsync(entity);
+                    await context.SaveChangesAsync();                 
 
                     return USmapper.ToDTO(entity);
-
-                    //await manager.ResetPasswordAsync(entity, null, )
-
+                   
                 }
                 else
                 {
@@ -1268,17 +1127,14 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<UserDTO>> Search(UserSearchDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Search");
 
             if (dto != null)
             {
-
                 List<User> list = new List<User>();
 
                 if (!string.IsNullOrEmpty(dto.UserName))
                 {
-
                     logger.LogInformation(GetType().Name + " : #0 - search by UserName parameter (is main)");
 
                     list = await context.Users.Where(u => u.NormalizedUserName.Contains(dto.UserName.ToUpper())).ToListAsync();
@@ -1323,6 +1179,38 @@ namespace onlineshop.Services.Implimentation
 
                     list = temp;
                 }
+                if (dto.RoleIds != null)
+                {
+                    logger.LogInformation(GetType().Name + " : #2 - search by PhoneNumber parameter");
+
+                    List<User> temp = new List<User>();
+
+                    foreach (var item in list)
+                    {
+                        List<RoleDTO> userRoles = await GetRolesForUser(item.Id.ToString());
+
+                        bool flag = false;
+
+                        foreach (var uRole in userRoles)
+                        {
+                            foreach (var rid in dto.RoleIds)
+                            {
+                                if (uRole.Id.Equals(rid))
+                                {
+                                    temp.Add(item);
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            if (flag)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    list = temp;
+                }
 
                 if (list.Count > 0)
                 {
@@ -1341,7 +1229,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + mesage);
                     throw new HttpException<User>("Search", mesage, HttpStatusCode.NotFound);
                 }
-
             }
             else
             {
@@ -1349,17 +1236,14 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Search", message, HttpStatusCode.BadRequest);
             }
-
         }
 
-        public string  EncryptPassword(string password)
+        public string EncryptPassword(string password)
         {
-
             logger.LogInformation(GetType().Name + " : EncryptPassword");
 
             if (password != null)
             {
-
                 string encryptPass = GetEncryptPassword(password);
 
                 return encryptPass;
@@ -1370,13 +1254,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("EncryptPassword", message, HttpStatusCode.BadRequest);
             }
-
         }
 
-
-        public bool ValidatePassword (string hash, string password)
+        public bool ValidatePassword(string hash, string password)
         {
-
             logger.LogInformation(GetType().Name + " : ValidatePassword");
 
             if (string.IsNullOrEmpty(hash))
@@ -1400,7 +1281,6 @@ namespace onlineshop.Services.Implimentation
 
         private string GetEncryptPassword(string password)
         {
-
             byte[] salt = new byte[128 / 8];
 
             using (var rng = RandomNumberGenerator.Create())
@@ -1415,14 +1295,12 @@ namespace onlineshop.Services.Implimentation
 
         private bool CheckPermissions(ClaimsPrincipal currentUser, User user)
         {
-
             logger.LogInformation(GetType().Name + " : CheckPermissions");
 
             bool flag = false;
 
             if (currentUser != null && user != null)
             {
-
                 string cUserName = currentUser.FindFirstValue(ClaimTypes.Name);
 
                 flag = currentUser.IsInRole("ADMIN") || currentUser.IsInRole("OWNER") || user.UserName.Equals(cUserName);
@@ -1433,21 +1311,18 @@ namespace onlineshop.Services.Implimentation
 
         private string GenerateKeyWord()
         {
-            
             logger.LogInformation(GetType().Name + " : GenerateKeyWord");
 
             string key = "";
 
             Random random = new Random();
 
-            for (int i=0; i<4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 key += random.Next(10).ToString();
             }
 
             return key;
         }
-
-       
     }
 }

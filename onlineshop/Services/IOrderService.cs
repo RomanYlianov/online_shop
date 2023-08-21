@@ -7,7 +7,6 @@ namespace onlineshop.Services
 {
     public interface IOrderService
     {
-
         Task<List<OrderDTO>> GetAll();
 
         Task<List<OrderDTO>> GetOrdersForUser(ClaimsPrincipal currentUser);
@@ -25,6 +24,5 @@ namespace onlineshop.Services
         Task Delete(ClaimsPrincipal currentUser, string id, List<ProductDTO> products);
 
         Task<OrderDTO> InicializeOrder(ClaimsPrincipal currentUser, List<string> basketIds, List<int> productCounts);
-
     }
 }

@@ -8,6 +8,5 @@ namespace onlineshop.Services.Mapper
         Event ToEntity(EventDTO dto);
 
         EventDTO ToDTO(Event entity);
-
     }
 }

@@ -14,7 +14,6 @@ namespace onlineshop.Controllers
     [Route("supplerfirms")]
     public class SupplerFirmsController : Controller
     {
-
         private readonly ISupplerFirmService SFService;
 
         private readonly IBasketService BService;
@@ -31,13 +30,11 @@ namespace onlineshop.Controllers
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<SupplerFirmsController>();
-                 
         }
 
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             await Inicialize();
@@ -63,7 +60,6 @@ namespace onlineshop.Controllers
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -84,7 +80,6 @@ namespace onlineshop.Controllers
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
-
             logger.LogInformation(GetType().Name + " : Create (GET)");
 
             await Inicialize();
@@ -100,7 +95,6 @@ namespace onlineshop.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create(SupplerFirmDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Create (POST)");
 
             await Inicialize();
@@ -113,11 +107,8 @@ namespace onlineshop.Controllers
 
             if (ModelState.IsValid)
             {
-                
-
                 if (Validate(dto))
                 {
-
                     ModelState.Clear();
 
                     try
@@ -130,7 +121,6 @@ namespace onlineshop.Controllers
                     {
                         return ExceptionHandler(ex.Message, ex.Code);
                     }
-
                 }
                 else
                 {
@@ -148,7 +138,6 @@ namespace onlineshop.Controllers
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (GET)");
 
             await Inicialize();
@@ -157,14 +146,11 @@ namespace onlineshop.Controllers
             {
                 SupplerFirmDTO dto = await SFService.GetById(id);
 
-
-
                 List<SelectListItem> items = InitSelectList(dto.Country);
 
                 ViewBag.Countries = new SelectList(items, "Value", "Text");
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.SupplerFirm> ex)
             {
@@ -176,7 +162,6 @@ namespace onlineshop.Controllers
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, SupplerFirmDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Edit (POST)");
 
             await Inicialize();
@@ -187,10 +172,8 @@ namespace onlineshop.Controllers
 
             if (ModelState.IsValid)
             {
-
                 if (Validate(dto))
                 {
-
                     ModelState.Clear();
 
                     try
@@ -203,40 +186,32 @@ namespace onlineshop.Controllers
                     {
                         return ExceptionHandler(ex.Message, ex.Code);
                     }
-
-
                 }
                 else
                 {
                     ModelState.AddModelError("Name", "supplerfirm with name \"root supplerfirm\" not allowed");
                     return View();
                 }
-
-                
             }
             else
             {
                 return View();
             }
-
         }
 
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (GET)");
 
             await Inicialize();
 
             try
             {
-
                 SupplerFirmDTO dto = await SFService.GetById(id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.SupplerFirm> ex)
             {
@@ -248,10 +223,7 @@ namespace onlineshop.Controllers
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, SupplerFirmDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Delete (POST)");
-
-          
 
             try
             {
@@ -263,13 +235,10 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
-
         }
 
         private List<SelectListItem> InitSelectList(string selected = null)
         {
-
             logger.LogInformation(GetType().Name + " : InitSelectList");
 
             List<string> countries = CService.GetCountriesList();
@@ -288,7 +257,6 @@ namespace onlineshop.Controllers
                     {
                         items.Add(new SelectListItem(text: item, value: item));
                     }
-                   
                 }
             }
             else
@@ -300,12 +268,10 @@ namespace onlineshop.Controllers
             }
 
             return items;
+        }
 
-        }      
-
-        bool Validate(SupplerFirmDTO dto)
+        private bool Validate(SupplerFirmDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Validate");
 
             bool flag = !dto.Name.Equals("root supplerfirm");
@@ -314,21 +280,18 @@ namespace onlineshop.Controllers
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -352,7 +315,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -369,31 +331,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

@@ -4,8 +4,6 @@ namespace onlineshop.Services
 {
     public interface ICountryService
     {
-
         List<string> GetCountriesList();
-
     }
 }

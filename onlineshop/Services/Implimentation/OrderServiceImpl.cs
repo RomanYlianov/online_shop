@@ -17,35 +17,32 @@ namespace onlineshop.Services.Implimentation
 {
     public class OrderServiceImpl : IOrderService
     {
-
         private readonly ApplicationDbContext context;
 
         private readonly IOrderMapper OMapper;
 
         private readonly IBasketService BService;
 
-        private readonly IProductService PService;
+        private readonly IUserService UService;
 
         private readonly IProductMapper PMapper;
-
-        private readonly IUserService UService;
 
         private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
-        public OrderServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketService bService,IProductService pService, IUserService uService ,IOrderMapper oMapper, IProductMapper pMapper)
+        public OrderServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketService bService, IUserService uService, IOrderMapper oMapper, IProductMapper pMapper)
         {
+            this.context = context;
 
             this.SINManager = sINManager;
 
-            this.context = context;
-
             this.UService = uService;
-            this.PService = pService;
+
             this.BService = bService;
 
             this.OMapper = oMapper;
+
             this.PMapper = pMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -54,7 +51,6 @@ namespace onlineshop.Services.Implimentation
 
         public async Task<List<OrderDTO>> GetAll()
         {
-
             logger.LogInformation(GetType().Name + " : GetAll");
 
             List<Order> list = await context.OrdersCtx.Include(o => o.Buyer).Include(o => o.DeliveryMethod).Include(o => o.PaymentMethod).ToListAsync();
@@ -63,34 +59,29 @@ namespace onlineshop.Services.Implimentation
 
             try
             {
-               result = await InitOrderList(list);
-
+                result = await InitOrderList(list);
             }
             catch (HttpException<Order> ex)
             {
                 throw ex;
             }
-            
 
             return result;
         }
 
         public async Task<List<OrderDTO>> GetOrdersForUser(ClaimsPrincipal currentUser)
         {
-
             logger.LogInformation(GetType().Name + " : GetOrdersForUser");
 
             List<OrderDTO> result = new List<OrderDTO>();
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 List<Order> list = await context.OrdersCtx.Include(o => o.Buyer).Include(o => o.DeliveryMethod).Include(o => o.PaymentMethod).Where(o => o.BuyerId.Equals(Guid.Parse(uid))).ToListAsync();
 
                 result = await InitOrderList(list);
-
             }
             else
             {
@@ -100,17 +91,14 @@ namespace onlineshop.Services.Implimentation
             }
 
             return result;
-
         }
 
         public async Task<List<OrderDTO>> Search(ClaimsPrincipal currentUser, OrderSearchDTO dto)
         {
-
             logger.LogInformation(GetType().Name + " : Search");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (dto != null)
                 {
                     List<Order> list = new List<Order>();
@@ -120,22 +108,17 @@ namespace onlineshop.Services.Implimentation
                         logger.LogInformation(GetType().Name + " : #0 - search by Cipher parameter (is main) ");
 
                         list = await context.OrdersCtx.Include(o => o.Buyer).Include(o => o.DeliveryMethod).Include(o => o.PaymentMethod).Where(o => o.Cipher.Contains(dto.Cipher)).ToListAsync();
-
                     }
                     else
                     {
                         logger.LogInformation(GetType().Name + " : #0 - get all records (is main)");
 
                         list = await context.OrdersCtx.Include(o => o.Buyer).Include(o => o.DeliveryMethod).Include(o => o.PaymentMethod).ToListAsync();
-
                     }
-
-
 
                     //working for seller/admin
                     if (!string.IsNullOrEmpty(dto.BuyerEmail))
                     {
-
                         logger.LogInformation(GetType().Name + " : #1 search by BuyerEmail");
 
                         if (currentUser.IsInRole("SELLER") || currentUser.IsInRole("OWNER"))
@@ -151,7 +134,6 @@ namespace onlineshop.Services.Implimentation
                             }
 
                             list = temp;
-
                         }
                         else
                         {
@@ -159,12 +141,10 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<User>("Search", message, HttpStatusCode.Forbidden);
                         }
-
                     }
 
                     if (!string.IsNullOrEmpty(dto.DeliveryMethodId))
                     {
-
                         logger.LogInformation(GetType().Name + " : #2 - search by DeliveryMethodName parameter");
 
                         List<Order> temp = new List<Order>();
@@ -178,12 +158,10 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         list = temp;
-
                     }
 
                     if (dto.PaymentType != null)
                     {
-
                         logger.LogInformation(GetType().Name + " : #3 - search by PaymentTypeName");
 
                         List<Order> temp = new List<Order>();
@@ -194,16 +172,13 @@ namespace onlineshop.Services.Implimentation
                             {
                                 temp.Add(item);
                             }
-                            
                         }
 
                         list = temp;
-
                     }
 
                     if (dto.OrderStatus != null)
                     {
-
                         logger.LogInformation(GetType().Name + " : #4 - serach by OrderStatus parameter");
 
                         List<Order> temp = new List<Order>();
@@ -217,12 +192,10 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         list = temp;
-
                     }
 
                     if (dto.CreationTimeStart != null)
                     {
-
                         logger.LogInformation(GetType().Name + " : #5 - search by CreationTimeStart parameter");
 
                         List<Order> temp = new List<Order>();
@@ -236,12 +209,10 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         list = temp;
-
                     }
 
                     if (dto.CreationTimeEnd != null)
                     {
-
                         logger.LogInformation(GetType().Name + " : #6 - search by CreationTimeEnd parameter");
 
                         List<Order> temp = new List<Order>();
@@ -255,7 +226,6 @@ namespace onlineshop.Services.Implimentation
                         }
 
                         list = temp;
-
                     }
 
                     if (list.Count > 0)
@@ -282,55 +252,43 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Order>("Search", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Search", message, HttpStatusCode.Forbidden);
-            }           
-
+            }
         }
 
         public async Task<List<ProductDTO>> GetProductsFromOrder(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetProductsFromOrder");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
-
                     List<ProductDTO> list = new List<ProductDTO>();
 
                     try
                     {
-
                         Order entity = await context.OrdersCtx.FindAsync(Guid.Parse(id));
 
                         if (entity != null)
                         {
-
                             string message = string.Empty;
 
                             if (CheckPermissions(currentUser, id))
                             {
-
                                 List<OrderProduct> opList = await context.OrderProductCtx.Where(op => op.OrderId.Equals(entity.Id)).ToListAsync();
-
-
 
                                 if (opList != null)
                                 {
-
                                     if (opList.Count == 0)
                                     {
                                         message = "OrderProduct entity is not contains sought rows";
                                     }
-
                                 }
                                 else
                                 {
@@ -344,7 +302,6 @@ namespace onlineshop.Services.Implimentation
                                         Product pEntity = await context.ProductsCtx.Include(p => p.SupplerFirm).Include(p => p.Category).Where(p => p.Id.Equals(item.ProductId)).FirstOrDefaultAsync();
                                         pEntity.CountThis = item.ProductsCount;
                                         list.Add(PMapper.ToDTO(pEntity));
-
                                     }
                                 }
                                 else
@@ -352,7 +309,6 @@ namespace onlineshop.Services.Implimentation
                                     logger.LogError(GetType().Name + " : " + message);
                                     throw new HttpException<Order>("GetProductsFromOrder", message, HttpStatusCode.NotFound);
                                 }
-
                             }
                             else
                             {
@@ -360,8 +316,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Order>("GetProductsFromOrder", message, HttpStatusCode.Forbidden);
                             }
-
-                            
                         }
                         else
                         {
@@ -369,7 +323,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Order>("GetProductsFromOrder", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -379,7 +332,6 @@ namespace onlineshop.Services.Implimentation
                     }
 
                     return list;
-
                 }
                 else
                 {
@@ -387,7 +339,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Order>("GetProductsFromOrder", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
@@ -395,31 +346,24 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetProductsFromOrder", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         public async Task<OrderDTO> GetById(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : GetById");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 if (id != null)
                 {
-
                     try
                     {
-
                         Order entity = await context.OrdersCtx.Include(o => o.Buyer).Include(o => o.DeliveryMethod).Include(o => o.PaymentMethod).Where(o => o.Id.Equals(Guid.Parse(id))).FirstOrDefaultAsync();
 
                         if (entity != null)
                         {
                             if (CheckPermissions(currentUser, entity.BuyerId.ToString()))
                             {
-                                
-
                                 List<OrderProduct> temp = await context.OrderProductCtx.Include(op => op.Product).Where(op => op.OrderId.Equals(entity.Id)).ToListAsync();
 
                                 List<ProductDTO> products = new List<ProductDTO>();
@@ -432,7 +376,6 @@ namespace onlineshop.Services.Implimentation
                                         {
                                             products.Add(PMapper.ToDTO(opEntity.Product));
                                         }
-                                      
                                     }
                                 }
 
@@ -448,17 +391,13 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Order>("getById", message, HttpStatusCode.Forbidden);
                             }
-
                         }
                         else
                         {
-
                             string message = "order with id " + id + " was not foud";
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Order>("GetById", message, HttpStatusCode.NotFound);
-
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -473,25 +412,21 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Order>("GetById", message, HttpStatusCode.BadRequest);
                 }
-
             }
             else
             {
                 string message = "user is not authorized";
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("GetById", message, HttpStatusCode.Forbidden);
-            }           
-
+            }
         }
 
         public async Task<OrderDTO> Add(ClaimsPrincipal currentUser, OrderDTO item, List<string> basketIds, List<int> productCounts)
         {
-
             logger.LogInformation(GetType().Name + " : Add");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string message = string.Empty;
 
                 if (basketIds != null && productCounts != null)
@@ -515,20 +450,14 @@ namespace onlineshop.Services.Implimentation
 
                 if (string.IsNullOrEmpty(message))
                 {
-
                     try
                     {
-
                         if (item != null)
                         {
-
                             string oid = string.Empty;
-
-
 
                             for (int i = 0; i < basketIds.Count; i++)
                             {
-
                                 string bid = basketIds[i];
                                 int pCount = productCounts[i];
 
@@ -541,7 +470,6 @@ namespace onlineshop.Services.Implimentation
                                 {
                                     Order entity = OMapper.ToEntity(item);
 
-
                                     entity.Cipher = GenerateOrderCipher();
                                     entity.CreationTime = DateTime.Now;
 
@@ -552,8 +480,7 @@ namespace onlineshop.Services.Implimentation
 
                                     context.Entry(entity).State = EntityState.Added;
                                     await context.Set<Order>().AddAsync(entity);
-
-                                    //await context.OrdersCtx.AddAsync(entity);
+                                    
 
                                     await context.SaveChangesAsync();
 
@@ -572,32 +499,28 @@ namespace onlineshop.Services.Implimentation
 
                                 context.Set<Product>().Update(pEntity);
 
-
-                                //context.ProductsCtx.Update(pEntity);
+                                
                                 await context.SaveChangesAsync();
 
                                 //уменьшить количество в строке сущности "корзина" или удалить запись, если количество равно 0
 
                                 if (pCount - bEntity.Count > 0)
                                 {
-
                                     bEntity.Count -= pCount;
 
                                     context.Entry(bEntity).State = EntityState.Detached;
 
                                     context.Set<Basket>().Update(bEntity);
 
-                                    //context.BasketCtx.Update(bEntity);
+                                    
                                     await context.SaveChangesAsync();
-
                                 }
                                 else
                                 {
                                     context.Entry(bEntity).State = EntityState.Deleted;
                                     context.Set<Basket>().Remove(bEntity);
-                                   // context.BasketCtx.Remove(bEntity);
+                                    
                                     await context.SaveChangesAsync();
-
                                 }
 
                                 //в сущность OrderProduct добавить записи: id товара и id заказа
@@ -608,14 +531,11 @@ namespace onlineshop.Services.Implimentation
                                 opEntity.ProductsCount = pCount;
                                 context.Entry(opEntity).State = EntityState.Added;
                                 await context.Set<OrderProduct>().AddAsync(opEntity);
-
-                                //await context.OrderProductCtx.AddAsync(opEntity);
+                                
                                 await context.SaveChangesAsync();
-
                             }
 
                             return item;
-
                         }
                         else
                         {
@@ -623,7 +543,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Order>("Add", message, HttpStatusCode.BadRequest);
                         }
-
                     }
                     catch (HttpException<Product> ex)
                     {
@@ -637,16 +556,12 @@ namespace onlineshop.Services.Implimentation
                     {
                         throw ex;
                     }
-
                 }
                 else
                 {
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Order>("Add", message, HttpStatusCode.BadRequest);
                 }
-
-
-               
             }
             else
             {
@@ -654,33 +569,27 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Add", message, HttpStatusCode.Forbidden);
             }
-
         }
 
         //buyer can edit rating, seller | owner - orderstatus
         public async Task<OrderDTO> Update(ClaimsPrincipal currentUser, OrderDTO item, bool iSRoot = false)
         {
-
             logger.LogInformation(GetType().Name + " : Update");
 
             if (SINManager.IsSignedIn(currentUser))
             {
                 if (item != null)
                 {
-
-                    
-
                     try
                     {
                         Order entity = await context.OrdersCtx.FindAsync(Guid.Parse(item.Id));
 
                         if (entity != null)
                         {
-                            //entity = OMapper.ToEntity(entity, item);
+                          
 
                             if (CheckPermissions(currentUser, item.Id))
                             {
-
                                 if (!iSRoot)
                                 {
                                     if (entity.Mark == 0)
@@ -693,7 +602,6 @@ namespace onlineshop.Services.Implimentation
                                         logger.LogError(GetType().Name + " : " + message);
                                         throw new HttpException<Order>("Update", message, HttpStatusCode.Forbidden);
                                     }
-
                                 }
 
                                 if (currentUser.IsInRole("SELLER") || currentUser.IsInRole("OWNER"))
@@ -702,20 +610,16 @@ namespace onlineshop.Services.Implimentation
                                     {
                                         entity.OrderStatus = item.OrderStatus.Value;
                                     }
-                                    
                                 }
 
                                 context.Entry(entity).State = EntityState.Detached;
                                 context.Set<Order>().Update(entity);
-
-                               
 
                                 await context.SaveChangesAsync();
 
                                 item = OMapper.ToDTO(entity);
 
                                 return item;
-
                             }
                             else
                             {
@@ -723,9 +627,6 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Order>("Update", message, HttpStatusCode.Forbidden);
                             }
-
-                           
-
                         }
                         else
                         {
@@ -733,7 +634,6 @@ namespace onlineshop.Services.Implimentation
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Order>("Update", message, HttpStatusCode.NotFound);
                         }
-
                     }
                     catch (FormatException ex)
                     {
@@ -741,7 +641,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name + " : : " + message);
                         throw new HttpException<Order>("Update", message, HttpStatusCode.InternalServerError);
                     }
-
                 }
                 else
                 {
@@ -756,34 +655,28 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
             }
-
         }
 
-        public async Task Delete(ClaimsPrincipal currentUser, string id,  List<ProductDTO> products)
+        public async Task Delete(ClaimsPrincipal currentUser, string id, List<ProductDTO> products)
         {
-
             logger.LogInformation(GetType().Name + " : Delete");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 Guid oid;
 
                 string message = string.Empty;
 
                 try
                 {
-
                     oid = Guid.Parse(id);
 
                     Order oEntity = await context.OrdersCtx.FindAsync(oid);
 
                     if (oEntity != null)
                     {
-
                         if (oEntity.CreationTime.AddDays(90) >= DateTime.Now)
                         {
-
                             if (products != null)
                             {
                                 if (products.Count == 0)
@@ -796,19 +689,14 @@ namespace onlineshop.Services.Implimentation
                                 message = "products parameter is mandatory";
                             }
 
-                            
-
                             if (string.IsNullOrEmpty(message))
                             {
-
                                 string pid = string.Empty;
 
                                 try
                                 {
-
                                     for (int i = 0; i < products.Count; i++)
                                     {
-
                                         pid = products[i].Id;
                                         int count = products[i].CountThis;
 
@@ -816,17 +704,14 @@ namespace onlineshop.Services.Implimentation
 
                                         if (opEntity.ProductsCount > count)
                                         {
-
                                             message = "You cannot return more items than ordered";
                                             logger.LogError(GetType().Name + " : " + message);
                                             throw new HttpException<Order>("Delete", message, HttpStatusCode.InternalServerError);
-
-                                        }                                       
+                                        }
                                     }
 
                                     for (int i = 0; i < products.Count; i++)
                                     {
-
                                         pid = products[i].Id;
                                         int count = products[i].CountThis;
 
@@ -836,7 +721,6 @@ namespace onlineshop.Services.Implimentation
 
                                             if (entity != null)
                                             {
-
                                                 //вернули количество товаров
                                                 entity.CountThis += count;
 
@@ -851,8 +735,6 @@ namespace onlineshop.Services.Implimentation
 
                                                 if (opEntity != null)
                                                 {
-
-
                                                     if (opEntity.ProductsCount == count)
                                                     {
                                                         context.Entry(opEntity).State = EntityState.Deleted;
@@ -863,13 +745,9 @@ namespace onlineshop.Services.Implimentation
                                                         opEntity.ProductsCount -= count;
                                                         context.Entry(opEntity).State = EntityState.Detached;
                                                         context.Set<OrderProduct>().Update(opEntity);
-
                                                     }
 
                                                     await context.SaveChangesAsync();
-
-
-
                                                 }
                                                 else
                                                 {
@@ -877,7 +755,6 @@ namespace onlineshop.Services.Implimentation
                                                     logger.LogWarning(GetType().Name + " : " + message);
                                                     //уведомить о неуспешной попытке найти запись в служебной сущности
                                                 }
-
                                             }
                                             else
                                             {
@@ -885,14 +762,12 @@ namespace onlineshop.Services.Implimentation
                                                 logger.LogWarning(GetType().Name + " : " + message);
                                                 //уведомить о неуспешной попытке найти товар
                                             }
-
                                         }
                                         catch (FormatException ex)
                                         {
                                             ExceptionHandler(pid, ex.Message);
-                                            //уведомить о неуспешном возвращении товара 
+                                            //уведомить о неуспешном возвращении товара
                                         }
-
                                     }
 
                                     //проверить, имеет ли заказ товары, если нет - удалить
@@ -912,46 +787,30 @@ namespace onlineshop.Services.Implimentation
 
                                     if (isNeedToRemove)
                                     {
-
                                         context.Entry(oEntity).State = EntityState.Deleted;
                                         context.Set<Order>().Remove(oEntity);
 
-
-
                                         await context.SaveChangesAsync();
-
                                     }
-
-
-
                                 }
                                 catch (FormatException ex)
                                 {
-                                     ExceptionHandler(pid, ex.Message);
-                                    //уведомить о неуспешном возвращении товара 
+                                    ExceptionHandler(pid, ex.Message);
+                                    //уведомить о неуспешном возвращении товара
                                 }
-
-
-
-
-
-
                             }
                             else
                             {
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Order>("Delete", message, HttpStatusCode.BadRequest);
                             }
-
                         }
                         else
                         {
                             message = "Orders can be returned within 90 days";
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Order>("Delete", message, HttpStatusCode.Forbidden);
-                            
                         }
-
                     }
                     else
                     {
@@ -959,7 +818,6 @@ namespace onlineshop.Services.Implimentation
                         logger.LogError(GetType().Name);
                         throw new HttpException<Order>("Delete", message, HttpStatusCode.BadRequest);
                     }
-
                 }
                 catch (FormatException ex)
                 {
@@ -967,7 +825,6 @@ namespace onlineshop.Services.Implimentation
                     logger.LogError(GetType().Name + " : : " + message);
                     throw new HttpException<Order>("Delete", message, HttpStatusCode.InternalServerError);
                 }
-
             }
             else
             {
@@ -981,17 +838,14 @@ namespace onlineshop.Services.Implimentation
                 message = "convert id " + pid + " failed : " + message;
                 logger.LogWarning(GetType().Name + " : " + message);
             }
-
         }
 
         public async Task<OrderDTO> InicializeOrder(ClaimsPrincipal currentUser, List<string> basketIds, List<int> productCounts)
         {
-
             logger.LogInformation(GetType().Name + " : InicializeOrder");
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string message = string.Empty;
 
                 if (basketIds != null && productCounts != null)
@@ -1011,37 +865,32 @@ namespace onlineshop.Services.Implimentation
                 else
                 {
                     message = "basketIds and productCounts parameters are required";
-                }               
+                }
 
                 if (string.IsNullOrEmpty(message))
                 {
-
                     OrderDTO dto = new OrderDTO();
 
                     int count = 0;
 
                     double price = 0;
 
-                    List<ProductDTO> products = new List<ProductDTO>();                  
+                    List<ProductDTO> products = new List<ProductDTO>();
 
                     try
                     {
-
-                        for (int i=0; i<basketIds.Count; i++)
+                        for (int i = 0; i < basketIds.Count; i++)
                         {
-                            
                             string bid = basketIds[i];
 
                             BasketDTO basketDTO = await BService.GetById(currentUser, bid);
 
                             if (basketDTO != null)
                             {
-                                
                                 int pCount = productCounts[i];
 
                                 if (basketDTO.ProductDTO.CountThis > 0)
                                 {
-
                                     if (basketDTO.ProductDTO.CountThis < pCount)
                                     {
                                         message = "the number of products in the basket exceeds the available quantity";
@@ -1053,7 +902,6 @@ namespace onlineshop.Services.Implimentation
                                     count += pCount;
 
                                     products.Add(basketDTO.ProductDTO);
-
                                 }
                                 else
                                 {
@@ -1061,7 +909,6 @@ namespace onlineshop.Services.Implimentation
                                     logger.LogError(GetType().Name + " : " + message);
                                     throw new HttpException<Order>("InicializeOrder", message, HttpStatusCode.BadRequest);
                                 }
-
                             }
                             else
                             {
@@ -1069,11 +916,10 @@ namespace onlineshop.Services.Implimentation
                                 logger.LogError(GetType().Name + " : " + message);
                                 throw new HttpException<Order>("InicializeOrder", message, HttpStatusCode.NotFound);
                             }
-
                         }
 
                         dto.ProductDTOs = products;
-                       
+
                         dto.Count = count;
                         dto.Price = price;
 
@@ -1085,7 +931,6 @@ namespace onlineshop.Services.Implimentation
                         dto.BuyerDTOId = uid;
 
                         return dto;
-
                     }
                     catch (HttpException<Basket> ex)
                     {
@@ -1099,13 +944,12 @@ namespace onlineshop.Services.Implimentation
                     {
                         throw ex;
                     }
-
                 }
                 else
                 {
                     logger.LogError(GetType().Name + " : " + message);
                     throw new HttpException<Order>("InicializeOrder", message, HttpStatusCode.NotFound);
-                }               
+                }
             }
             else
             {
@@ -1113,12 +957,10 @@ namespace onlineshop.Services.Implimentation
                 logger.LogError(GetType().Name + " : " + message);
                 throw new HttpException<User>("InicializeOrder", message, HttpStatusCode.Forbidden);
             }
-            
         }
 
         private async Task<List<OrderDTO>> InitOrderList(List<Order> list)
         {
-
             logger.LogInformation(GetType().Name + " : InitOrdersList");
 
             List<OrderDTO> result = new List<OrderDTO>();
@@ -1139,10 +981,8 @@ namespace onlineshop.Services.Implimentation
 
             if (string.IsNullOrEmpty(message))
             {
-
                 foreach (var item in list)
                 {
-
                     List<OrderProduct> temp = await context.OrderProductCtx.Include(op => op.Product).Where(op => op.OrderId.Equals(item.Id)).ToListAsync();
 
                     List<ProductDTO> products = new List<ProductDTO>();
@@ -1151,25 +991,19 @@ namespace onlineshop.Services.Implimentation
                     {
                         if (list.Count > 0)
                         {
-
                             foreach (var opEntity in temp)
                             {
-
                                 products.Add(PMapper.ToDTO(opEntity.Product));
                             }
-
                         }
                     }
-
 
                     OrderDTO dto = OMapper.ToDTO(item);
 
                     dto.ProductDTOs = products;
 
                     result.Add(dto);
-
                 }
-
             }
             else
             {
@@ -1178,35 +1012,31 @@ namespace onlineshop.Services.Implimentation
             }
 
             return result;
-
         }
 
         private bool CheckPermissions(ClaimsPrincipal currentUser, string id)
         {
-
             logger.LogInformation(GetType().Name + " : CheckPermissions");
 
             bool flag = false;
 
             if (SINManager.IsSignedIn(currentUser))
             {
-
                 string uid = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 flag = currentUser.IsInRole("SELLER") || currentUser.IsInRole("OWNER") || uid.Equals(id);
             }
 
             return flag;
-
         }
 
         private string GenerateTrackNumber()
         {
             logger.LogInformation(GetType().Name + " : GenereateTrackNumber");
 
-            string track = "";             
+            string track = "";
 
-            for (int i=0; i<20; i++)
+            for (int i = 0; i < 20; i++)
             {
                 int arg0 = RandomNumberGenerator.GetInt32(2);
 
@@ -1217,34 +1047,31 @@ namespace onlineshop.Services.Implimentation
                     case 0:
                         arg1 = RandomNumberGenerator.GetInt32(97, 123);
                         break;
+
                     case 1:
                         arg1 = RandomNumberGenerator.GetInt32(48, 58);
                         break;
                 }
-               
-                track+= Convert.ToChar(arg1);
+
+                track += Convert.ToChar(arg1);
             }
 
             return track;
-
         }
 
         private Int16 GenerateReceiptCode()
         {
-
             logger.LogInformation(GetType().Name + " : GenerateReceiptCode");
 
             Random rand = new Random();
 
-            Int16 code =  Int16.Parse(rand.Next(1000, 9999).ToString());
+            Int16 code = Int16.Parse(rand.Next(1000, 9999).ToString());
 
             return code;
-
         }
 
         private string GenerateOrderCipher()
         {
-
             logger.LogInformation(GetType().Name + " : GenerateOrderCipher");
 
             string result = "O#";
@@ -1254,13 +1081,11 @@ namespace onlineshop.Services.Implimentation
 
             for (int i = 0; i < 30; i++)
             {
-
                 int arg0 = 1;
                 if (i > 6)
                 {
                     arg0 = RandomNumberGenerator.GetInt32(3);
                 }
-
 
                 int rand = -1;
                 switch (arg0)
@@ -1269,29 +1094,26 @@ namespace onlineshop.Services.Implimentation
                         {
                             //0-9
                             rand = RandomNumberGenerator.GetInt32(48, 58);
-
                         }
                         break;
+
                     case 1:
                         {
                             rand = RandomNumberGenerator.GetInt32(65, 91);
                         }
                         //A-Z
                         break;
+
                     case 2:
                         {
-
                             rand = RandomNumberGenerator.GetInt32(97, 123);
                         }
                         //a-z
                         break;
                 }
                 result += Convert.ToChar(rand);
-
             }
             return result;
         }
-
-       
     }
 }

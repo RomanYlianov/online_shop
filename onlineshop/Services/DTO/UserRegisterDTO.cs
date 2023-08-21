@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace onlineshop.Services.DTO
 {
     public class UserRegisterDTO : AbstractUserDTO
-    {   
-
+    {
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
 
@@ -16,6 +13,5 @@ namespace onlineshop.Services.DTO
         public string PasswordConfirm { get; set; }
 
         public List<string> UserRoles { get; set; }
-
     }
 }

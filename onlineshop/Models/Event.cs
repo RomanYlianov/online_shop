@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,15 +11,9 @@ namespace onlineshop.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-
         [Column("title")]
-        public string Tittle { get; set; }
+        public string Title { get; set; }
 
-
-        //public byte[] Photo { get; set; }
-
-
-        //[ForeignKey("product")]
         public Product Product { get; set; }
 
         [Column("product_id")]
@@ -31,11 +24,10 @@ namespace onlineshop.Models
 
         [DataType(DataType.Date)]
         [Column("creation_time")]
-        public  DateTime CreationTime { get; set; }
+        public DateTime CreationTime { get; set; }
 
         [DataType(DataType.Date)]
         [Column("explanation_time")]
         public DateTime? ExpirationTime { get; set; }
-
     }
 }

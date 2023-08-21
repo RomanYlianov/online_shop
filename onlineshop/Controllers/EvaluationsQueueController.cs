@@ -13,7 +13,6 @@ namespace onlineshop.Controllers
     [Route("evaluationsqueue")]
     public class EvaluationsQueueController : Controller
     {
-
         private readonly IEvaluationQueueService EQService;
 
         private readonly IBasketService BService;
@@ -22,20 +21,17 @@ namespace onlineshop.Controllers
 
         public EvaluationsQueueController(IEvaluationQueueService eQService, IBasketService bService)
         {
-
             this.EQService = eQService;
             this.BService = bService;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<EvaluationsQueueController>();
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
-
             logger.LogInformation(GetType().Name + " : Index");
 
             List<EvaluationQueueDTO> list = new List<EvaluationQueueDTO>();
@@ -58,14 +54,12 @@ namespace onlineshop.Controllers
             ViewBag.flag = isExists;
 
             return View(list);
-
         }
 
         [Authorize(Roles = "BUYER")]
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
-
             logger.LogInformation(GetType().Name + " : Details");
 
             await Inicialize();
@@ -75,7 +69,6 @@ namespace onlineshop.Controllers
                 EvaluationQueueDTO dto = await EQService.GetById(User, id);
 
                 return View(dto);
-
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.EvaluationQueue> ex)
             {
@@ -85,26 +78,22 @@ namespace onlineshop.Controllers
             {
                 return ExceptionHandler(ex.Message, ex.Code);
             }
-
         }
 
         private async Task<bool> Inicialize()
         {
-
             logger.LogInformation(GetType().Name + " : Inicializate");
 
             bool isSuccess = true;
 
             if (User != null)
             {
-
                 logger.LogInformation(GetType().Name + " : user is authorized");
 
                 string uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 try
                 {
-
                     int pCount = await BService.GetCountOfProductsInBasket(User);
 
                     ViewData["CountProductsInBasket"] = pCount;
@@ -128,7 +117,6 @@ namespace onlineshop.Controllers
                     {
                         ViewData["rBuyer"] = true;
                     }
-
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
@@ -145,31 +133,23 @@ namespace onlineshop.Controllers
                     logger.LogError(GetType().Name + " : " + message);
                     isSuccess = false;
                 }
-
-
             }
             else
             {
-
                 logger.LogInformation(GetType().Name + " : user is not authorized");
-
             }
 
             return isSuccess;
-
         }
 
         private IActionResult ExceptionHandler(string message, HttpStatusCode code)
         {
-
             logger.LogInformation(GetType().Name + " : ExceptionHandler");
 
             message = "error : " + message + ", message " + message;
             logger.LogError(GetType().Name + " : " + message);
             ViewBag.error = code.ToString();
             return View("~/Views/Home/Error.cshtml");
-
         }
-
     }
 }

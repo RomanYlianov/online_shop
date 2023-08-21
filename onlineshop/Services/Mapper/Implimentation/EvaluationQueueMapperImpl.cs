@@ -7,7 +7,6 @@ namespace onlineshop.Services.Mapper.Implimentation
 {
     public class EvaluationQueueMapperImpl : IEvaluationQueueMapper
     {
-
         private readonly IUserMapper UMapper;
 
         private readonly IProductMapper PMapper;
@@ -18,19 +17,73 @@ namespace onlineshop.Services.Mapper.Implimentation
 
         public EvaluationQueueMapperImpl(IUserMapper uMapper, IProductMapper pMapper, IOrderMapper oMapper)
         {
-
             this.UMapper = uMapper;
             this.PMapper = pMapper;
             this.OMapper = oMapper;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<EvaluationQueueMapperImpl>();
+        }
 
+        public EvaluationQueue ToEntity(EvaluationQueueDTO dto)
+        {
+            logger.LogInformation(GetType().Name + " : convert DTO to entity");
+
+            EvaluationQueue entity = new EvaluationQueue();
+
+            if (dto != null)
+            {
+                try
+                {
+                    if (dto.Id != null)
+                    {
+                        entity.Id = Guid.Parse(dto.Id);
+                    }
+
+                    if (dto.BuyerDTO != null)
+                    {
+                        entity.Buyer = UMapper.ToEntity(dto.BuyerDTO);
+                    }
+
+                    if (dto.BuyerDTOId != null)
+                    {
+                        entity.BuyerId = Guid.Parse(dto.BuyerDTOId);
+                    }
+
+                    if (dto.ProductDTO != null)
+                    {
+                        entity.Product = PMapper.ToEntity(dto.ProductDTO);
+                    }
+
+                    if (dto.ProductDTOId != null)
+                    {
+                        entity.ProductId = Guid.Parse(dto.ProductDTOId);
+                    }
+
+                    if (dto.OrderDTO != null)
+                    {
+                        entity.Order = OMapper.ToEntity(dto.OrderDTO);
+                    }
+
+                    if (dto.OrderDTOId != null)
+                    {
+                        entity.OrderId = Guid.Parse(dto.OrderDTOId);
+                    }
+
+                    entity.IsAddedComment = dto.IsAddedComment;
+                    entity.IsRateProduct = dto.IsRateProduct;
+                }
+                catch (FormatException ex)
+                {
+                    logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
+                }
+            }
+
+            return entity;
         }
 
         public EvaluationQueueDTO ToDTO(EvaluationQueue entity)
         {
-
             logger.LogInformation(GetType().Name + " : Convert entity to DTO");
 
             EvaluationQueueDTO dto = new EvaluationQueueDTO();
@@ -76,73 +129,7 @@ namespace onlineshop.Services.Mapper.Implimentation
             dto.IsAddedComment = entity.IsAddedComment;
             dto.IsRateProduct = entity.IsRateProduct;
 
-
             return dto;
-
-        }
-
-        public EvaluationQueue ToEntity(EvaluationQueueDTO dto)
-        {
-
-            logger.LogInformation(GetType().Name + " : convert DTO to entity");
-
-            EvaluationQueue entity = new EvaluationQueue();
-
-            if (dto != null)
-            {
-
-                try
-                {
-
-                    if (dto.Id != null)
-                    {
-                        entity.Id = Guid.Parse(dto.Id);
-                    }
-
-                    if (dto.BuyerDTO != null)
-                    {
-                        entity.Buyer = UMapper.ToEntity(dto.BuyerDTO);
-                    }
-
-                    if (dto.BuyerDTOId != null)
-                    {
-                        entity.BuyerId = Guid.Parse(dto.BuyerDTOId);
-                    }
-
-                    if (dto.ProductDTO != null)
-                    {
-                        entity.Product = PMapper.ToEntity(dto.ProductDTO);
-                    }
-
-                    if (dto.ProductDTOId != null)
-                    {
-                        entity.ProductId = Guid.Parse(dto.ProductDTOId);
-                    }
-
-                    if (dto.OrderDTO != null)
-                    {
-                        entity.Order = OMapper.ToEntity(dto.OrderDTO);
-                    }
-
-                    if (dto.OrderDTOId != null)
-                    {
-                        entity.OrderId = Guid.Parse(dto.OrderDTOId);
-                    }
-
-                    entity.IsAddedComment = dto.IsAddedComment;
-                    entity.IsRateProduct = dto.IsRateProduct;
-
-
-                }
-                catch (FormatException ex)
-                {
-                    logger.LogError(GetType().Name + " : convert failed : " + ex.Message);
-                }
-
-            }
-
-            return entity;
-
         }
     }
 }

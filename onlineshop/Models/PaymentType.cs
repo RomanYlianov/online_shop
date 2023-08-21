@@ -4,11 +4,13 @@ namespace onlineshop.Models
 {
     public enum PaymentType
     {
-        [Display(Name ="bank card")]
+        [Display(Name = "bank card")]
         BANK_CARD,
-        [Display(Name ="qiwi")]
+
+        [Display(Name = "qiwi")]
         QIWI,
-        [Display(Name ="webmoney")]
+
+        [Display(Name = "webmoney")]
         WEBMONEY
     }
 }
