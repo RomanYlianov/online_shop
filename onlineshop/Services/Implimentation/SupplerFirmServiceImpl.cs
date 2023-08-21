@@ -6,6 +6,7 @@ using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -232,5 +233,69 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<Category>("Delete", message, HttpStatusCode.BadRequest);
             }
         }
+
+        public async Task<SupplerFirmDTO> CalculateRating(string id)
+        {
+
+            logger.LogInformation(GetType().Name + " : CalculateRating");
+
+            try
+            {
+
+                SupplerFirm entity = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(id));
+
+                if (entity != null)
+                {
+
+                    List<Product> products = await context.ProductsCtx.Where(p => p.SupplerFirmId.Equals(entity.Id)).ToListAsync();
+
+                    long count = 0;
+
+                    double ratingSum = 0;
+
+                    if (products != null)
+                    {                       
+
+                        foreach (var product in products)
+                        {
+                            ratingSum += product.Rating;
+                            count++;
+                        }
+
+                    }
+                    else
+                    {
+                        string message = "supplerfirm with id " + id + " have not products";
+                        logger.LogWarning(message);
+                    }
+
+                    if (ratingSum > 0 && count > 0)
+                    {
+                        entity.Rating = ratingSum / count;
+                        context.Entry(entity).State = EntityState.Modified;
+                        context.Set<SupplerFirm>().Update(entity);
+                        await context.SaveChangesAsync();
+                    }
+
+                    return SFMapper.ToDTO(entity);
+
+                }
+                else
+                {
+                    string message = "supplerFirm with id " + id + " was not foud";
+                    logger.LogError(GetType().Name + " : " + message);
+                    throw new HttpException<SupplerFirm>("CalculateRating", message, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (FormatException ex)
+            {
+                string message = "convert id " + id + " failed : " + ex.Message;
+                logger.LogError(GetType().Name + " : : " + message);
+                throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.InternalServerError);
+            }
+            
+        }
+
     }
 }

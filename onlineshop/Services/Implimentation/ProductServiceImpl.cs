@@ -20,12 +20,16 @@ namespace onlineshop.Services.Implimentation
 
         private readonly IProductMapper PMapper;
 
+        private readonly ISupplerFirmService SFService;
+
         private readonly ILogger logger;
 
-        public ProductServiceImpl(ApplicationDbContext context, IProductMapper mapper)
+        public ProductServiceImpl(ApplicationDbContext context, IProductMapper mapper, ISupplerFirmService sFService)
         {
             this.context = context;
             this.PMapper = mapper;
+
+            this.SFService = sFService;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<ProductServiceImpl>();
@@ -294,6 +298,10 @@ namespace onlineshop.Services.Implimentation
                                     }
 
                                     await context.SaveChangesAsync();
+
+                                    //calculate supplerfirm rating (need a lot of resources)
+
+                                    //await SFService.CalculateRating(entity.SupplerFirmId.ToString());
 
                                     return dto;
                                 }
@@ -1139,6 +1147,8 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<Product>("Search", message, HttpStatusCode.BadRequest);
             }
         }
+
+       
 
         private string GenerateProductCipher()
         {
