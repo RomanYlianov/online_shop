@@ -87,6 +87,7 @@ namespace onlineshop
                         return Task.CompletedTask;
                     }
                 };
+                options.AccessDeniedPath = "/Home/AccessDeaned";
             });
 
             services.AddAuthorization(options =>

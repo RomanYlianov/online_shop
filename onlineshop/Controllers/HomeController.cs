@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 using onlineshop.Services;
@@ -36,6 +37,12 @@ namespace onlineshop.Controllers
             await Inicialize();
 
             return View();
+        }
+      
+        public IActionResult AccessDeaned()
+        {
+            ViewData["error"] = 401;
+            return View("~/Views/Home/Error.cshtml");
         }
 
         //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
