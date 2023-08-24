@@ -278,8 +278,19 @@ namespace onlineshop.Services.Implimentation
                             {
                                 if (eqEntity.BuyerId.ToString().Equals(uid) && eqEntity.ProductId.ToString().Equals(dto.Id))
                                 {
-                                    entity.Rating = (entity.Rating + dto.Rating) / (entity.MarksCount + 1);
-                                    entity.MarksCount++;
+                                    //calculate rating
+
+                                    if (entity.Rating == 0)
+                                    {
+                                        entity.Rating = dto.Rating;
+                                    }
+                                    else
+                                    {
+                                        entity.Rating = (entity.Rating + dto.Rating) / 2;
+                                    }
+                                    
+                                    //entity.Rating = (entity.Rating + dto.Rating) / (entity.MarksCount + 1);
+                                    //entity.MarksCount++;
 
                                     context.Entry(entity).State = EntityState.Modified;
                                     context.Set<Product>().Update(entity);
@@ -298,6 +309,32 @@ namespace onlineshop.Services.Implimentation
                                     }
 
                                     await context.SaveChangesAsync();
+
+                                    SupplerFirm sfEntity = await context.SupplerFirmsCtx.FindAsync(entity.SupplerFirmId);
+
+                                    if (sfEntity != null)
+                                    {
+
+                                        if (sfEntity.Rating == 0)
+                                        {
+                                            sfEntity.Rating = dto.Rating;
+                                        }
+                                        else
+                                        {
+                                            sfEntity.Rating = (sfEntity.Rating + dto.Rating) / 2;
+                                        }
+
+                                        context.Entry(sfEntity).State = EntityState.Modified;
+                                        context.Set<SupplerFirm>().Update(sfEntity);
+
+                                        await context.SaveChangesAsync();
+
+                                    }
+                                    else
+                                    {
+                                        string message = "SuppletrFirm with id " + entity.SupplerFirmId + " was not found";
+                                        logger.LogWarning(GetType().Name + " : "+message);
+                                    }
 
                                     //calculate supplerfirm rating (need a lot of resources)
 
