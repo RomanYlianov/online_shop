@@ -84,6 +84,9 @@ go
 insert into AspNetUserRoles (UserId, RoleId ) values ((select Id from AspNetUsers where NormalizedUserName = 'username1'), (select Id from AspNetRoles where NormalizedName = 'SELLER'));
 go
 
+insert into AspNetUserRoles (UserId, RoleId ) values ((select Id from AspNetUsers where NormalizedUserName = 'username1'), (select Id from AspNetRoles where NormalizedName = 'OWNER'));
+go
+
 /*
 * deliverymethods table
 */
@@ -131,18 +134,20 @@ insert into product (cipher, name, category_id, supplerfirm_id, count_all, count
 go
 
 /*
+* events
+*/
+
+insert into event (title, product_id, text, creation_time) values ('title 12345', (select id from product where name = 'product 1'), 'text 123234235235235235 text', GETDATE());
+go
+
+/*
 * basket
 */
 
 insert into basket (product_id, buyer_id, count, intermediate_cost) values ((select id from product where name='product 1'), (select Id from AspNetUsers where NormalizedEmail='ROOT@MAIL.RU'), 1, (select price from product where name='product 1'));
 go
 
-/*
-* events
-*/
 
-insert into event (title, product_id, text, creation_time) values ('title 12345', (select id from product where name = 'product 1'), 'text 123234235235235235 text', GETDATE());
-go
 /*
 * orders
 */
