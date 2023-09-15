@@ -6,6 +6,13 @@
 
 <h2>Events list</h2>
 
+@if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+{
+    <p>
+        @Html.ActionLink("Create new", "Create")
+    </p>
+}
+
 <table class="table">
 
     <thead>

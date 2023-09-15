@@ -6,9 +6,13 @@
 
 <h2>delivery methods list</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+@if (ViewData["rOwner"] != null)
+{
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+}
+
 
 <table class="table">
 
@@ -24,7 +28,7 @@
             <th>
                 Details
             </th>
-            @if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+            @if (ViewData["rOwner"] != null)
             {
                 <th>
                     Edit

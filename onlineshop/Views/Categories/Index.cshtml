@@ -6,9 +6,14 @@
 
 <h2>Categories list</h2>
 
-<p>
-    @Html.ActionLink("Create new", "Create")
-</p>
+@if (ViewData["rSeller"] != null || ViewData["rOwner"] != null)
+{
+    <p>
+        @Html.ActionLink("Create new", "Create")
+    </p>
+}
+
+
 
 <table class="table">
     <thead>
