@@ -76,7 +76,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
@@ -91,7 +91,7 @@ namespace onlineshop.Controllers
             return View();
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpPost("Create")]
         public async Task<IActionResult> Create(SupplerFirmDTO dto)
         {
@@ -134,7 +134,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
@@ -158,7 +158,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, SupplerFirmDTO dto)
         {
@@ -199,7 +199,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -219,7 +219,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "OWNER")]
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, SupplerFirmDTO dto)
         {
