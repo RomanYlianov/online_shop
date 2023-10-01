@@ -25,13 +25,17 @@ namespace onlineshop.Services.Implimentation
 
         private readonly IUserService UService;
 
+        private readonly ISupplerFirmService SFService;
+
+        private readonly IPaymentMethodService PMService;
+
         private readonly IProductMapper PMapper;
 
         private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
-        public OrderServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketService bService, IUserService uService, IOrderMapper oMapper, IProductMapper pMapper)
+        public OrderServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, IBasketService bService, IUserService uService, ISupplerFirmService sFService, IPaymentMethodService pmService, IOrderMapper oMapper, IProductMapper pMapper)
         {
             this.context = context;
 
@@ -41,6 +45,10 @@ namespace onlineshop.Services.Implimentation
 
             this.BService = bService;
 
+            this.SFService = sFService;
+
+            this.PMService = pmService;
+
             this.OMapper = oMapper;
 
             this.PMapper = pMapper;
@@ -49,7 +57,7 @@ namespace onlineshop.Services.Implimentation
             logger = logFactory.CreateLogger<OrderServiceImpl>();
         }
 
-        public async Task<List<OrderDTO>> GetAll()
+        public async Task<List<OrderDTO>> GetAll(ClaimsPrincipal currentUser)
         {
             logger.LogInformation(GetType().Name + " : GetAll");
 
@@ -300,7 +308,7 @@ namespace onlineshop.Services.Implimentation
                                     foreach (var item in opList)
                                     {
                                         Product pEntity = await context.ProductsCtx.Include(p => p.SupplerFirm).Include(p => p.Category).Where(p => p.Id.Equals(item.ProductId)).FirstOrDefaultAsync();
-                                        pEntity.CountThis = item.ProductsCount;
+                                        pEntity.CountAll = item.ProductsCount;
                                         list.Add(PMapper.ToDTO(pEntity));
                                     }
                                 }
@@ -463,6 +471,27 @@ namespace onlineshop.Services.Implimentation
 
                                 Basket bEntity = await context.BasketCtx.AsNoTracking().Include(b => b.Product).FirstOrDefaultAsync(b => b.Id.Equals(Guid.Parse(bid)));
 
+                               
+
+                             
+
+                                //зачисление средств на счет фирмы поставщика
+
+                                Guid supplerFirmId = await context.ProductsCtx.Where(p => p.Id.Equals(bEntity.ProductId)).Select(p=>p.SupplerFirmId).FirstOrDefaultAsync();
+
+                                double money = bEntity.Product.Price * pCount;
+
+                                 PaymentResult result = await SFService.ChangeBalance(currentUser, supplerFirmId.ToString(), money);
+
+                                if (result != PaymentResult.OKAY)
+                                {
+                                    //обработка ситуации с ошибкой зачисления средств
+                                    message = "Supplierfirms account is not available";
+                                    logger.LogWarning(GetType().Name + " : " + message);
+                                }
+
+                                
+
                                 //формируем заказ
                                 //в первый раз: создать заказ, получить id созданного заказа
 
@@ -486,14 +515,29 @@ namespace onlineshop.Services.Implimentation
 
                                     item = OMapper.ToDTO(entity);
 
+                                    
+
                                     oid = item.Id;
+
+                                    //form evaliation queue
+                                    EvaluationQueue eqEntity = new EvaluationQueue();
+                                    eqEntity.BuyerId = Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier));
+                                    eqEntity.ProductId = bEntity.ProductId;
+                                    eqEntity.OrderId = entity.Id;
+
+                                    eqEntity.IsAddedComment = false; eqEntity.IsRateProduct = false;
+
+                                    context.Entry(eqEntity).State = EntityState.Added;
+                                    await context.Set<EvaluationQueue>().AddAsync(eqEntity);
+                                    await context.SaveChangesAsync();
+
                                 }
 
                                 //уменьшить текущее количество товаров на количество заказанных
 
                                 Product pEntity = await context.ProductsCtx.AsNoTracking().FirstOrDefaultAsync(p => p.Id.Equals(bEntity.ProductId));
 
-                                pEntity.CountThis -= pCount;
+                                pEntity.CountAll -= pCount;
 
                                 context.Entry(pEntity).State = EntityState.Detached;
 
@@ -657,7 +701,7 @@ namespace onlineshop.Services.Implimentation
             }
         }
 
-        public async Task Delete(ClaimsPrincipal currentUser, string id, List<ProductDTO> products)
+        public async Task Delete(ClaimsPrincipal currentUser, string id, string method, List<ProductDTO> products)
         {
             logger.LogInformation(GetType().Name + " : Delete");
 
@@ -698,7 +742,31 @@ namespace onlineshop.Services.Implimentation
                                     for (int i = 0; i < products.Count; i++)
                                     {
                                         pid = products[i].Id;
-                                        int count = products[i].CountThis;
+
+                                        Product productEntity = await context.ProductsCtx.Where(p => p.Id.Equals(Guid.Parse(pid))).FirstOrDefaultAsync();
+
+                                        int count = products[i].CountAll;
+
+                                        //снятие со счета фирмы поставщика
+
+                                        double money = productEntity.Price * products[i].CountAll;
+                                        PaymentResult result = await SFService.ChangeBalance(currentUser, productEntity.SupplerFirmId.ToString(), money, false);
+
+                                        if (result != PaymentResult.OKAY)
+                                        {
+                                            //обработка ошибки списания средств
+                                            logger.LogWarning(GetType().Name + " : failed to write off money from supplerfirms account");
+                                        }
+
+                                        //зачисление на счет покупателя
+
+                                        result = await PMService.ChangeBalance(currentUser, method, money);
+
+                                        if (result != PaymentResult.OKAY)
+                                        {
+                                            //обрвботка ошибки зачисления средств
+                                            logger.LogWarning(GetType().Name + " : failed to add money on user account");
+                                        }
 
                                         OrderProduct opEntity = await context.OrderProductCtx.Where(op => op.OrderId.Equals(oid) && op.ProductId.Equals(Guid.Parse(pid))).FirstOrDefaultAsync();
 
@@ -713,7 +781,7 @@ namespace onlineshop.Services.Implimentation
                                     for (int i = 0; i < products.Count; i++)
                                     {
                                         pid = products[i].Id;
-                                        int count = products[i].CountThis;
+                                        int count = products[i].CountAll;
 
                                         try
                                         {
@@ -722,7 +790,7 @@ namespace onlineshop.Services.Implimentation
                                             if (entity != null)
                                             {
                                                 //вернули количество товаров
-                                                entity.CountThis += count;
+                                                entity.CountAll += count;
 
                                                 context.Entry(entity).State = EntityState.Detached;
                                                 context.Set<Product>().Update(entity);
@@ -755,6 +823,18 @@ namespace onlineshop.Services.Implimentation
                                                     logger.LogWarning(GetType().Name + " : " + message);
                                                     //уведомить о неуспешной попытке найти запись в служебной сущности
                                                 }
+
+                                                //remove evaluation queue
+
+                                                EvaluationQueue eqEntity = await context.EvaluationQueueCtx.Where(eq => eq.OrderId.Equals(oid) && eq.ProductId.Equals(entity.Id)).FirstOrDefaultAsync();
+
+                                                if (eqEntity != null)
+                                                {
+                                                    context.Entry(opEntity).State = EntityState.Deleted;
+                                                    context.Set<EvaluationQueue>().Remove(eqEntity);
+                                                    await context.SaveChangesAsync();
+                                                }
+
                                             }
                                             else
                                             {
@@ -889,13 +969,13 @@ namespace onlineshop.Services.Implimentation
                             {
                                 int pCount = productCounts[i];
 
-                                if (basketDTO.ProductDTO.CountThis > 0)
+                                if (basketDTO.ProductDTO.CountAll > 0)
                                 {
-                                    if (basketDTO.ProductDTO.CountThis < pCount)
+                                    if (basketDTO.ProductDTO.CountAll < pCount)
                                     {
                                         message = "the number of products in the basket exceeds the available quantity";
                                         logger.LogWarning(GetType().Name + " : " + message);
-                                        pCount = basketDTO.ProductDTO.CountThis;
+                                        pCount = basketDTO.ProductDTO.CountAll;
                                     }
 
                                     price += basketDTO.ProductDTO.Price * pCount;

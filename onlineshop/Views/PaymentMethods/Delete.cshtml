@@ -16,8 +16,16 @@
         <dt class="col-sm-3">
             @Html.DisplayNameFor(model=>model.Name)
         </dt>
+
         <dd class="col-sm-9">
             @Html.DisplayFor(model=>model.Name)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model=>model.MoneyValue)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model=>model.MoneyValue)
         </dd>
 
         <dt class="col-sm-3">
@@ -51,7 +59,7 @@
             </dt>
 
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.ExpirationDate)
+                @Html.DisplayFor(model => model.ExpirationDate.Value)
             </dd>
         }
 
@@ -61,7 +69,7 @@
                 @Html.DisplayNameFor(model => model.CVV )
             </dt>
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.CVV)
+                @Html.DisplayFor(model => model.CVV.Value)
             </dd>
         }
 

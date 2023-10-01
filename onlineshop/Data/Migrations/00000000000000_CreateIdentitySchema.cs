@@ -44,6 +44,7 @@ namespace onlineshop.Data.Migrations
                     Country = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Is_Vip = table.Column<bool>(type: "bit", nullable: false),
                     creation_time = table.Column<DateTime>(type: "datetime2", nullable: false),
+                   
 
                     SecurityStamp = table.Column<string>(nullable: true),
                     ConcurrencyStamp = table.Column<string>(nullable: true),

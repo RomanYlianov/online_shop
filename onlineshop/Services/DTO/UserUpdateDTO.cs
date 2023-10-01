@@ -8,5 +8,8 @@ namespace onlineshop.Services.DTO
         public DateTime CreationTime { get; set; }
 
         public List<string> OtherRoles { get; set; }
+
+        public List<string> OtherSupplerFirms { get; set; }
+
     }
 }

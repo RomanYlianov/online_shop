@@ -34,6 +34,8 @@ namespace onlineshop.Controllers
         {
             logger.LogInformation(GetType().Name + " : Index");
 
+            await Inicialize();
+
             List<EvaluationQueueDTO> list = new List<EvaluationQueueDTO>();
 
             bool isExists = true;

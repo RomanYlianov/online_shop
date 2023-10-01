@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using onlineshop.Services;
 using onlineshop.Services.DTO;
 using onlineshop.Services.Mapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,16 +26,23 @@ namespace onlineshop.Controllers
 
         private readonly ICountryService CService;
 
+        private readonly ISupplerFirmService SFService;
+
+        private readonly ISupperFirmMapper SFMapper;
+
         private readonly IUserMapper USMapper;
 
         private readonly ILogger logger;
 
-        public UsersController(IUserService uService, IRoleService rService, ICountryService cService, IUserMapper uMapper, IBasketService bService)
+        public UsersController(IUserService uService, IRoleService rService, ICountryService cService, ISupplerFirmService sfService, ISupperFirmMapper sfMapper, IUserMapper uMapper, IBasketService bService)
         {
             this.UService = uService;
             this.RService = rService;
             this.CService = cService;
             this.BService = bService;
+
+            this.SFService = sfService;
+            this.SFMapper = sfMapper;
 
             this.USMapper = uMapper;
 
@@ -120,9 +128,12 @@ namespace onlineshop.Controllers
             {
                 UserDTO dto = await UService.GetById(User, id);
 
-                List<RoleDTO> list = await UService.GetRolesForUser(id);
+                List<RoleDTO> userRolesList = await UService.GetRolesForUser(id);
 
-                ViewBag.UserRoles = list;
+                List<SupplerFirmDTO> supplerFirmsList = await UService.GetDependentSupplerFirmsForUser(User, id);
+
+                ViewBag.UserRoles = userRolesList;
+                ViewBag.SupplerFirms = supplerFirmsList;
 
                 return View(dto);
             }
@@ -146,9 +157,13 @@ namespace onlineshop.Controllers
 
                 UserDTO dto = await UService.GetById(User, currentId);
 
-                List<RoleDTO> list = await UService.GetRolesForUser(currentId);
+                List<RoleDTO> userRolesList = await UService.GetRolesForUser(currentId);
 
-                ViewBag.UserRoles = list;
+                List<SupplerFirmDTO> supplerFirmsList = await UService.GetDependentSupplerFirmsForUser(User, currentId);
+
+                ViewBag.SupplerFirms = supplerFirmsList;
+
+                ViewBag.UserRoles = userRolesList;
 
                 return View(dto);
             }
@@ -166,13 +181,17 @@ namespace onlineshop.Controllers
 
             await Inicialize();
 
-            List<SelectListItem> items = await InitListOfUserRoles();
+            List<SelectListItem> listOfUserRoles = await InitListOfUserRoles();
 
-            List<SelectListItem> list = InitSelectListOfCountries();
+            List<SelectListItem> listOfCountries = InitSelectListOfCountries();
 
-            ViewBag.Roles = new SelectList(items, "Value", "Text");
+            List<SelectListItem> listOfSSupplerFirms = await InitSelectListOfSupplerFirms();
 
-            ViewBag.Countries = new SelectList(list, "Value", "Text");
+            ViewBag.Roles = new SelectList(listOfUserRoles, "Value", "Text");
+
+            ViewBag.Countries = new SelectList(listOfCountries, "Value", "Text");
+
+            ViewBag.SupplerFirms = new SelectList(listOfSSupplerFirms, "Value", "Text");
 
             return View();
         }
@@ -185,13 +204,19 @@ namespace onlineshop.Controllers
 
             await Inicialize();
 
-            List<SelectListItem> items = await InitListOfUserRoles();
+            
 
-            List<SelectListItem> list = InitSelectListOfCountries();
+            List<SelectListItem> listOfUserRoles = await InitListOfUserRoles();
 
-            ViewBag.Roles = new SelectList(items, "Value", "Text");
+            List<SelectListItem> listOfCountries = InitSelectListOfCountries();
 
-            ViewBag.Countries = new SelectList(list, "Value", "Text");
+            List<SelectListItem> listOfSupplerFirms = await InitSelectListOfSupplerFirms();
+
+            ViewBag.Roles = new SelectList(listOfUserRoles, "Value", "Text");
+
+            ViewBag.Countries = new SelectList(listOfCountries, "Value", "Text");
+
+            ViewBag.SupplerFirms = new SelectList(listOfSupplerFirms, "Value", "Text");
 
             if (ModelState.IsValid)
             {
@@ -228,17 +253,26 @@ namespace onlineshop.Controllers
                     }
                     catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                     {
-                        return ExceptionHandler(ex.Message, ex.Code);
+                        if (ex.Code == HttpStatusCode.Forbidden)
+                        {
+                            ModelState.AddModelError("UserSupplerFirms", ex.Message);
+                            return View(dto);
+                        }
+                        else
+                        {
+                            return ExceptionHandler(ex.Message, ex.Code);
+                        }
+                       
                     }
                 }
                 else
                 {
-                    return View();
+                    return View(dto);
                 }
             }
             else
             {
-                return View();
+                return View(dto);
             }
         }
 
@@ -256,16 +290,18 @@ namespace onlineshop.Controllers
 
                 dto.PasswordHash = null;
 
-                Pair pair = await InitListOfUpdateUserRoles(id);
+                UserUpdateData uUpdateData = await InitListOfUserUpdateData(id);
 
-                ViewBag.uRoles = new SelectList(pair.UserRoles, "Value", "Text");
-                ViewBag.oRoles = new SelectList(pair.OtherRoles, "Value", "Text");
+                ViewBag.uRoles = new SelectList(uUpdateData.UserRoles, "Value", "Text");
+                ViewBag.oRoles = new SelectList(uUpdateData.OtherRoles, "Value", "Text");
+                ViewBag.uSupplerFirms = new SelectList(uUpdateData.UserSupplerFirms, "Value", "Text");
+                ViewBag.oSupplerFirms = new SelectList(uUpdateData.OtherSupplerFirms, "Value", "Text");
 
                 List<SelectListItem> list = InitSelectListOfCountries();
 
                 ViewBag.Countries = new SelectList(list, "Value", "Text");
 
-                UserUpdateDTO result = USMapper.ToUpdateDTO(dto, pair.UserRolesValues, pair.OtherRolesValues);
+                UserUpdateDTO result = USMapper.ToUpdateDTO(dto, uUpdateData.UserRolesValues, uUpdateData.OtherRolesValues);
 
                 return View(result);
             }
@@ -285,10 +321,12 @@ namespace onlineshop.Controllers
 
             string cuid = dto.Id;
 
-            Pair pair = await InitListOfUpdateUserRoles(id);
+            UserUpdateData uUpdateData = await InitListOfUserUpdateData(id);
 
-            ViewBag.uRoles = new SelectList(pair.UserRoles, "Value", "Text");
-            ViewBag.oRoles = new SelectList(pair.OtherRoles, "Value", "Text");
+            ViewBag.uRoles = new SelectList(uUpdateData.UserRoles, "Value", "Text");
+            ViewBag.oRoles = new SelectList(uUpdateData.OtherRoles, "Value", "Text");
+            ViewBag.uSupplerFirms = new SelectList(uUpdateData.UserSupplerFirms, "Value", "Text");
+            ViewBag.oSupplerFirms = new SelectList(uUpdateData.OtherSupplerFirms, "Value", "Text");
 
             List<SelectListItem> list = InitSelectListOfCountries();
 
@@ -342,18 +380,18 @@ namespace onlineshop.Controllers
                         return RedirectToAction("Index");
                     }
                     catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
-                    {
+                    {                       
                         return ExceptionHandler(ex.Message, ex.Code);
                     }
                 }
                 else
                 {
-                    return View();
+                    return View(dto);
                 }
             }
             else
             {
-                return View();
+                return View(dto);
             }
         }
 
@@ -673,10 +711,7 @@ namespace onlineshop.Controllers
                         {
                             result.Add(new SelectListItem(text: item.Name, value: item.Id));
                         }
-                        //else
-                        //{
-                        //    result.Add(new SelectListItem(text: item.Name, value: item.Id));
-                        //}
+                       
                     }
                 }
             }
@@ -744,6 +779,59 @@ namespace onlineshop.Controllers
             return items;
         }
 
+        private async Task<List<SelectListItem>> InitSelectListOfSupplerFirms(List<SupplerFirmDTO> selected = null)
+        {
+
+            logger.LogInformation(GetType().Name + " : InitSelectListOfSupplerFirms");
+
+            List<SelectListItem> items = new List<SelectListItem>();
+
+            try
+            {
+                List<SupplerFirmDTO> firms = await SFService.GetAll();
+
+                
+
+                if (selected == null)
+                {
+                    foreach (var firm in firms)
+                    {
+                        items.Add(new SelectListItem(text: firm.Name, value: firm.Id));
+                    }
+                }
+                else
+                {
+                    foreach (var firm in firms)
+                    {
+                        bool isSelected = false;
+
+                        foreach (var item in selected)
+                        {
+                            if (item.Name.Equals(firm.Name))
+                            {
+                                isSelected = true;
+                                break;
+                            }
+                        }
+
+                        if (isSelected)
+                        {
+                            items.Add(new SelectListItem(text: firm.Name, value: firm.Id));
+                        }
+                    }
+                }
+
+               
+            }
+            catch (onlineshop.Models.HttpException<onlineshop.Models.SupplerFirm> ex)
+            {
+                logger.LogWarning("InitSelectListOfSupplerFirms : " + ex.Message);
+            }
+
+            return items;
+
+        }
+
         public List<string> ValidatePassword(string password)
         {
             logger.LogInformation(GetType().Name + " ValidatePassword");
@@ -778,7 +866,7 @@ namespace onlineshop.Controllers
             return errors;
         }
 
-        private struct Pair
+        private struct UserUpdateData
         {
             public List<SelectListItem> UserRoles { get; set; }
 
@@ -787,13 +875,21 @@ namespace onlineshop.Controllers
             public List<SelectListItem> OtherRoles { get; set; }
 
             public List<RoleDTO> OtherRolesValues { get; set; }
+
+            public List<SelectListItem> UserSupplerFirms { get; set; }
+
+            public List<SupplerFirmDTO> UserSupplerFirmsValues { get; set; }
+
+            public List<SelectListItem> OtherSupplerFirms { get; set; }
+
+            public List<SupplerFirmDTO> OtherSupplerFirmsValues { get; set; }
         }
 
-        private async Task<Pair> InitListOfUpdateUserRoles(string id)
+        private async Task<UserUpdateData> InitListOfUserUpdateData(string id)
         {
-            logger.LogInformation(GetType().Name + " : InitListOfUpdateUserRoles");
+            logger.LogInformation(GetType().Name + " : InitListOfUserUpdateData");
 
-            Pair result = new Pair();
+            UserUpdateData result = new UserUpdateData();
 
             try
             {
@@ -804,6 +900,15 @@ namespace onlineshop.Controllers
                 List<SelectListItem> userRoles = await InitListOfUserRoles(userRolesValues);
 
                 List<RoleDTO> otherRolesValues = new List<RoleDTO>();
+
+                List<SupplerFirmDTO> allSupplerFirms = await SFService.GetAll();
+
+                List<SupplerFirmDTO> userSupplerFirmsValues = await UService.GetDependentSupplerFirmsForUser(User, id);
+
+                List<SelectListItem> userSupplerFirms =  await InitSelectListOfSupplerFirms(userSupplerFirmsValues);
+
+                List<SupplerFirmDTO> otherSupplerFirmsValues = new List<SupplerFirmDTO>();
+
 
                 if (userRolesValues != null)
                 {
@@ -826,7 +931,30 @@ namespace onlineshop.Controllers
                     }
                 }
 
+                if (userSupplerFirmsValues != null)
+                {
+                    foreach (var firm in allSupplerFirms)
+                    {
+                        bool flag = true;
+
+                        foreach (var temp in userSupplerFirmsValues)
+                        {
+                            if (temp.Name.Equals(firm.Name))
+                            {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag)
+                        {
+                            otherSupplerFirmsValues.Add(firm);
+                        }
+                    }
+                }
+
                 List<SelectListItem> otherRoles = await InitListOfUserRoles(otherRolesValues);
+
+                List<SelectListItem> otherSupplerFirms = await InitSelectListOfSupplerFirms(otherSupplerFirmsValues);
 
                 if (userRoles != null && otherRoles != null)
                 {
@@ -834,6 +962,10 @@ namespace onlineshop.Controllers
                     result.UserRolesValues = userRolesValues;
                     result.OtherRoles = otherRoles;
                     result.OtherRolesValues = otherRolesValues;
+                    result.UserSupplerFirms = userSupplerFirms;
+                    result.UserSupplerFirmsValues = userSupplerFirmsValues;
+                    result.OtherSupplerFirms = otherSupplerFirms;
+                    result.OtherSupplerFirmsValues = otherSupplerFirmsValues;
                 }
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Role> ex)
@@ -844,7 +976,10 @@ namespace onlineshop.Controllers
             {
                 logger.LogWarning("InitListOfUpdateUserRoles : " + ex.Message);
             }
-
+            catch (onlineshop.Models.HttpException<onlineshop.Models.SupplerFirm> ex)
+            {
+                logger.LogWarning("InitListOfUpdateUserRoles : " + ex.Message);
+            }
             return result;
         }
 

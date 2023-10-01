@@ -113,12 +113,21 @@
 
         <!--roles-->
 
-
         <div class="form-group row">
             @Html.LabelFor(model => model.UserRoles, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.ListBoxFor(model=>model.UserRoles, ViewBag.roles as IEnumerable<SelectListItem>, new { @class = "form-control"})
+                @Html.ListBoxFor(model=>model.UserRoles, ViewBag.Roles as IEnumerable<SelectListItem>, new { @class = "form-control"})
                 @Html.ValidationMessageFor(model => model.UserRoles, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--suppler firms-->
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.UserSupplerFirms, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.ListBoxFor(model=>model.UserSupplerFirms, ViewBag.SupplerFirms as IEnumerable<SelectListItem>, new { @class = "form-control"})
+                @Html.ValidationMessageFor(model => model.UserSupplerFirms, "", new { @class = "text-danger" })
             </div>
         </div>
 

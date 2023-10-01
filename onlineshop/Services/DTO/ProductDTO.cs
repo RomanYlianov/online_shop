@@ -32,17 +32,12 @@ namespace onlineshop.Services.DTO
         [Range(0, int.MaxValue, ErrorMessage = "CountAll must be positive or zero")]
         public int CountAll { get; set; }
 
-        [Required(ErrorMessage = "CountThis is required")]
-        [Range(0, int.MaxValue, ErrorMessage = "CountThis must be positive or zero")]
-        public int CountThis { get; set; }
-
         [Required(ErrorMessage = "Price is required")]
         [Range(0, double.MaxValue, ErrorMessage = "Price must be positive or zero")]
         public double Price { get; set; }
 
         public double Rating { get; set; }
 
-        public long MarksCount { get; set; }
 
         [Required(ErrorMessage = "IsHot is required")]
         public bool IsHot { get; set; }

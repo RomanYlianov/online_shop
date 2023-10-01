@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using onlineshop.Data;
 using onlineshop.Models;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace onlineshop.Services.Implimentation
@@ -18,12 +20,16 @@ namespace onlineshop.Services.Implimentation
 
         private readonly ISupperFirmMapper SFMapper;
 
+        private readonly SignInManager<User> SINManager;
+
         private readonly ILogger logger;
 
-        public SupplerFirmServiceImpl(ApplicationDbContext context, ISupperFirmMapper mapper)
+        public SupplerFirmServiceImpl(ApplicationDbContext context, SignInManager<User> sINManager, ISupperFirmMapper mapper)
         {
             this.context = context;
             this.SFMapper = mapper;
+
+            this.SINManager = sINManager;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<SupplerFirmServiceImpl>();
@@ -152,12 +158,23 @@ namespace onlineshop.Services.Implimentation
                     {
                         if (!entity.Name.Equals("root supplerfirm"))
                         {
-                            context.SupplerFirmsCtx.Update(entity);
-                            await context.SaveChangesAsync();
 
-                            item = SFMapper.ToDTO(entity);
+                            if (item.MoneyValue < 0)
+                            {
+                                string message = "balanse must be positive or zero";
+                                logger.LogError(GetType().Name + " : " + message);
+                                throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.BadRequest);
+                            }
+                            else
+                            {
+                                entity = SFMapper.ToEntity(item);
+                                context.SupplerFirmsCtx.Update(entity);
+                                await context.SaveChangesAsync();
 
-                            return item;
+                                item = SFMapper.ToDTO(entity);
+
+                                return item;
+                            }
                         }
                         else
                         {
@@ -177,14 +194,14 @@ namespace onlineshop.Services.Implimentation
                 {
                     string message = "convert id " + item.Id + " failed : " + ex.Message;
                     logger.LogError(GetType().Name + " : : " + message);
-                    throw new HttpException<DeliveryMethod>("Update", message, HttpStatusCode.InternalServerError);
+                    throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.InternalServerError);
                 }
             }
             else
             {
                 string message = "item parameter is mandatory";
                 logger.LogError(GetType().Name + " : " + message);
-                throw new HttpException<Category>("Update", message, HttpStatusCode.BadRequest);
+                throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.BadRequest);
             }
         }
 
@@ -223,79 +240,82 @@ namespace onlineshop.Services.Implimentation
                 {
                     string message = "convert id " + id + " failed : " + ex.Message;
                     logger.LogError(GetType().Name + " : " + message);
-                    throw new HttpException<Category>("Delete", message, HttpStatusCode.InternalServerError);
+                    throw new HttpException<SupplerFirm>("Delete", message, HttpStatusCode.InternalServerError);
                 }
             }
             else
             {
                 string message = "id parameter id mandatory";
                 logger.LogError(GetType().Name + " : " + message);
-                throw new HttpException<Category>("Delete", message, HttpStatusCode.BadRequest);
+                throw new HttpException<SupplerFirm>("Delete", message, HttpStatusCode.BadRequest);
             }
         }
 
-        public async Task<SupplerFirmDTO> CalculateRating(string id)
+        public async Task<PaymentResult> ChangeBalance(ClaimsPrincipal currentUser, string supplerFirmId, double money, bool isIncrement)
         {
+            logger.LogInformation(GetType().Name + " : ChangeBalance");
 
-            logger.LogInformation(GetType().Name + " : CalculateRating");
-
-            try
+            if (SINManager.IsSignedIn(currentUser))
             {
-
-                SupplerFirm entity = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(id));
-
-                if (entity != null)
+                if (supplerFirmId != null && money > 0)
                 {
-
-                    List<Product> products = await context.ProductsCtx.Where(p => p.SupplerFirmId.Equals(entity.Id)).ToListAsync();
-
-                    long count = 0;
-
-                    double ratingSum = 0;
-
-                    if (products != null)
-                    {                       
-
-                        foreach (var product in products)
+                    try
+                    {
+                        SupplerFirm entity = await context.SupplerFirmsCtx.Where(sf => sf.Id.Equals(Guid.Parse(supplerFirmId))).FirstOrDefaultAsync();
+                        if (entity != null)
                         {
-                            ratingSum += product.Rating;
-                            count++;
+
+                            PaymentResult result = PaymentResult.OKAY;
+
+                            if (isIncrement)
+                            {
+                                entity.MoneyValue += money;
+                            }
+                            else
+                            {
+                                entity.MoneyValue -= money;
+                            }
+                            if (entity.MoneyValue < 0)
+                            {
+                                result = PaymentResult.INSUFFICIENT_MONEY;
+                            }
+
+                            context.Entry(entity).State = EntityState.Modified;
+                            context.Set<SupplerFirm>().Update(entity);
+                            await context.SaveChangesAsync();
+
+                            return result;
+
                         }
-
+                        else
+                        {
+                            string message = "supplerfirm with id " + supplerFirmId + " was not found";
+                            logger.LogError(GetType().Name + " : " + message);
+                            throw new HttpException<SupplerFirm>("Changebalance", message, HttpStatusCode.NotFound);
+                        }
                     }
-                    else
+                    catch (FormatException ex)
                     {
-                        string message = "supplerfirm with id " + id + " have not products";
-                        logger.LogWarning(message);
+                        
+                        string message = "convert id " + supplerFirmId + " failed : " + ex.Message;
+                        logger.LogError(GetType().Name + " : " + message);
+                        throw new HttpException<SupplerFirm>("ChangeBalance", message, HttpStatusCode.InternalServerError);
                     }
-
-                    if (ratingSum > 0 && count > 0)
-                    {
-                        entity.Rating = ratingSum / count;
-                        context.Entry(entity).State = EntityState.Modified;
-                        context.Set<SupplerFirm>().Update(entity);
-                        await context.SaveChangesAsync();
-                    }
-
-                    return SFMapper.ToDTO(entity);
-
+                   
                 }
                 else
                 {
-                    string message = "supplerFirm with id " + id + " was not foud";
+                    string message = "input parameters are invalid";
                     logger.LogError(GetType().Name + " : " + message);
-                    throw new HttpException<SupplerFirm>("CalculateRating", message, HttpStatusCode.NotFound);
+                    throw new HttpException<SupplerFirm>("ChangeBalance", message, HttpStatusCode.BadRequest);
                 }
-
             }
-            catch (FormatException ex)
+            else
             {
-                string message = "convert id " + id + " failed : " + ex.Message;
-                logger.LogError(GetType().Name + " : : " + message);
-                throw new HttpException<SupplerFirm>("Update", message, HttpStatusCode.InternalServerError);
+                string message = "user is not authorized";
+                logger.LogError(GetType().Name + " : " + message);
+                throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
             }
-            
         }
-
     }
 }

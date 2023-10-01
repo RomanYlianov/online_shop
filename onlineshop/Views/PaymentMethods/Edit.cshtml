@@ -6,10 +6,32 @@
 
 <h2>Payment method</h2>
 
+
+<script>
+
+    window.onload = f1;
+   
+
+    function f1() {
+        let arg = document.getElementById('el_pmtype').value;
+
+        let cvvItem = document.getElementById('el_cvv');
+
+        if (arg == 0) {
+            cvvItem.style.visibility = "visible";
+        }
+        else {
+            cvvItem.style.visibility = "hidden";
+        }
+
+    }
+</script>
+
+
 @using (Html.BeginForm("Edit", "PaymentMethods", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-    ;
+
 
     <div class="container">
 
@@ -26,11 +48,19 @@
             </div>
         </div>
 
+        <div class="form-group row">
+            @Html.LabelFor(model => model.MoneyValue, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.MoneyValue, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.MoneyValue, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
         <!--dropdown-->
         <div class="form-group row">
             @Html.LabelFor(model => model.PaymentType, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("PaymentType", Html.GetEnumSelectList(typeof(PaymentType)), new { @class = "form-control"})
+                @Html.DropDownListFor(model=>model.PaymentType, Html.GetEnumSelectList(typeof(PaymentType)), new { @id="el_pmtype", @onchange="f1();", @class = "form-control"})
                 @Html.ValidationMessageFor(model => model.PaymentType, "", new { @class = "text-danger" })
             </div>
 
@@ -57,15 +87,15 @@
         <div class="form-group row">
             @Html.LabelFor(model => model.ExpirationDate, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.ExpirationDate.Value, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.ExpirationDate, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.ExpirationDate, "", new { @class = "text-danger" })
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="form-group row" id="el_cvv">
             @Html.LabelFor(model => model.CVV, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CVV.Value, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.CVV, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.CVV, "", new { @class = "text-danger" })
             </div>
         </div>

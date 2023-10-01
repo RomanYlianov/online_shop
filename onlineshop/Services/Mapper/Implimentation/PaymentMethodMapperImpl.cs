@@ -85,6 +85,8 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.Name = entity.Name;
                 }
 
+                dto.MoneyValue = entity.MoneyValue;
+
                 dto.PaymentType = entity.PaymentType;
 
                 if (entity.Provider != null)
@@ -136,6 +138,8 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.User = UMapper.ToEntity(dto.UserDTO);
                     }
+
+                    entity.MoneyValue = dto.MoneyValue;
 
                     if (dto.PaymentType != null)
                     {

@@ -359,10 +359,10 @@ namespace onlineshop.Controllers
 
                     if (isValid)
                     {
-                        isValid = basketDTO.ProductDTO.CountThis >= dto.Count;
+                        isValid = basketDTO.ProductDTO.CountAll >= dto.Count;
                         if (!isValid)
                         {
-                            ModelState.AddModelError("Count", $"Count must be between 0 and {basketDTO.ProductDTO.CountThis}");
+                            ModelState.AddModelError("Count", $"Count must be between 0 and {basketDTO.ProductDTO.CountAll}");
                         }
                     }
                     else

@@ -32,8 +32,8 @@ namespace onlineshop.Models
         [Column("count_all")]
         public int CountAll { get; set; }
 
-        [Column("count_this")]
-        public int CountThis { get; set; }
+        //[Column("count_this")]
+       // public int CountThis { get; set; }
 
         [Column("price")]
         public double Price { get; set; }
@@ -41,8 +41,6 @@ namespace onlineshop.Models
         [Column("rating")]
         public double Rating { get; set; }
 
-        [Column("marks_count")]
-        public long MarksCount { get; set; }
 
         [Column("is_hot")]
         public bool IsHot { get; set; }

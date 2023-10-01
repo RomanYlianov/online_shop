@@ -20,6 +20,9 @@ namespace onlineshop.Models
         [Column("user_id")]
         public Guid UserId { get; set; }
 
+        [Column("money_value")]
+        public double MoneyValue { get; set; }
+
         [Column("payment_type")]
         public PaymentType PaymentType { get; set; }
 

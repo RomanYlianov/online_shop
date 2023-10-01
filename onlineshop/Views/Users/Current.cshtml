@@ -111,6 +111,29 @@
 
         </dd>
 
+        <dt class="col-sm-3">
+            Manage suppler firms
+        </dt>
+
+        @if (ViewBag.SupplerFirms != null)
+        {
+            <dd class="col-sm-9">
+                <ul>
+                    @foreach (var item in ViewBag.SupplerFirms)
+                    {
+                        <li>@item.Name</li>
+                    }
+                </ul>
+            </dd>
+        }
+        else
+        {
+            <dd class="col-sm-9">
+                the user is not a representative of any company
+            </dd>
+        }
+
+
     </dl>
 
 </div>

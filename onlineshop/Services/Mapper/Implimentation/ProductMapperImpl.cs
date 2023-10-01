@@ -72,10 +72,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.CountAll = dto.CountAll;
                     }
 
-                    if (dto.CountThis > 0)
-                    {
-                        entity.CountThis = dto.CountThis;
-                    }
+                   
 
                     if (dto.Price > 0)
                     {
@@ -87,7 +84,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.Rating = dto.Rating;
                     }
 
-                    entity.MarksCount = dto.MarksCount;
+                   
 
                     entity.IsHot = dto.IsHot;
 
@@ -153,10 +150,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.CountAll = entity.CountAll;
                 }
 
-                if (entity.CountThis > 0)
-                {
-                    dto.CountThis = entity.CountThis;
-                }
+               
 
                 if (entity.Price > 0)
                 {
@@ -168,7 +162,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.Rating = entity.Rating;
                 }
 
-                dto.MarksCount = entity.MarksCount;
+               
 
                 dto.IsHot = entity.IsHot;
 

@@ -1,4 +1,5 @@
-﻿using onlineshop.Services.DTO;
+﻿using onlineshop.Models;
+using onlineshop.Services.DTO;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -16,5 +17,8 @@ namespace onlineshop.Services
         Task<PaymentMethodDTO> Update(ClaimsPrincipal currentUser, PaymentMethodDTO item);
 
         Task Delete(ClaimsPrincipal currentUser, string id);
+
+        Task<PaymentResult> ChangeBalance(ClaimsPrincipal currentUser, string paymentMethodId, double val, bool isIncrement = true);
+
     }
 }

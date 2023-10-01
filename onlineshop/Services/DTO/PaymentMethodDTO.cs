@@ -16,6 +16,9 @@ namespace onlineshop.Services.DTO
 
         public string UserDTOId { get; set; }
 
+        [Required(ErrorMessage = "MoneyValue is required")]
+        public double MoneyValue { get; set; }
+
         [Required(ErrorMessage = "PaymetnType is required")]
         public PaymentType? PaymentType { get; set; }
 

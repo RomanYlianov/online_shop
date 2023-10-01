@@ -25,20 +25,28 @@ namespace onlineshop.Controllers
 
         private readonly IPaymentMethodService PMService;
 
+        private readonly ISupplerFirmService SFService;
+
         private readonly ILogger logger;
 
-        public OrdersController(IOrderService oService, IBasketService bService, IDeliveryMethodService dMService, IPaymentMethodService pMService)
+        private static List<string> basketIds = new List<string>();
+
+        private static List<int> productCounts = new List<int>();
+
+        public OrdersController(IOrderService oService, IBasketService bService, IDeliveryMethodService dMService, IPaymentMethodService pMService, ISupplerFirmService sfService)
         {
             this.OService = oService;
             this.BService = bService;
 
             this.DMSercice = dMService;
             this.PMService = pMService;
+            this.SFService = sfService;
 
             var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
             logger = logFactory.CreateLogger<OrdersController>();
         }
 
+      
         [Authorize(Roles = "SELLER, OWNER")]
         [HttpGet("AllOrders")]
         public async Task<IActionResult> AllOrders(
@@ -64,7 +72,7 @@ namespace onlineshop.Controllers
                 }
                 else
                 {
-                    list = await OService.GetAll();
+                    list = await OService.GetAll(User);
                 }
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order>)
@@ -230,9 +238,9 @@ namespace onlineshop.Controllers
 
             //get values
 
-            List<string> basketIds = new List<string>();
+            //List<string> basketIds = new List<string>();
 
-            List<int> productCounts = new List<int>();
+            //List<int> productCounts = new List<int>();
 
             if (TempData.ContainsKey("arg0"))
             {
@@ -255,13 +263,44 @@ namespace onlineshop.Controllers
             ViewBag.deliveryMethods = new SelectList(deliveryMethods, "Value", "Text");
             ViewBag.paymentMethods = new SelectList(paymentMethods, "Value", "Text");
 
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    dto = await OService.Add(User, dto, basketIds, productCounts);
+                    //уменьшить количество денег на счете покупателя
 
-                    return RedirectToAction("MyOrders");
+                    PaymentResult result = await PMService.ChangeBalance(User, dto.PaymentMethodDTOId, dto.Price, false);
+
+                    if (result == PaymentResult.OKAY)
+                    {
+                        ModelState.Clear();
+
+                        
+
+                        dto = await OService.Add(User, dto, basketIds, productCounts);
+
+                        basketIds = new List<string>();
+                        productCounts = new List<int>();
+
+                        return RedirectToAction("MyOrders");
+                    }
+                    else
+                    {
+                        if (result == PaymentResult.INSUFFICIENT_MONEY)
+                        {
+                            return ExceptionHandler("insufficient of money", HttpStatusCode.Forbidden);
+                            
+                        }
+                        else
+                        {
+                            return ExceptionHandler("date of payment method was expiried", HttpStatusCode.Forbidden);
+                          
+                        }
+
+                       
+                    }
+
                 }
                 catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
                 {
@@ -290,7 +329,7 @@ namespace onlineshop.Controllers
             }
             else
             {
-                return View();
+                return View(dto);
             }
         }
 
@@ -436,6 +475,10 @@ namespace onlineshop.Controllers
             {
                 List<ProductDTO> list = await OService.GetProductsFromOrder(User, id);
 
+                List<SelectListItem> paymentMethods = await InitListOfPaymentMethods();
+
+                ViewBag.paymentMethods = new SelectList(paymentMethods, "Value", "Text");
+
                 return View(list);
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
@@ -450,32 +493,47 @@ namespace onlineshop.Controllers
 
         [Authorize(Roles = "BUYER")]
         [HttpPost("Return/{id}")]
-        public async Task<IActionResult> Return(string id, List<ProductDTO> list)
+        public async Task<IActionResult> Return(string id, string method, List<ProductDTO> list)
         {
             logger.LogInformation(GetType().Name + " : Return (POST)");
 
-            try
-            {
-                await OService.Delete(User, id, list);
 
-                return RedirectToAction("myOrders");
-            }
-            catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
+            List<SelectListItem> paymentMethods = await InitListOfPaymentMethods();
+
+            ViewBag.paymentMethods = new SelectList(paymentMethods, "Value", "Text");
+
+            if (method == null)
             {
-                if (ex.Code == HttpStatusCode.InternalServerError)
+                ModelState.AddModelError("", "please select payment method");
+                return View(list);
+            }
+            else
+            {
+                try
                 {
-                    ModelState.AddModelError("", ex.Message);
-                    return View(list);
+                    await OService.Delete(User, id, method, list);
+
+                    return RedirectToAction("MyOrders");
                 }
-                else
+                catch (onlineshop.Models.HttpException<onlineshop.Models.Order> ex)
+                {
+                    if (ex.Code == HttpStatusCode.InternalServerError)
+                    {
+                        ModelState.AddModelError("", ex.Message);
+                        return View(list);
+                    }
+                    else
+                    {
+                        return ExceptionHandler(ex.Message, ex.Code);
+                    }
+                }
+                catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
                 {
                     return ExceptionHandler(ex.Message, ex.Code);
                 }
             }
-            catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
-            {
-                return ExceptionHandler(ex.Message, ex.Code);
-            }
+
+           
         }
 
         private async Task<List<SelectListItem>> InitSelectListOfDeliveryMethods(string selected = null)

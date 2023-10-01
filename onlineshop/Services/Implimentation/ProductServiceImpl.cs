@@ -82,7 +82,7 @@ namespace onlineshop.Services.Implimentation
         {
             logger.LogInformation(GetType().Name + " : GetProductsInCatalog");
 
-            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0).ToListAsync();
+            List<Product> list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountAll > 0 && p.SupplerFirm.MoneyValue >= 0).ToListAsync();
 
             List<ProductDTO> result = new List<ProductDTO>();
 
@@ -106,6 +106,7 @@ namespace onlineshop.Services.Implimentation
                 {
                     if (!item.Name.Equals("removed product"))
                     {
+
                         ProductDTO dto = PMapper.ToDTO(item);
 
                         result.Add(dto);
@@ -278,7 +279,7 @@ namespace onlineshop.Services.Implimentation
                             {
                                 if (eqEntity.BuyerId.ToString().Equals(uid) && eqEntity.ProductId.ToString().Equals(dto.Id))
                                 {
-                                    //calculate rating
+                                    //calculate rating for product
 
                                     if (entity.Rating == 0)
                                     {
@@ -309,6 +310,8 @@ namespace onlineshop.Services.Implimentation
                                     }
 
                                     await context.SaveChangesAsync();
+
+                                    //calculate ration for supplerfirm
 
                                     SupplerFirm sfEntity = await context.SupplerFirmsCtx.FindAsync(entity.SupplerFirmId);
 
@@ -395,8 +398,8 @@ namespace onlineshop.Services.Implimentation
                 {
                     //generate cipher
                     item.Cipher = GenerateProductCipher();
-                    //set CountThis attribute
-                    item.CountThis = item.CountAll;
+                    
+                   
                     //set ratng
                     item.Rating = 0;
                     //need to set CountOfRating as null
@@ -425,53 +428,82 @@ namespace onlineshop.Services.Implimentation
             }
         }
 
-        public async Task<ProductDTO> Update(ProductDTO item)
+        public async Task<ProductDTO> Update(ClaimsPrincipal currentUser, ProductDTO item)
         {
             logger.LogInformation(GetType().Name + " : Update");
 
             if (item != null)
             {
+
+                Product entity = await context.ProductsCtx.FindAsync(Guid.Parse(item.Id));
+
                 try
                 {
-                    Product entity = await context.ProductsCtx.FindAsync(Guid.Parse(item.Id));
-
-                    if (entity != null)
+                    bool isAllow = false;
+                    if (currentUser.IsInRole("OWNER"))
                     {
-                        if (!entity.Name.Equals("removed product"))
+                        isAllow = true;
+                    }
+                    else
+                    {
+                        if (currentUser.IsInRole("SELLER"))
                         {
-                            entity = PMapper.ToEntity(item);
-
-                            //sync count
-                            if (entity.CountAll < entity.CountThis)
+                            List<Guid> firmIds = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier)))).Select(uf => uf.SupplerFirmId).ToListAsync();
+                            foreach (var fid in firmIds)
                             {
-                                entity.CountThis = entity.CountAll;
+                                if (fid.Equals(entity.SupplerFirmId))
+                                {
+                                    isAllow = true;
+                                }
                             }
+                        }
+                    }
+                   
+                    if (isAllow)
+                    {
+                       
 
-                            entity.Category = await context.CategoriesCtx.FindAsync(Guid.Parse(item.CategoryDTOId));
+                        if (entity != null)
+                        {
+                            if (!entity.Name.Equals("removed product"))
+                            {
+                                entity = PMapper.ToEntity(item);
 
-                            entity.SupplerFirm = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(item.SupplerFirmDTOId));
 
-                            context.ProductsCtx.Update(entity);
 
-                            await context.SaveChangesAsync();
+                                entity.Category = await context.CategoriesCtx.FindAsync(Guid.Parse(item.CategoryDTOId));
 
-                            item = PMapper.ToDTO(entity);
+                                entity.SupplerFirm = await context.SupplerFirmsCtx.FindAsync(Guid.Parse(item.SupplerFirmDTOId));
 
-                            return item;
+                                context.ProductsCtx.Update(entity);
+
+                                await context.SaveChangesAsync();
+
+                                item = PMapper.ToDTO(entity);
+
+                                return item;
+                            }
+                            else
+                            {
+                                string message = "product with name \"removed product\" cant be modify";
+                                logger.LogError(GetType().Name + " : " + message);
+                                throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
+                            }
                         }
                         else
                         {
-                            string message = "product with name \"removed product\" cant be modify";
+                            string message = "product with id " + item.Id + " was not found";
                             logger.LogError(GetType().Name + " : " + message);
-                            throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
+                            throw new HttpException<Product>("Update", message, HttpStatusCode.NotFound);
                         }
                     }
                     else
                     {
-                        string message = "product with id " + item.Id + " was not found";
+                        string message = "you dont have permissions to change data";
                         logger.LogError(GetType().Name + " : " + message);
-                        throw new HttpException<Product>("Update", message, HttpStatusCode.NotFound);
+                        throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
                     }
+                   
                 }
                 catch (FormatException ex)
                 {
@@ -569,7 +601,7 @@ namespace onlineshop.Services.Implimentation
                 }
                 else
                 {
-                    list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(name.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                    list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(name.ToUpper()) && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                 }
 
                 string message = string.Empty;
@@ -631,7 +663,7 @@ namespace onlineshop.Services.Implimentation
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Category.Name.ToUpper().Contains(category.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Category.Name.ToUpper().Contains(category.ToUpper()) && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                     }
 
                     string message = string.Empty;
@@ -700,7 +732,7 @@ namespace onlineshop.Services.Implimentation
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.SupplerFirm.Name.ToUpper().Contains(firm.ToUpper()) && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.SupplerFirm.Name.ToUpper().Contains(firm.ToUpper()) && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                     }
 
                     string message = string.Empty;
@@ -781,7 +813,7 @@ namespace onlineshop.Services.Implimentation
                         }
                         else
                         {
-                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.Price <= higestPrice && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                         }
                     }
                     else
@@ -792,7 +824,7 @@ namespace onlineshop.Services.Implimentation
                         }
                         else
                         {
-                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Price >= lowestPrice && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                         }
                     }
 
@@ -881,7 +913,7 @@ namespace onlineshop.Services.Implimentation
                         }
                         else
                         {
-                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.Rating <= higestRating && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                         }
                     }
                     else
@@ -892,7 +924,7 @@ namespace onlineshop.Services.Implimentation
                         }
                         else
                         {
-                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.CountThis > 0 && !p.Name.Equals("removed product")).ToListAsync();
+                            list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Rating >= lowestRating && p.CountAll > 0 && !p.Name.Equals("removed product")).ToListAsync();
                         }
                     }
 
@@ -963,7 +995,7 @@ namespace onlineshop.Services.Implimentation
             }
             else
             {
-                list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0 && (p.IsHot == true) && !p.Name.Equals("removed product")).ToListAsync();
+                list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountAll > 0 && (p.IsHot == true) && !p.Name.Equals("removed product")).ToListAsync();
             }
 
             string message = string.Empty;
@@ -1020,7 +1052,7 @@ namespace onlineshop.Services.Implimentation
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(dto.Name.ToUpper()) && (p.CountThis > 0) && !p.Name.Equals("removed product")).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.Name.ToUpper().Contains(dto.Name.ToUpper()) && (p.CountAll > 0) && !p.Name.Equals("removed product")).ToListAsync();
                     }
                 }
                 else
@@ -1033,7 +1065,7 @@ namespace onlineshop.Services.Implimentation
                     }
                     else
                     {
-                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountThis > 0).ToListAsync();
+                        list = await context.ProductsCtx.Include(p => p.Category).Include(p => p.SupplerFirm).Where(p => p.CountAll > 0).ToListAsync();
                     }
                 }
 

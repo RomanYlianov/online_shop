@@ -55,6 +55,8 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.Rating = dto.Rating;
                     }
 
+                    entity.MoneyValue = dto.MoneyValue;
+
                     if (dto.Description != null)
                     {
                         entity.Description = dto.Description;
@@ -106,6 +108,8 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     dto.Rating = entity.Rating;
                 }
+
+                dto.MoneyValue = entity.MoneyValue;
 
                 if (entity.Description != null)
                 {

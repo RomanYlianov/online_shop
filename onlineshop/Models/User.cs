@@ -32,6 +32,7 @@ namespace onlineshop.Models
         [Column("is_vip")]
         public bool IsVIP { get; set; }
 
+
         [DataType(DataType.Date)]
         [Column("creation_time")]
         public DateTime CreationTime { get; set; }
@@ -44,6 +45,7 @@ namespace onlineshop.Models
             }
         }
 
+
         public virtual List<PaymentMethod> PaymentMethods { get; set; }
 
         public virtual List<Basket> Baskets { get; set; }
@@ -51,5 +53,8 @@ namespace onlineshop.Models
         public virtual List<Order> Orders { get; set; }
 
         public virtual List<EvaluationQueue> EvaluationQueues { get; set; }
+
+        public List<UserSupplerFirm> UserSupplerFirms { get; set; }
+
     }
 }

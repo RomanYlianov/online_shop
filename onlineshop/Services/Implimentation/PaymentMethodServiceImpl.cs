@@ -306,6 +306,97 @@ namespace onlineshop.Services.Implimentation
             }
         }
 
+        public async Task<PaymentResult> ChangeBalance(ClaimsPrincipal currentUser, string paymentMethodId, double money, bool isIncrement = true)
+        {
+            logger.LogInformation(GetType().Name + " : ChangeBalance");
+
+            if (SINManager.IsSignedIn(currentUser))
+            {
+              
+
+                if (paymentMethodId != null && money > 0)
+                {
+
+                    try
+                    {
+                        PaymentMethod entity = await context.PaymentMethodsCtx.Where(pm => pm.Id.Equals(Guid.Parse(paymentMethodId))).FirstOrDefaultAsync();
+
+                        if (entity != null)
+                        {
+
+                            PaymentResult result = PaymentResult.OKAY;
+
+                            if (entity.ExpirationDate < DateTime.Now)
+                            {
+                                string message = "paymentmethod with id " + paymentMethodId + " was expiried";
+                                logger.LogError(GetType().Name + " : " + message);
+                                throw new HttpException<PaymentMethod>("ChangeBalance", message, HttpStatusCode.Forbidden);
+                            }
+                            else
+                            {
+                                if (isIncrement)
+                                {
+                                    entity.MoneyValue += money;
+                                    context.Entry(entity).State = EntityState.Modified;
+                                    context.Set<PaymentMethod>().Update(entity);
+                                    await context.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    if (entity.MoneyValue - money < 0)
+                                    {
+                                        result = PaymentResult.INSUFFICIENT_MONEY;
+                                    }
+                                    else
+                                    {
+                                        entity.MoneyValue -= money;
+                                        context.Entry(entity).State = EntityState.Modified;
+                                        context.Set<PaymentMethod>().Update(entity);
+                                        await context.SaveChangesAsync();
+                                    }
+
+                                }
+                                return result;
+                            }
+
+                        }
+                        else
+                        {
+                            string message = "paymentmethod with id " + paymentMethodId + " was not found";
+                            logger.LogError(GetType().Name + " : " + message);
+                            throw new HttpException<PaymentMethod>("Changebalance", message, HttpStatusCode.NotFound);
+                        }
+                    }
+                    catch (FormatException ex)
+                    {
+                        string message = "convert id " + paymentMethodId + " failed : " + ex.Message;
+                        logger.LogError(GetType().Name + " : " + message);
+                        throw new HttpException<PaymentMethod>("Delete", message, HttpStatusCode.InternalServerError);
+                    }
+
+                    
+
+                }
+                else
+                {
+                    string message = "input parameters are invalid";
+                    logger.LogError(GetType().Name + " : " + message);
+                    throw new HttpException<PaymentMethod>("ChangeBalance", message, HttpStatusCode.BadRequest);
+                }
+
+                
+
+            }
+            else
+            {
+                string message = "user is not authorized";
+                logger.LogError(GetType().Name + " : " + message);
+                throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
+            }
+
+           
+        }
+
         private bool CheckPermissions(ClaimsPrincipal currentUser, string id)
         {
             logger.LogInformation(GetType().Name + " : CheckPermissions");
