@@ -29,6 +29,7 @@ namespace onlineshop.Controllers
         }
 
         [HttpGet("Index")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         public async Task<IActionResult> Index()
         {
             logger.LogInformation(GetType().Name + " : Index");
@@ -59,6 +60,7 @@ namespace onlineshop.Controllers
             return View(list);
         }
 
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(string id)
         {
@@ -82,7 +84,8 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpGet("Create")]
         public async Task<IActionResult> Create()
         {
@@ -93,7 +96,7 @@ namespace onlineshop.Controllers
             return View();
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpPost("Create")]
         public async Task<IActionResult> Create(PaymentMethodDTO dto)
         {
@@ -128,7 +131,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
         {
@@ -152,7 +155,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpPost("Edit/{id}")]
         public async Task<IActionResult> Edit(string id, PaymentMethodDTO dto)
         {
@@ -160,7 +163,7 @@ namespace onlineshop.Controllers
 
             await Inicialize();
 
-            bool flag = ValidateData(dto);
+            bool flag = ValidateData(dto, false);
 
             if (ModelState.IsValid && flag)
             {
@@ -187,7 +190,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -211,7 +214,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        [Authorize(Roles = "SELLER, OWNER")]
+        [Authorize(Roles = "BUYER, SELLER, ADMIN, OWNER")]
         [HttpPost("Delete/{id}")]
         public async Task<IActionResult> Delete(string id, PaymentMethodDTO dto)
         {
@@ -233,7 +236,7 @@ namespace onlineshop.Controllers
             }
         }
 
-        private bool ValidateData(PaymentMethodDTO dto)
+        private bool ValidateData(PaymentMethodDTO dto, bool iSAddAction = true)
         {
             logger.LogInformation(GetType().Name + " : validation");
 
@@ -254,6 +257,17 @@ namespace onlineshop.Controllers
                         ModelState.AddModelError("CVV", "CVV is required");
                         flag = false;
                     }
+
+                    if (iSAddAction)
+                    {
+                        if (dto.MoneyValue < 0)
+                        {
+                            ModelState.AddModelError("MoneyValue", "balance must be positive or zero");
+                            flag = false;
+                        }
+                    }
+
+                   
                 }
             }
 

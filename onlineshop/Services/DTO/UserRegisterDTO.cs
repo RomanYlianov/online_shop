@@ -13,5 +13,7 @@ namespace onlineshop.Services.DTO
         public string PasswordConfirm { get; set; }
 
         public List<string> UserRoles { get; set; }
+
+        public List<string> UserSupplerFirms { get; set; }
     }
 }

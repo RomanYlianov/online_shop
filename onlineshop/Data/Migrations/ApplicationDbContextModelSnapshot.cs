@@ -287,7 +287,7 @@ namespace onlineshop.Data.Migrations
                         .HasColumnName("text")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Tittle")
+                    b.Property<string>("Title")
                         .HasColumnName("title")
                         .HasColumnType("nvarchar(max)");
 
@@ -395,6 +395,10 @@ namespace onlineshop.Data.Migrations
                         .HasColumnName("expiration_date")
                         .HasColumnType("datetime2");
 
+                    b.Property<double>("MoneyValue")
+                        .HasColumnName("money_value")
+                        .HasColumnType("float");
+
                     b.Property<string>("Name")
                         .HasColumnName("name")
                         .HasColumnType("nvarchar(max)");
@@ -441,10 +445,6 @@ namespace onlineshop.Data.Migrations
                         .HasColumnName("count_all")
                         .HasColumnType("int");
 
-                    b.Property<int>("CountThis")
-                        .HasColumnName("count_this")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .HasColumnName("description")
                         .HasColumnType("nvarchar(max)");
@@ -452,10 +452,6 @@ namespace onlineshop.Data.Migrations
                     b.Property<bool>("IsHot")
                         .HasColumnName("is_hot")
                         .HasColumnType("bit");
-
-                    b.Property<long>("MarksCount")
-                        .HasColumnName("marks_count")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .HasColumnName("name")
@@ -532,6 +528,10 @@ namespace onlineshop.Data.Migrations
                         .HasColumnName("description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("MoneyValue")
+                        .HasColumnName("money_value")
+                        .HasColumnType("float");
+
                     b.Property<string>("Name")
                         .HasColumnName("name")
                         .HasColumnType("nvarchar(max)");
@@ -603,6 +603,10 @@ namespace onlineshop.Data.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<double>("MoneyValue")
+                        .HasColumnName("money_value")
+                        .HasColumnType("float");
+
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -641,6 +645,23 @@ namespace onlineshop.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("onlineshop.Models.UserSupplerFirm", b =>
+                {
+                    b.Property<Guid>("SellerId")
+                        .HasColumnName("user_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SupplerFirmId")
+                        .HasColumnName("supplerfirm_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SellerId", "SupplerFirmId");
+
+                    b.HasIndex("SupplerFirmId");
+
+                    b.ToTable("UserSupplerFirm");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -807,6 +828,21 @@ namespace onlineshop.Data.Migrations
 
                     b.HasOne("onlineshop.Models.SupplerFirm", "SupplerFirm")
                         .WithMany("Products")
+                        .HasForeignKey("SupplerFirmId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("onlineshop.Models.UserSupplerFirm", b =>
+                {
+                    b.HasOne("onlineshop.Models.User", "Seller")
+                        .WithMany("UserSupplerFirms")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("onlineshop.Models.SupplerFirm", "SupplerFirm")
+                        .WithMany("UserSupplerFirms")
                         .HasForeignKey("SupplerFirmId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -11,6 +11,7 @@ using onlineshop.Services.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
@@ -27,17 +28,23 @@ namespace onlineshop.Services.Implimentation
 
         private readonly IRoleMapper RMapper;
 
+        private readonly ISupplerFirmService SFService;
+
+        private readonly ISupperFirmMapper SFMapper;
+
         private readonly UserManager<User> USManager;
 
         private readonly SignInManager<User> SINManager;
 
         private readonly ILogger logger;
 
-        public UserServiceImpl(ApplicationDbContext context, UserManager<User> uManager, SignInManager<User> sinManeger, IUserMapper uMapper, IRoleMapper rMapper)
+        public UserServiceImpl(ApplicationDbContext context, UserManager<User> uManager, SignInManager<User> sinManeger, ISupplerFirmService sfService, ISupperFirmMapper sfMapper, IUserMapper uMapper, IRoleMapper rMapper)
         {
             this.context = context;
             this.USManager = uManager;
             this.SINManager = sinManeger;
+            this.SFService = sfService;
+            this.SFMapper = sfMapper;
             this.USmapper = uMapper;
             this.RMapper = rMapper;
 
@@ -172,10 +179,47 @@ namespace onlineshop.Services.Implimentation
             {
                 User entity = USmapper.ToEntity(item);
 
+                
+
+                if (item.UserSupplerFirms != null)
+                {
+                    List<Role> roles = await context.Roles.ToListAsync();
+
+                    bool flag = false;
+
+                    foreach (var role in roles)
+                    {
+                        foreach (string rid in item.UserRoles)
+                        {
+                            if (rid.Equals(role.Id.ToString()))
+                            {
+                                flag = role.Name.Equals("SELLER");
+                                if (flag)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        if (flag)
+                        {
+                            break;
+                        }    
+                    }
+
+                    if (!flag)
+                    {
+                        string message = "user must be have a role \"SELLER\" for bundig with supplerfirms";
+                        logger.LogError(GetType().Name + " : " + message);
+                        throw new HttpException<User>("Add", message, HttpStatusCode.Forbidden);
+                    }                  
+                }
+                
                 entity.PasswordHash = EncryptPassword(entity.PasswordHash);
                 entity.KeyWord = GenerateKeyWord();
                 entity.CreationTime = DateTime.Now;
                 entity.SecurityStamp = Guid.NewGuid().ToString();
+
+
 
                 //create new user
                 await context.Users.AddAsync(entity);
@@ -221,11 +265,11 @@ namespace onlineshop.Services.Implimentation
                                     throw new HttpException<User>("Add", message, HttpStatusCode.NotFound);
                                 }
                             }
-                            catch (Exception ex)
+                            catch (FormatException ex)
                             {
-                                string message = "convert id " + rid + " failes : " + ex.Message;
+                                string message = "convert id " + rid + " failed : " + ex.Message;
                                 logger.LogError(GetType().Name + " : " + message);
-                                throw new HttpException<SupplerFirm>("GetById", message, HttpStatusCode.InternalServerError);
+                                throw new HttpException<SupplerFirm>("Add", message, HttpStatusCode.InternalServerError);
                             }
                         }
 
@@ -235,6 +279,45 @@ namespace onlineshop.Services.Implimentation
                             await context.SaveChangesAsync();
                         }
                     }
+
+                    if (item.UserSupplerFirms != null)
+                    {
+                        List<UserSupplerFirm> ufList = new List<UserSupplerFirm>();
+
+                        foreach (string sfid in item.UserSupplerFirms)
+                        {
+
+                            try
+                            {
+                                SupplerFirm firm = await context.SupplerFirmsCtx.FirstOrDefaultAsync(sf => sf.Id == Guid.Parse(sfid));
+
+                                if (firm != null)
+                                {
+                                    ufList.Add(new UserSupplerFirm(entity.Id, firm.Id));
+                                }
+                                else
+                                {
+                                    string message = "supplerFirm with id " + sfid + " doesn't exists";
+                                    logger.LogError(GetType().Name + " : " + message);
+                                    throw new HttpException<User>("Add", message, HttpStatusCode.NotFound);
+                                }
+                            }
+                            catch (FormatException ex)
+                            {
+                                string message = "convert id " + sfid + " failed : " + ex.Message;
+                                logger.LogError(GetType().Name + " : " + message);
+                                throw new HttpException<SupplerFirm>("Add", message, HttpStatusCode.InternalServerError);
+                            }
+                            
+                            if (ufList.Count > 0)
+                            {
+                                await context.UserSupplerFirmCtx.AddRangeAsync(ufList);
+                                await context.SaveChangesAsync();
+                            }
+
+                        }
+                    }
+
                 }
                 else
                 {
@@ -259,6 +342,9 @@ namespace onlineshop.Services.Implimentation
 
             if (SINManager.IsSignedIn(currentUser))
             {
+
+                bool isHavingSellerRole = false;
+
                 if (item != null)
                 {
                     try
@@ -267,7 +353,7 @@ namespace onlineshop.Services.Implimentation
 
                         if (old != null)
                         {
-                            User entity = await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(old.UserName)); //await manager.FindByNameAsync(old.UserName);
+                            User entity = await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(old.UserName)); 
 
                             if (entity != null)
                             {
@@ -330,6 +416,8 @@ namespace onlineshop.Services.Implimentation
                                             }
                                         }
 
+                                        
+
                                         if (rolesIds != null)
                                         {
                                             List<UserRole> urList = new List<UserRole>();
@@ -337,6 +425,8 @@ namespace onlineshop.Services.Implimentation
                                             foreach (string roleId in rolesIds)
                                             {
                                                 Role role = await context.Roles.FindAsync(Guid.Parse(roleId));
+                                                if (!isHavingSellerRole)
+                                                    isHavingSellerRole = role.Name.Equals("SELLER");
                                                 urList.Add(new UserRole(entity.Id, role.Id));
                                             }
                                             await context.UserRoles.AddRangeAsync(urList);
@@ -348,13 +438,73 @@ namespace onlineshop.Services.Implimentation
                                             await context.SaveChangesAsync();
                                         }
 
+                                        if (item.UserSupplerFirms != null || item.OtherSupplerFirms != null)
+                                        {
+                                            if (isHavingSellerRole)
+                                            {
+                                                List<UserSupplerFirm> userSupplerFirms = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(entity.Id)).ToListAsync();
+
+                                                
+
+                                                if (userSupplerFirms != null)
+                                                {
+                                                    if (item.OtherSupplerFirms != null)
+                                                    {
+                                                        foreach (string firmId in item.OtherSupplerFirms)
+                                                        {
+                                                            SupplerFirm firm = await context.SupplerFirmsCtx.FirstOrDefaultAsync(sf => sf.Id.Equals(Guid.Parse(firmId)));
+                                                            if (firm != null)
+                                                            {
+                                                                UserSupplerFirm userFirm = new UserSupplerFirm(entity.Id, firm.Id);
+                                                                context.Entry(userFirm).State = EntityState.Added;
+                                                                await context.Set<UserSupplerFirm>().AddAsync(userFirm);
+                                                                await context.SaveChangesAsync();
+                                                                userSupplerFirms.Add(userFirm);
+
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    if (item.UserSupplerFirms != null)
+                                                    {
+                                                        foreach (string firmId in item.UserSupplerFirms)
+                                                        {
+                                                            SupplerFirm firm = await context.SupplerFirmsCtx.FirstOrDefaultAsync(sf => sf.Id.Equals(Guid.Parse(firmId)));
+                                                            if (firm != null)
+                                                            {
+                                                                UserSupplerFirm userFirm = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(entity.Id) && uf.SupplerFirmId.Equals(firm.Id)).FirstOrDefaultAsync();
+                                                                context.Entry(userFirm).State = EntityState.Deleted;
+                                                                context.Set<UserSupplerFirm>().Remove(userFirm);
+                                                                await context.SaveChangesAsync();
+                                                                userSupplerFirms.Remove(userSupplerFirms.Where(uf => uf.SellerId.Equals(entity.Id) && uf.SupplerFirmId.Equals(firm.Id)).FirstOrDefault());
+
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                }
+                                               
+
+                                            }
+                                            else
+                                            {
+                                                string message = "user must be have a role \"SELLER\" for bundig with supplerfirms";
+                                                logger.LogError(GetType().Name + " : " + message);
+                                                throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
+                                            }
+                                        }
+                                        
+                                       
+
+                                        
+
                                         return USmapper.ToDTO(entity);
                                     }
                                     else
                                     {
                                         string message = "you don't have permissions to change data";
                                         logger.LogInformation(GetType().Name + " : " + message);
-                                        throw new HttpException<User>("Delete", message, HttpStatusCode.Forbidden);
+                                        throw new HttpException<User>("Update", message, HttpStatusCode.Forbidden);
                                     }
                                 }
                                 else
@@ -382,7 +532,7 @@ namespace onlineshop.Services.Implimentation
                     {
                         string message = "convert id " + item.Id + " failed: " + ex.Message;
                         logger.LogError(GetType().Name + " : " + message);
-                        throw new HttpException<Role>("GetById", message, HttpStatusCode.InternalServerError);
+                        throw new HttpException<Role>("Update", message, HttpStatusCode.InternalServerError);
                     }
                 }
                 else
@@ -573,7 +723,7 @@ namespace onlineshop.Services.Implimentation
                 {
                     string message = "convert id " + id + " failed : " + ex.Message;
                     logger.LogError(GetType().Name + " : " + message);
-                    throw new HttpException<Role>("Delete", message, HttpStatusCode.InternalServerError);
+                    throw new HttpException<Role>("GetRolesForUser", message, HttpStatusCode.InternalServerError);
                 }
             }
             else
@@ -584,6 +734,96 @@ namespace onlineshop.Services.Implimentation
             }
 
             return result;
+        }
+
+        public async Task<List<SupplerFirmDTO>> GetDependentSupplerFirmsForUser(ClaimsPrincipal currentUser, string id)
+        {
+
+            logger.LogInformation(GetType().Name + " : GetSupplerFirmsForBuyer");
+
+            List<SupplerFirmDTO> result = new List<SupplerFirmDTO>();
+
+            if (id != null)
+            {
+
+                try
+                {
+                    User userEntity = await context.Users.FirstOrDefaultAsync(u => u.Id.Equals(Guid.Parse(id)));
+
+                    if (userEntity != null)
+                    {
+
+                       
+
+                        if (SINManager.IsSignedIn(currentUser))
+                        {
+
+                            List<RoleDTO> roles = await GetRolesForUser(id);
+
+                            if (roles.Where(r => r.Name.Equals("OWNER")).FirstOrDefault() != null)
+                            {
+                                result = await SFService.GetAll();
+                            }
+                            else
+                            {
+                                if (roles.Where(r => r.Name.Equals("SELLER")).FirstOrDefault() != null)
+                                {
+                                    try
+                                    {
+                                        List<SupplerFirm> temp = await context.UserSupplerFirmCtx.Include(uf => uf.SupplerFirm).Where(uf => uf.SellerId.Equals(Guid.Parse(id))).Select(uf => uf.SupplerFirm).ToListAsync();
+                                        if (temp != null)
+                                        {
+                                            foreach (var entity in temp)
+                                            {
+                                                result.Add(SFMapper.ToDTO(entity));
+                                            }
+                                        }
+                                    }
+                                    catch (FormatException ex)
+                                    {
+                                        string message = "convert id " + id + " failed : " + ex.Message;
+                                        logger.LogError(GetType().Name + " : " + message);
+                                        throw new HttpException<Role>("GetDependentSupplerFirmsForUser", message, HttpStatusCode.InternalServerError);
+                                    }
+                                }
+                                else
+                                {
+                                    string message = "you dont have permissions to view this data";
+                                    logger.LogError(GetType().Name + " : " + message);
+                                    throw new HttpException<User>("GetDependentSupplerFirmsForUser", message, HttpStatusCode.Forbidden);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            string message = "user is not authorized";
+                            logger.LogError(GetType().Name + " : " + message);
+                            throw new HttpException<User>("GetDependentSupplerFirmsForUser", message, HttpStatusCode.Forbidden);
+                        }
+                    }
+                    else
+                    {
+                        string message = "user with id " + id + " was not found";
+                        logger.LogError(GetType().Name + " : " + message);
+                        throw new HttpException<User>("GetSupplerFirmsForBuyer", message, HttpStatusCode.NotFound);
+                    }
+
+                }
+                catch (FormatException ex)
+                {
+                    string message = "convert id " + id + " failed : " + ex.Message;
+                    logger.LogError(GetType().Name + " : " + message);
+                    throw new HttpException<Role>("GetSupplerFirmsForBuyer", message, HttpStatusCode.InternalServerError);
+                }
+               
+
+
+               
+            }
+
+            return result;
+
         }
 
         public async Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null)
@@ -645,6 +885,8 @@ namespace onlineshop.Services.Implimentation
                 throw new HttpException<User>("CheckEmail", message, HttpStatusCode.Forbidden);
             }
         }
+
+        
 
         public async Task<bool> CheckUserName(ClaimsPrincipal currentUser, string uName, string modifyId = null)
         {

@@ -28,9 +28,14 @@ namespace onlineshop.Models
         [Column("rating")]
         public double Rating { get; set; }
 
+        [Column("money_value")]
+        public double MoneyValue { get; set; }
+
         [Column("description")]
         public string Description { get; set; }
 
         public virtual List<Product> Products { get; set; }
+
+        public List<UserSupplerFirm> UserSupplerFirms { get; set; }
     }
 }

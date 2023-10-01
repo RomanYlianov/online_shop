@@ -86,9 +86,9 @@ namespace onlineshop.Services.Implimentation
                                 if (temp.Product.CountAll > 0)
                                 {
                                     bool isModify = false;
-                                    if (temp.Product.CountThis < item.Count)
+                                    if (temp.Product.CountAll < item.Count)
                                     {
-                                        temp.Count = temp.Product.CountThis;
+                                        temp.Count = temp.Product.CountAll;
                                         temp.IntermediateCost = CalculatePrice(item.Count, item.Product.Price);
                                         isModify = true;
                                     }
@@ -186,9 +186,9 @@ namespace onlineshop.Services.Implimentation
                                 {
                                     Basket temp = item;
                                     bool isModify = false;
-                                    if (temp.Product.CountThis < item.Count)
+                                    if (temp.Product.CountAll < item.Count)
                                     {
-                                        temp.Count = temp.Product.CountThis;
+                                        temp.Count = temp.Product.CountAll;
                                         temp.IntermediateCost = CalculatePrice(item.Count, item.Product.Price);
                                         isModify = true;
                                     }

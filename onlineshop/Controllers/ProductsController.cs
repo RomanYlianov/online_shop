@@ -249,7 +249,7 @@ namespace onlineshop.Controllers
                     ViewBag.Categories = new SelectList(categories, "Value", "Text");
                     ViewBag.SupplerFirms = new SelectList(supplerFirms, "Value", "Text");
 
-                    dto = await PService.Update(dto);
+                    dto = await PService.Update(User, dto);
 
                     return RedirectToAction("Index");
                 }

@@ -1,12 +1,23 @@
 ﻿using onlineshop.Services.DTO;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace onlineshop.Services
 {
-    public interface IProductService : ICrud<ProductDTO, string>
+    public interface IProductService 
     {
+        Task<List<ProductDTO>> GetAll();
+
+        Task<ProductDTO> GetById(string id);
+
+        Task<ProductDTO> Add(ProductDTO item);
+
+        Task<ProductDTO> Update(ClaimsPrincipal currrentUser, ProductDTO item);
+
+        Task Delete(string id);
+
         Task<List<ProductDTO>> GetProductsInCatalog();
 
         Task<List<ProductDTO>> FindByName(string name, bool isRoot = false);

@@ -21,6 +21,8 @@ namespace onlineshop.Services
 
         Task<List<RoleDTO>> GetRolesForUser(string id);
 
+        Task<List<SupplerFirmDTO>> GetDependentSupplerFirmsForUser(ClaimsPrincipal currentUser, string id);
+
         Task<UserDTO> ResetPassword(UserResetPasswordDTO dto);
 
         Task<List<UserDTO>> FindByEmail(ClaimsPrincipal currentUser, string email);

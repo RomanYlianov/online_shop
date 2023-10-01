@@ -294,3 +294,4 @@ G:\VS projects\onlineshop\onlineshop\obj\Debug\netcoreapp3.1\Razor\Views\Comment
 G:\VS projects\onlineshop\onlineshop\obj\Debug\netcoreapp3.1\Razor\Views\Comments\Details.cshtml.g.cs
 G:\VS projects\onlineshop\onlineshop\obj\Debug\netcoreapp3.1\Razor\Views\Comments\Edit.cshtml.g.cs
 G:\VS projects\onlineshop\onlineshop\obj\Debug\netcoreapp3.1\Razor\Views\Comments\Index.cshtml.g.cs
+G:\VS projects\onlineshop\onlineshop\obj\Debug\netcoreapp3.1\onlineshop.sourcelink.json

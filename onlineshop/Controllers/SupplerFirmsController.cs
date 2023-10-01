@@ -103,6 +103,9 @@ namespace onlineshop.Controllers
 
             ViewBag.Countries = new SelectList(items, "Value", "Text");
 
+            dto.MoneyValue = 0;
+            dto.Rating = 0;
+
             // dto.Country = dto.Item.Text;
 
             if (ModelState.IsValid)
@@ -154,6 +157,7 @@ namespace onlineshop.Controllers
             }
             catch (onlineshop.Models.HttpException<onlineshop.Models.SupplerFirm> ex)
             {
+                
                 return ExceptionHandler(ex.Message, ex.Code);
             }
         }
@@ -174,6 +178,12 @@ namespace onlineshop.Controllers
             {
                 if (Validate(dto))
                 {
+
+                    if (dto.MoneyValue < 0)
+                    {
+                        ModelState.AddModelError("MoneyValue", "balanse must be positive or zero");
+                    }
+
                     ModelState.Clear();
 
                     try
@@ -190,7 +200,7 @@ namespace onlineshop.Controllers
                 else
                 {
                     ModelState.AddModelError("Name", "supplerfirm with name \"root supplerfirm\" not allowed");
-                    return View();
+                    return View(dto);
                 }
             }
             else

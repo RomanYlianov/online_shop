@@ -20,6 +20,13 @@ else
 
     <div class="validation" asp-validation-summary="ModelOnly"></div>
 
+    <div class="form-group">
+        <label for="pmid">Payment method</label>
+        @Html.DropDownList("method", ViewBag.paymentMethods as IEnumerable<SelectListItem>, "select type",new { @id="pmid", @class = "form-control"})
+    </div>
+
+   
+
     <table class="table">
         <thead>
             <tr>
@@ -46,7 +53,7 @@ else
                         @Html.TextBox("list["+i+"].Name", Model[i].Name, new {@readonly = "readonly", @class= "form-control"} )
                     </td>
                     <td>
-                        @Html.TextBox("list["+i+"].CountThis", Model[i].CountThis, new { @class= "form-control",  @type = "number" } )
+                        @Html.TextBox("list["+i+"].CountAll", Model[i].CountAll, new { @class= "form-control",  @type = "number" } )
                     </td>                    
                 </tr>
             }

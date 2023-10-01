@@ -38,8 +38,11 @@ namespace onlineshop.Services.DTO
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Country is required")]
+      
         public string Country { get; set; }
 
+        
+        
         public bool IsVIP { get; set; } = false;
     }
 }

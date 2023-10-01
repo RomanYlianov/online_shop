@@ -109,6 +109,7 @@ namespace onlineshop.Services.Mapper.Implimentation
                     {
                         entity.LockoutEnd = dto.LookOutEnd.Value;
                     }
+                    
 
                     entity.LockoutEnabled = dto.LookOutEnabled;
 
@@ -175,6 +176,8 @@ namespace onlineshop.Services.Mapper.Implimentation
                 {
                     entity.Country = dto.Country;
                 }
+                
+                
 
                 entity.IsVIP = dto.IsVIP;
             }

@@ -22,9 +22,12 @@ namespace onlineshop.Services.DTO
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime? RegisterDate { get; set; }
 
-        [Required(ErrorMessage = "Rating is required")]
-        [Range(0, 10, ErrorMessage = "Rating must be 0 and 10")]
+        //[Required(ErrorMessage = "Rating is required")]
+        //[Range(0, 10, ErrorMessage = "Rating must be 0 and 10")]
         public double Rating { get; set; }
+
+        [Required(ErrorMessage = "MoneyValue is mandatory")]
+        public double MoneyValue { get; set; }
 
         [Required(ErrorMessage = "Description is required")]
         [StringLength(255, MinimumLength = 5, ErrorMessage = "Description must be between 5 and 255")]

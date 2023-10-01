@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace onlineshop.Data.Migrations
 {
@@ -29,6 +29,7 @@ namespace onlineshop.Data.Migrations
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
                     name = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    money_value = table.Column<double>(type: "float", nullable: false),
                     payment_type = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     provider = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     number = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -57,6 +58,7 @@ namespace onlineshop.Data.Migrations
                     country = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     register_date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     rating = table.Column<double>(type: "float", nullable: false),
+                    money_value = table.Column<double>(type: "float", nullable: false),
                     description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
                 constraints: table =>
@@ -89,10 +91,8 @@ namespace onlineshop.Data.Migrations
                     category_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     supplerfirm_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     count_all = table.Column<int>(type: "int", nullable: false),
-                    count_this = table.Column<int>(type: "int", nullable: false),
                     price = table.Column<double>(type: "float", nullable: false),
                     rating = table.Column<double>(type: "float", defaultValueSql: "0.0"),
-                    marks_count = table.Column<long>(type: "bigint", defaultValueSql: "0"),
                     is_hot = table.Column<bool>(type: "bit", nullable: false),
                     description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
@@ -302,6 +302,28 @@ namespace onlineshop.Data.Migrations
                    );
                 }
              );
+            migrationBuilder.CreateTable(
+                name: "UserSupplerfirm",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    supplerfirm_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSupplerFirm", x => new { x.supplerfirm_id, x.user_id });
+                    table.ForeignKey(name: "FK_UserSupplerfirm_AspNetUsers_Id",
+                        column: v => v.user_id,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(name: "FK_UserSupplerfirm_SupplerFirm_id",
+                        column: x => x.supplerfirm_id,
+                        principalTable: "supplerfirm",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                }
+                );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -316,6 +338,8 @@ namespace onlineshop.Data.Migrations
             migrationBuilder.DropTable(name: "basket");
             migrationBuilder.DropTable(name: "order");
             migrationBuilder.DropTable(name: "evaluationQueue");
+            migrationBuilder.DropTable(name: "UserSupplerFirm");
+            migrationBuilder.DropTable(name: "UserSupplerFirm");
         }
     }
 }
