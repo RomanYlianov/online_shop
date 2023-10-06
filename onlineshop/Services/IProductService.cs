@@ -16,7 +16,7 @@ namespace onlineshop.Services
 
         Task<ProductDTO> Update(ClaimsPrincipal currrentUser, ProductDTO item);
 
-        Task Delete(string id);
+        Task Delete(ClaimsPrincipal currentUser, string id);
 
         Task<List<ProductDTO>> GetProductsInCatalog();
 
