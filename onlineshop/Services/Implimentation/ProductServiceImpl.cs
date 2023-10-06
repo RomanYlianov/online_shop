@@ -439,31 +439,30 @@ namespace onlineshop.Services.Implimentation
 
                 try
                 {
-                    bool isAllow = false;
-                    if (currentUser.IsInRole("OWNER"))
+
+                    if (entity != null)
                     {
-                        isAllow = true;
-                    }
-                    else
-                    {
-                        if (currentUser.IsInRole("SELLER"))
+                        bool isAllow = false;
+                        if (currentUser.IsInRole("OWNER"))
                         {
-                            List<Guid> firmIds = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier)))).Select(uf => uf.SupplerFirmId).ToListAsync();
-                            foreach (var fid in firmIds)
+                            isAllow = true;
+                        }
+                        else
+                        {
+                            if (currentUser.IsInRole("SELLER"))
                             {
-                                if (fid.Equals(entity.SupplerFirmId))
+                                List<Guid> firmIds = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier)))).Select(uf => uf.SupplerFirmId).ToListAsync();
+                                foreach (var fid in firmIds)
                                 {
-                                    isAllow = true;
+                                    if (fid.Equals(entity.SupplerFirmId))
+                                    {
+                                        isAllow = true;
+                                    }
                                 }
                             }
                         }
-                    }
-                   
-                    if (isAllow)
-                    {
-                       
 
-                        if (entity != null)
+                        if (isAllow)
                         {
                             if (!entity.Name.Equals("removed product"))
                             {
@@ -492,17 +491,18 @@ namespace onlineshop.Services.Implimentation
                         }
                         else
                         {
-                            string message = "product with id " + item.Id + " was not found";
+                            string message = "you dont have permissions to change data";
                             logger.LogError(GetType().Name + " : " + message);
-                            throw new HttpException<Product>("Update", message, HttpStatusCode.NotFound);
+                            throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
                         }
                     }
                     else
                     {
-                        string message = "you dont have permissions to change data";
+                        string message = "product with id " + item.Id + " was not found";
                         logger.LogError(GetType().Name + " : " + message);
-                        throw new HttpException<Product>("Update", message, HttpStatusCode.Forbidden);
+                        throw new HttpException<Product>("Update", message, HttpStatusCode.NotFound);
                     }
+                    
                    
                 }
                 catch (FormatException ex)
@@ -521,7 +521,7 @@ namespace onlineshop.Services.Implimentation
         }
 
         [Obsolete]
-        public async Task Delete(string id)
+        public async Task Delete(ClaimsPrincipal currentUser, string id)
         {
             logger.LogInformation(GetType().Name + " : Delete");
 
@@ -533,37 +533,68 @@ namespace onlineshop.Services.Implimentation
 
                     if (entity != null)
                     {
-                        if (!entity.Name.Equals("removed product"))
+
+                        bool isAllow = false;
+                        if (currentUser.IsInRole("OWNER"))
                         {
-                            //replace depends link
-                            List<OrderProduct> list = await context.OrderProductCtx.Where(op => op.ProductId.Equals(entity.Id)).ToListAsync();
-
-                            if (list != null)
-                            {
-                                Guid removedProductId = await context.ProductsCtx.Where(p => p.Name.Equals("removed product")).Select(p => p.Id).FirstOrDefaultAsync();                                
-
-                                foreach (var item in list)
-                                {
-                                    string pid = removedProductId.ToString();
-                                    string oid = item.OrderId.ToString();
-                                    string oldProductId = item.ProductId.ToString();
-                                    string query = $"update OrderProduct set product_id = '{pid}' where order_id = '{oid}' and product_id='{oldProductId}';";
-                                    var res = await context.Database.ExecuteSqlCommandAsync(query);
-                                    await context.SaveChangesAsync();
-                                }
-
-                                list = await context.OrderProductCtx.Where(op => op.ProductId.Equals(entity.Id)).ToListAsync();
-                            }
-
-                            context.ProductsCtx.Remove(entity);
-                            await context.SaveChangesAsync();
+                            isAllow = true;
                         }
                         else
                         {
-                            string message = "product with name \"reomved product\" cant be removed";
+                            if (currentUser.IsInRole("SELLER"))
+                            {
+                                List<Guid> firmIds = await context.UserSupplerFirmCtx.Where(uf => uf.SellerId.Equals(Guid.Parse(currentUser.FindFirstValue(ClaimTypes.NameIdentifier)))).Select(uf => uf.SupplerFirmId).ToListAsync();
+                                foreach (var fid in firmIds)
+                                {
+                                    if (fid.Equals(entity.SupplerFirmId))
+                                    {
+                                        isAllow = true;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isAllow)
+                        {
+                            if (!entity.Name.Equals("removed product"))
+                            {
+                                //replace depends link
+                                List<OrderProduct> list = await context.OrderProductCtx.Where(op => op.ProductId.Equals(entity.Id)).ToListAsync();
+
+                                if (list != null)
+                                {
+                                    Guid removedProductId = await context.ProductsCtx.Where(p => p.Name.Equals("removed product")).Select(p => p.Id).FirstOrDefaultAsync();
+
+                                    foreach (var item in list)
+                                    {
+                                        string pid = removedProductId.ToString();
+                                        string oid = item.OrderId.ToString();
+                                        string oldProductId = item.ProductId.ToString();
+                                        string query = $"update OrderProduct set product_id = '{pid}' where order_id = '{oid}' and product_id='{oldProductId}';";
+                                        var res = await context.Database.ExecuteSqlCommandAsync(query);
+                                        await context.SaveChangesAsync();
+                                    }
+
+                                    list = await context.OrderProductCtx.Where(op => op.ProductId.Equals(entity.Id)).ToListAsync();
+                                }
+
+                                context.ProductsCtx.Remove(entity);
+                                await context.SaveChangesAsync();
+                            }
+                            else
+                            {
+                                string message = "product with name \"reomved product\" cant be removed";
+                                logger.LogError(GetType().Name + " : " + message);
+                                throw new HttpException<Product>("Delete", message, HttpStatusCode.Forbidden);
+                            }
+                        }
+                        else
+                        {
+                            string message = "you dont have permissions to change data";
                             logger.LogError(GetType().Name + " : " + message);
                             throw new HttpException<Product>("Delete", message, HttpStatusCode.Forbidden);
                         }
+                       
                     }
                     else
                     {

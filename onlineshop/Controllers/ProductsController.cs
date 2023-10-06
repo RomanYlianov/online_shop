@@ -293,7 +293,7 @@ namespace onlineshop.Controllers
 
             try
             {
-                await PService.Delete(id);
+                await PService.Delete(User, id);
 
                 return RedirectToAction("Index");
             }
