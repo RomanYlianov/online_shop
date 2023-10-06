@@ -236,6 +236,14 @@ namespace onlineshop.Controllers
 
             await Inicialize();
 
+            List<SelectListItem> deliveryMethods = await InitSelectListOfDeliveryMethods();
+
+            List<SelectListItem> paymentMethods = await InitListOfPaymentMethods();
+
+            ViewBag.deliveryMethods = new SelectList(deliveryMethods, "Value", "Text");
+            ViewBag.paymentMethods = new SelectList(paymentMethods, "Value", "Text");
+
+
             //get values
 
             //List<string> basketIds = new List<string>();
@@ -256,12 +264,8 @@ namespace onlineshop.Controllers
 
             TempData.Clear();
 
-            List<SelectListItem> deliveryMethods = await InitSelectListOfDeliveryMethods();
+            
 
-            List<SelectListItem> paymentMethods = await InitListOfPaymentMethods();
-
-            ViewBag.deliveryMethods = new SelectList(deliveryMethods, "Value", "Text");
-            ViewBag.paymentMethods = new SelectList(paymentMethods, "Value", "Text");
 
 
             if (ModelState.IsValid)
@@ -276,7 +280,7 @@ namespace onlineshop.Controllers
                     {
                         ModelState.Clear();
 
-                        
+
 
                         dto = await OService.Add(User, dto, basketIds, productCounts);
 
@@ -287,18 +291,24 @@ namespace onlineshop.Controllers
                     }
                     else
                     {
+                        dto = await OService.InicializeOrder(User, basketIds, productCounts);
                         if (result == PaymentResult.INSUFFICIENT_MONEY)
                         {
-                            return ExceptionHandler("insufficient of money", HttpStatusCode.Forbidden);
-                            
+                            ModelState.AddModelError("", "insufficient of money");
+                            return View(dto);
+                            //return ExceptionHandler("insufficient of money", HttpStatusCode.Forbidden);
+
                         }
                         else
                         {
-                            return ExceptionHandler("date of payment method was expiried", HttpStatusCode.Forbidden);
-                          
+                            ModelState.AddModelError("", "insufficient of money");
+
+                            return View(dto);
+                            //return ExceptionHandler("date of payment method was expiried", HttpStatusCode.Forbidden);
+
                         }
 
-                       
+
                     }
 
                 }
@@ -329,6 +339,7 @@ namespace onlineshop.Controllers
             }
             else
             {
+                dto = await OService.Add(User, dto, basketIds, productCounts);
                 return View(dto);
             }
         }
