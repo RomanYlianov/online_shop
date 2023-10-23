@@ -384,6 +384,8 @@ namespace onlineshop.Controllers
         {
             logger.LogInformation(GetType().Name + " : AddProductToBasket (GET)");
 
+            await Inicialize();
+
             try
             {
                 ProductDTO dto = await PService.GetById(id);

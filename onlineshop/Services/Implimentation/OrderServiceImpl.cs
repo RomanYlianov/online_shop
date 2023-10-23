@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using onlineshop.Data;
@@ -737,8 +738,11 @@ namespace onlineshop.Services.Implimentation
                             {
                                 string pid = string.Empty;
 
+                                double moneyValue = 0;
+
                                 try
                                 {
+                                    PaymentResult result = PaymentResult.OKAY;
                                     for (int i = 0; i < products.Count; i++)
                                     {
                                         pid = products[i].Id;
@@ -750,23 +754,20 @@ namespace onlineshop.Services.Implimentation
                                         //снятие со счета фирмы поставщика
 
                                         double money = productEntity.Price * products[i].CountAll;
-                                        PaymentResult result = await SFService.ChangeBalance(currentUser, productEntity.SupplerFirmId.ToString(), money, false);
-
+                                        moneyValue += money;
+                                        result = await SFService.ChangeBalance(currentUser, productEntity.SupplerFirmId.ToString(), money, false);
+                                      
                                         if (result != PaymentResult.OKAY)
                                         {
                                             //обработка ошибки списания средств
                                             logger.LogWarning(GetType().Name + " : failed to write off money from supplerfirms account");
                                         }
 
-                                        //зачисление на счет покупателя
+                                        
 
-                                        result = await PMService.ChangeBalance(currentUser, method, money);
+                                       
 
-                                        if (result != PaymentResult.OKAY)
-                                        {
-                                            //обрвботка ошибки зачисления средств
-                                            logger.LogWarning(GetType().Name + " : failed to add money on user account");
-                                        }
+                                       
 
                                         OrderProduct opEntity = await context.OrderProductCtx.Where(op => op.OrderId.Equals(oid) && op.ProductId.Equals(Guid.Parse(pid))).FirstOrDefaultAsync();
 
@@ -776,6 +777,15 @@ namespace onlineshop.Services.Implimentation
                                             logger.LogError(GetType().Name + " : " + message);
                                             throw new HttpException<Order>("Delete", message, HttpStatusCode.InternalServerError);
                                         }
+                                    }
+                                    //зачисление на счет покупателя
+                                    result = await PMService.ChangeBalance(currentUser, method, moneyValue);
+
+
+                                    if (result != PaymentResult.OKAY)
+                                    {
+                                        //обрвботка ошибки зачисления средств
+                                        logger.LogWarning(GetType().Name + " : failed to add money on user account");
                                     }
 
                                     for (int i = 0; i < products.Count; i++)
@@ -830,7 +840,7 @@ namespace onlineshop.Services.Implimentation
 
                                                 if (eqEntity != null)
                                                 {
-                                                    context.Entry(opEntity).State = EntityState.Deleted;
+                                                    context.Entry(eqEntity).State = EntityState.Deleted;
                                                     context.Set<EvaluationQueue>().Remove(eqEntity);
                                                     await context.SaveChangesAsync();
                                                 }

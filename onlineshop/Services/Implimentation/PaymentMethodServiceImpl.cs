@@ -337,7 +337,7 @@ namespace onlineshop.Services.Implimentation
                                 if (isIncrement)
                                 {
                                     entity.MoneyValue += money;
-                                    context.Entry(entity).State = EntityState.Modified;
+                                    context.Entry(entity).State = EntityState.Detached;
                                     context.Set<PaymentMethod>().Update(entity);
                                     await context.SaveChangesAsync();
                                 }
@@ -350,7 +350,7 @@ namespace onlineshop.Services.Implimentation
                                     else
                                     {
                                         entity.MoneyValue -= money;
-                                        context.Entry(entity).State = EntityState.Modified;
+                                        context.Entry(entity).State = EntityState.Detached;
                                         context.Set<PaymentMethod>().Update(entity);
                                         await context.SaveChangesAsync();
                                     }
