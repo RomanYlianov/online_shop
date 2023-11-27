@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "G:\\VS projects\\onlineshop\\onlineshop\\onlineshop.csproj": {}
+    "D:\\документы\\WEB SITE\\release\\onlineshop\\onlineshop.csproj": {}
   },
   "projects": {
-    "G:\\VS projects\\onlineshop\\onlineshop\\onlineshop.csproj": {
+    "D:\\документы\\WEB SITE\\release\\onlineshop\\onlineshop.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "G:\\VS projects\\onlineshop\\onlineshop\\onlineshop.csproj",
+        "projectUniqueName": "D:\\документы\\WEB SITE\\release\\onlineshop\\onlineshop.csproj",
         "projectName": "onlineshop",
-        "projectPath": "G:\\VS projects\\onlineshop\\onlineshop\\onlineshop.csproj",
+        "projectPath": "D:\\документы\\WEB SITE\\release\\onlineshop\\onlineshop.csproj",
         "packagesPath": "C:\\Users\\ROMAN\\.nuget\\packages\\",
-        "outputPath": "G:\\VS projects\\onlineshop\\onlineshop\\obj\\",
+        "outputPath": "D:\\документы\\WEB SITE\\release\\onlineshop\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
