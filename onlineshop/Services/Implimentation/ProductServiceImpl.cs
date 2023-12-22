@@ -287,11 +287,11 @@ namespace onlineshop.Services.Implimentation
                                     }
                                     else
                                     {
-                                        entity.Rating = (entity.Rating + dto.Rating) / 2;
+                                        entity.Rating = (entity.Rating*entity.MarksCount + dto.Rating) / (entity.MarksCount+1);
                                     }
                                     
                                     //entity.Rating = (entity.Rating + dto.Rating) / (entity.MarksCount + 1);
-                                    //entity.MarksCount++;
+                                    entity.MarksCount++;
 
                                     context.Entry(entity).State = EntityState.Modified;
                                     context.Set<Product>().Update(entity);
@@ -324,7 +324,8 @@ namespace onlineshop.Services.Implimentation
                                         }
                                         else
                                         {
-                                            sfEntity.Rating = (sfEntity.Rating + dto.Rating) / 2;
+                                            sfEntity.Rating = (sfEntity.Rating*sfEntity.MarksCount + dto.Rating) / (sfEntity.MarksCount+1);
+                                            sfEntity.MarksCount++;
                                         }
 
                                         context.Entry(sfEntity).State = EntityState.Modified;

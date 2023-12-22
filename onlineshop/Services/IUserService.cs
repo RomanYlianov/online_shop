@@ -33,11 +33,11 @@ namespace onlineshop.Services
 
         Task<List<UserDTO>> Search(UserSearchDTO dto);
 
-        Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null);
+        Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null, bool isRegisteer = false);
 
-        Task<bool> CheckUserName(ClaimsPrincipal currentUser, string nick, string modifyId = null);
+        Task<bool> CheckUserName(ClaimsPrincipal currentUser, string nick, string modifyId = null, bool isRegister = false);
 
-        Task<bool> CheckPhoneNumber(ClaimsPrincipal currentUser, string phone, string modifyId = null);
+        Task<bool> CheckPhoneNumber(ClaimsPrincipal currentUser, string phone, string modifyId = null, bool isRegister = false);
 
         Task<UserDTO> CheckUser(UserLoginDTO dto);
 

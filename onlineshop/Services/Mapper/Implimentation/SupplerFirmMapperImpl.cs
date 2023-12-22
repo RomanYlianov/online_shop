@@ -55,6 +55,11 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.Rating = dto.Rating;
                     }
 
+                    if (dto.MarksCount >= 0)
+                    {
+                        entity.MarksCount = dto.MarksCount;
+                    }
+
                     entity.MoneyValue = dto.MoneyValue;
 
                     if (dto.Description != null)
@@ -107,6 +112,12 @@ namespace onlineshop.Services.Mapper.Implimentation
                 if (entity.Rating >= 0 && entity.Rating <= 10)
                 {
                     dto.Rating = entity.Rating;
+                }
+
+
+                if (entity.MarksCount >= 0)
+                {
+                    dto.MarksCount = entity.MarksCount;
                 }
 
                 dto.MoneyValue = entity.MoneyValue;

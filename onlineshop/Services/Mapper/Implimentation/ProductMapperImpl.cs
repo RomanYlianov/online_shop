@@ -84,6 +84,11 @@ namespace onlineshop.Services.Mapper.Implimentation
                         entity.Rating = dto.Rating;
                     }
 
+                    if (dto.MarksCount >= 0)
+                    {
+                        entity.MarksCount = dto.MarksCount;
+                    }
+
                    
 
                     entity.IsHot = dto.IsHot;
@@ -162,6 +167,10 @@ namespace onlineshop.Services.Mapper.Implimentation
                     dto.Rating = entity.Rating;
                 }
 
+                if (entity.MarksCount >= 0)
+                {
+                    dto.MarksCount = entity.MarksCount;
+                }
                
 
                 dto.IsHot = entity.IsHot;

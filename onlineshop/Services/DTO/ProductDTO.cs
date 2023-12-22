@@ -38,6 +38,8 @@ namespace onlineshop.Services.DTO
 
         public double Rating { get; set; }
 
+        public long MarksCount { get; set; }
+
 
         [Required(ErrorMessage = "IsHot is required")]
         public bool IsHot { get; set; }

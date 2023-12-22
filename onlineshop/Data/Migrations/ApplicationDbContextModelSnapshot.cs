@@ -453,6 +453,10 @@ namespace onlineshop.Data.Migrations
                         .HasColumnName("is_hot")
                         .HasColumnType("bit");
 
+                    b.Property<int>("MarksCount")
+                        .HasColumnName("marks_count")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnName("name")
                         .HasColumnType("nvarchar(max)");
@@ -602,10 +606,6 @@ namespace onlineshop.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<double>("MoneyValue")
-                        .HasColumnName("money_value")
-                        .HasColumnType("float");
 
                     b.Property<string>("NormalizedEmail")
                         .HasColumnType("nvarchar(256)")

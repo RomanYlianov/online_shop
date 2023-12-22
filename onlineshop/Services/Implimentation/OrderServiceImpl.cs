@@ -478,7 +478,7 @@ namespace onlineshop.Services.Implimentation
 
                                 //зачисление средств на счет фирмы поставщика
 
-                                Guid supplerFirmId = await context.ProductsCtx.Where(p => p.Id.Equals(bEntity.ProductId)).Select(p=>p.SupplerFirmId).FirstOrDefaultAsync();
+                                Guid supplerFirmId = await context.ProductsCtx.AsNoTracking().Where(p => p.Id.Equals(bEntity.ProductId)).Select(p=>p.SupplerFirmId).FirstOrDefaultAsync();
 
                                 double money = bEntity.Product.Price * pCount;
 

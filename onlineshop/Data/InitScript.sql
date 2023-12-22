@@ -114,7 +114,7 @@ go
 
 insert into supplerfirm (name, address, country, register_date, rating, money_value, description) values ('root supplerfirm', 'root address', 'root country', GETDATE(), 10.0, 0, 'root description');
 go
-insert into supplerfirm (name, address, country, register_date, rating, money_value, description) values ('firm 2', 'address 2', 'country 2', GETDATE(), 0.0, 0, 'description 2');
+insert into supplerfirm (name, address, country, register_date, rating, money_value, description) values ('firm 2', 'address 2', 'country 2', GETDATE(), 0.0, 1000000, 'description 2');
 go
 
 /*
@@ -127,7 +127,7 @@ go
 * payment methods
 */
 
-insert into paymentmethod (name, user_id, money_value, payment_type, provider, number, cvv ) values ('method 1', (select Id from AspNetUsers where NormalizedEmail='ROOT@MAIL.RU'), 0, 'QIWI', 'provider 1', '123456', 123);
+insert into paymentmethod (name, user_id, money_value, payment_type, provider, number, cvv ) values ('method 1', (select Id from AspNetUsers where NormalizedEmail='ROOT@MAIL.RU'), 800000, 'QIWI', 'provider 1', '123456', 123);
 go
 insert into paymentmethod (name, user_id, money_value, payment_type, provider, number) values ('method 2', (select Id from AspNetUsers where NormalizedEmail='ROOT@MAIL.RU'), 0, 'QIWI', 'provider 2', '123456');
 go
@@ -136,9 +136,9 @@ go
 * products
 */
 
-insert into product (cipher, name, category_id, supplerfirm_id, count_all, price, rating, is_hot, description) values ('P#0000-00-00#AAAAAaaaaaaaaaaaaaaa', 'removed product', (select id from category where name='root category'), (select id from supplerfirm where name='root supplerfirm'), 0,0.0, 10.0, 0, 'root description root description'); 
+insert into product (cipher, name, category_id, supplerfirm_id, count_all, price, rating, marks_count, is_hot, description) values ('P#0000-00-00#AAAAAaaaaaaaaaaaaaaa', 'removed product', (select id from category where name='root category'), (select id from supplerfirm where name='root supplerfirm'), 0,0.0, 10.0, 0, 0, 'root description root description'); 
 go
-insert into product (cipher, name, category_id, supplerfirm_id, count_all, price, rating, is_hot, description) values ('P#2023-08-12#LPLHYRQK0ba1Bvn7nXVi', 'product 1', (select id from category where name='name 2'), (select id from supplerfirm where name='firm 2'), 1000, 125.40, 8.3, 1, 'description description 1') 
+insert into product (cipher, name, category_id, supplerfirm_id, count_all, price, rating, marks_count, is_hot, description) values ('P#2023-08-12#LPLHYRQK0ba1Bvn7nXVi', 'product 1', (select id from category where name='name 2'), (select id from supplerfirm where name='firm 2'), 1000, 125.40, 8.3, 0, 1, 'description description 1') 
 go
 
 /*

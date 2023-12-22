@@ -251,7 +251,7 @@ namespace onlineshop.Services.Implimentation
             }
         }
 
-        public async Task<PaymentResult> ChangeBalance(ClaimsPrincipal currentUser, string supplerFirmId, double money, bool isIncrement)
+        public async Task<PaymentResult> ChangeBalance(ClaimsPrincipal currentUser, String supplerFirmId, double money, bool isIncrement)
         {
             logger.LogInformation(GetType().Name + " : ChangeBalance");
 
@@ -280,8 +280,13 @@ namespace onlineshop.Services.Implimentation
                                 result = PaymentResult.INSUFFICIENT_MONEY;
                             }
 
-                            context.Entry(entity).State = EntityState.Modified;
-                            context.Set<SupplerFirm>().Update(entity);
+                            //string query = "update supplerfirm set money_value = "+entity.MoneyValue+" where id = '"+supplerFirmId+"'";
+                           
+
+                            //int q_result  = context.Database.ExecuteSqlCommand(query);
+
+                            //context.Entry(entity).State = EntityState.Detached;
+                            //context.Set<SupplerFirm>().Update(entity);
                             await context.SaveChangesAsync();
 
                             return result;

@@ -41,6 +41,9 @@ namespace onlineshop.Models
         [Column("rating")]
         public double Rating { get; set; }
 
+        [Column("marks_count")]
+        public long MarksCount { get; set; }
+
 
         [Column("is_hot")]
         public bool IsHot { get; set; }

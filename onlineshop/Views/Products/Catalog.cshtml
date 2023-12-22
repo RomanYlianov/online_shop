@@ -105,7 +105,9 @@
                     <td>
                         @Html.DisplayFor(modelItem=>item.CountAll)
                     </td>
-                    
+                    <td>
+                        @Html.DisplayFor(modelItem=>item.Price)
+                    </td>
                     <td>
                         @Html.DisplayFor(modelItem=>item.Rating)
                     </td>
@@ -118,7 +120,7 @@
                     else
                     {
                         <td>
-                            &nbsp;
+                            not
                         </td>
                     }
                     <td colspan="2">

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace onlineshop.Data.Migrations
 {
-    public partial class UpdateDatabaseStructure : Migration
+    public partial class InitDatabaseStructure : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -57,7 +57,8 @@ namespace onlineshop.Data.Migrations
                     address = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     country = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     register_date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    rating = table.Column<double>(type: "float", nullable: false),
+                    rating = table.Column<double>(type: "float", defaultValueSql: "0"),
+                    marks_count = table.Column<long>(type: "bigint", defaultValueSql: "0"),
                     money_value = table.Column<double>(type: "float", nullable: false),
                     description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },
@@ -93,6 +94,7 @@ namespace onlineshop.Data.Migrations
                     count_all = table.Column<int>(type: "int", nullable: false),
                     price = table.Column<double>(type: "float", nullable: false),
                     rating = table.Column<double>(type: "float", defaultValueSql: "0.0"),
+                    marks_count = table.Column<long>(type: "bigint", defaultValueSql: "0"),
                     is_hot = table.Column<bool>(type: "bit", nullable: false),
                     description = table.Column<string>(type: "nvarchar(100)", nullable: false)
                 },

@@ -27,6 +27,10 @@ namespace onlineshop.Models
 
         [Column("rating")]
         public double Rating { get; set; }
+        
+        [Column("marks_count")]
+
+        public long MarksCount { get; set; }
 
         [Column("money_value")]
         public double MoneyValue { get; set; }

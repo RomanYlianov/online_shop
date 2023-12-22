@@ -463,21 +463,21 @@ namespace onlineshop.Controllers
 
             if (ModelState.IsValid)
             {
-                bool flag = await UService.CheckUserName(User, dto.UserName);
+                bool flag = await UService.CheckUserName(User, dto.UserName, isRegister : true);
 
                 if (flag)
                 {
                     ModelState.AddModelError("UserName", "username is already used");
                 }
 
-                flag = await UService.CheckEmail(User, dto.Email);
+                flag = await UService.CheckEmail(User, dto.Email, isRegisteer: true);
 
                 if (flag)
                 {
                     ModelState.AddModelError("Email", "email is already used");
                 }
 
-                flag = await UService.CheckPhoneNumber(User, dto.PhoneNumber);
+                flag = await UService.CheckPhoneNumber(User, dto.PhoneNumber, isRegister: true);
 
                 if (flag)
                 {
@@ -654,9 +654,61 @@ namespace onlineshop.Controllers
         {
             logger.LogInformation(GetType().Name + " : ResetPassword (POST)");
 
-            await UService.ResetPassword(dto);
+            if (ModelState.IsValid)
+            {
 
-            return RedirectToAction("Login", "Users");
+                bool flag = true;
+
+                List<string> errors = ValidatePassword(dto.Password);
+
+                if (errors.Count > 0)
+                {
+                    flag = false;
+                    string message = "";
+                    foreach (string error in errors)
+                    {
+                        message += error + ", ";
+                    }
+
+                    message = message.Substring(0, message.Length - 2);
+                    ModelState.AddModelError("Password", message);
+                }
+
+                if (flag)
+                {
+                    
+                    try
+                    {
+                        await UService.ResetPassword(dto);
+
+                        return RedirectToAction("Login", "Users");
+                    }
+                    catch (onlineshop.Models.HttpException<onlineshop.Models.User> ex)
+                    {
+                        if (ex.Code == HttpStatusCode.NotFound)
+                        {
+                            ModelState.AddModelError("UserName", "user is not exists");
+                            return View();
+                        }
+                        else
+                        {
+                            return ExceptionHandler(ex.Message, ex.Code);
+                        }
+                      
+                    }
+                 
+                }
+                else
+                {
+                    return View();
+                }
+
+            }
+            else
+            {
+                return View();
+            }
+                     
         }
 
         public async Task Autentificate(string id, string login, LoginType type)

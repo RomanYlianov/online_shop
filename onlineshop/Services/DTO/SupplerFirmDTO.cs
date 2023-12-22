@@ -26,6 +26,8 @@ namespace onlineshop.Services.DTO
         //[Range(0, 10, ErrorMessage = "Rating must be 0 and 10")]
         public double Rating { get; set; }
 
+        public long MarksCount { get; set; }
+
         [Required(ErrorMessage = "MoneyValue is mandatory")]
         public double MoneyValue { get; set; }
 

@@ -826,11 +826,11 @@ namespace onlineshop.Services.Implimentation
 
         }
 
-        public async Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null)
+        public async Task<bool> CheckEmail(ClaimsPrincipal currentUser, string email, string modifyId = null, bool isRegister = false)
         {
             logger.LogInformation(GetType().Name + " : CheckEmail");
 
-            if (SINManager.IsSignedIn(currentUser))
+            if (SINManager.IsSignedIn(currentUser) || isRegister)
             {
                 bool flag = false;
 
@@ -888,11 +888,11 @@ namespace onlineshop.Services.Implimentation
 
         
 
-        public async Task<bool> CheckUserName(ClaimsPrincipal currentUser, string uName, string modifyId = null)
+        public async Task<bool> CheckUserName(ClaimsPrincipal currentUser, string uName, string modifyId = null, bool isRegister = false)
         {
             logger.LogInformation(GetType().Name + " : CheckUserName");
 
-            if (SINManager.IsSignedIn(currentUser))
+            if (SINManager.IsSignedIn(currentUser) || isRegister)
             {
                 bool flag = false;
 
@@ -949,11 +949,11 @@ namespace onlineshop.Services.Implimentation
             }
         }
 
-        public async Task<bool> CheckPhoneNumber(ClaimsPrincipal currentUser, string phone, string modifyId = null)
+        public async Task<bool> CheckPhoneNumber(ClaimsPrincipal currentUser, string phone, string modifyId = null, bool isRegister = false)
         {
             logger.LogInformation(GetType().Name + " : ChecPhoneNumber");
 
-            if (SINManager.IsSignedIn(currentUser))
+            if (SINManager.IsSignedIn(currentUser) || isRegister)
             {
                 bool flag = false;
 
